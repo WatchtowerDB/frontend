@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1000"
+   height="1000"
+   viewBox="0 0 264.58333 264.58332"
+   version="1.1"
+   id="svg1"
+   xml:space="preserve"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   sodipodi:docname="watchtower logo with text.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><style>
+    @font-face {
+      font-family: 'Vipnagorgialla';
+      src: url('/fonts/Vipnagorgialla Bd.otf') format('opentype');
+    }
+
+    text {
+      font-family: 'Vipnagorgialla';
+    }
+</style><sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="false"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showguides="false"
+     showgrid="true"
+     inkscape:zoom="0.49424827"
+     inkscape:cx="371.2709"
+     inkscape:cy="636.31988"
+     inkscape:window-width="1920"
+     inkscape:window-height="1080"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer3"><inkscape:grid
+       id="grid4"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="5.2916665"
+       spacingy="5.2916665"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true"
+       dotted="false"
+       snapvisiblegridlinesonly="true" /></sodipodi:namedview><defs
+     id="defs1"><linearGradient
+       id="linearGradient4"
+       inkscape:collect="always"><stop
+         style="stop-color:#347d8e;stop-opacity:1;"
+         offset="0"
+         id="stop4" /><stop
+         style="stop-color:#194d65;stop-opacity:1;"
+         offset="1"
+         id="stop5" /></linearGradient><linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4"
+       id="linearGradient5"
+       x1="26.458334"
+       y1="238.56862"
+       x2="238.12515"
+       y2="238.56862"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-7.8859789e-5,4.8480672)" /></defs><g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Logo"
+     transform="translate(0,-12.712343)"><g
+       inkscape:groupmode="layer"
+       id="layer2"
+       inkscape:label="Text"
+       inkscape:highlight-color="#59b569"><text
+         xml:space="preserve"
+         style="font-size:23.2908px;font-family:Vipnagorgialla;-inkscape-font-specification:Vipnagorgialla;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:url(#linearGradient5);stroke-width:0.272939"
+         x="26.248665"
+         y="251.11427"
+         id="text1"
+         inkscape:label="WATCHTOWER"><tspan
+           sodipodi:role="line"
+           id="tspan1"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Vipnagorgialla;-inkscape-font-specification:'Vipnagorgialla Bold';fill:url(#linearGradient5);fill-opacity:1;stroke-width:0.272939"
+           x="26.248665"
+           y="251.11427">WATCH<tspan
+   style="fill:url(#linearGradient5);fill-opacity:1"
+   id="tspan4">TOWER</tspan></tspan></text></g><g
+       inkscape:label="Walls"
+       inkscape:groupmode="layer"
+       id="layer1"
+       transform="translate(0,3.4395783)"
+       inkscape:highlight-color="#b85a57"><path
+         id="rect7"
+         style="fill:#347d8e;fill-opacity:1;stroke-width:0.313059"
+         d="M 132.29167,74.083337 26.458334,148.16668 132.29166,222.25001 Z"
+         inkscape:label="Left Wall" /><path
+         id="path8"
+         style="fill:#194d65;fill-opacity:1;stroke-width:0.31306"
+         d="M 132.29166,222.25001 238.125,148.16667 132.29167,74.08334 Z"
+         inkscape:label="RIght Wall" /></g><g
+       id="g2"
+       transform="translate(0,3.4395783)"
+       inkscape:label="Merlons"
+       inkscape:highlight-color="#3ab0c9"><path
+         id="rect13"
+         style="fill:#347d8e;fill-opacity:1;stroke-width:0.33205"
+         d="m 21.166665,113.24167 v 33.3375 L 132.29166,68.791668 V 35.454167 l -15.875,11.112502 v 16.66875 L 100.54165,74.347921 V 57.679171 L 84.666668,68.79167 V 85.46042 L 68.791667,96.57292 V 79.90417 L 52.916666,91.016671 v 16.668749 l -15.875,11.1125 v -16.66875 z"
+         inkscape:label="Left Merlons" /><path
+         id="path20"
+         style="fill:#194d65;fill-opacity:1;stroke-width:0.33205"
+         d="m 243.41666,113.24167 v 33.3375 L 132.29166,68.791668 V 35.454167 l 15.875,11.112502 v 16.66875 l 15.87501,11.112502 v -16.66875 l 15.87499,11.112499 v 16.66875 l 15.875,11.1125 V 79.90417 l 15.875,11.112501 v 16.668749 l 15.875,11.1125 v -16.66875 z"
+         inkscape:label="RIght Merlons" /></g></g></svg>
