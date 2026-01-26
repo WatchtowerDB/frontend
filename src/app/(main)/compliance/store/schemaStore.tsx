@@ -9,8 +9,8 @@ export type SchemaStoreType = {
 
   // Actions
   fetchSchemas: () => Promise<void>;
-  addSchema: (schemaJson: SchemaItem, clientDb: number) => Promise<void>;
-  updateSchema: (index: number, schemaJson: string, clientDb: number) => void;
+  addSchema: (schemaJson: string, clientDb: number) => Promise<void>;
+  // updateSchema: (index: number, schemaJson: string, clientDb: number) => void; // schemas shouldnt be modifiable, but i'm leaving this in ic.
   removeSchema: (index: number) => void;
   clearSchemas: () => void;
   selectSchema: (index: number) => void;
@@ -18,6 +18,7 @@ export type SchemaStoreType = {
 
 export const useSchemaStore = create<SchemaStoreType>()(
   devtools((set, get) => ({
+    //remember TODO you're using devtools.
     schemas: [],
     selectedSchema: "",
     loading: false,
@@ -37,7 +38,7 @@ export const useSchemaStore = create<SchemaStoreType>()(
       }
     },
 
-    addSchema: async (schemaJson: SchemaItem, clientDb: number) => {
+    addSchema: async (schemaJson: string, clientDb: number) => {
       set({ loading: true, error: null });
       try {
         const response = await fetch("/api/schemas", {
@@ -51,42 +52,39 @@ export const useSchemaStore = create<SchemaStoreType>()(
 
         if (!response.ok) throw new Error("Failed to upload schema");
 
-        set((state) => ({
-          schemas: [...state.schemas, schemaJson],
-          loading: false,
-        }));
+        await get().fetchSchemas();
       } catch (err: any) {
         set({ error: err.message, loading: false });
       }
     },
 
-    updateSchema: async (id: number, updatedSchema: string, clientDb: number) => {
-      set({ loading: true, error: null });
-      try {
-        const response = await fetch(`/api/schemas/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            schemaJson: updatedSchema,
-            clientDb: clientDb, // backend uses this to identify which schema, but still. todo: figure out client DB.
-            // for now, I will pass it manually.
-          }),
-        });
+    // updateSchema: async (id: number, updatedSchema: string, clientDb: number) => {
+    //   set({ loading: true, error: null });
+    //   try {
+    //     const response = await fetch(`/api/schemas/${id}`, {
+    //       method: "PUT",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({
+    //         schemaJson: updatedSchema,
+    //         clientDb: clientDb, // backend uses this to identify which schema, but still. todo: figure out client DB.
+    //         // for now, I will pass it manually.
+    //       }),
+    //     });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Failed to update schema: ${errorText}`);
-        }
+    //     if (!response.ok) {
+    //       const errorText = await response.text();
+    //       throw new Error(`Failed to update schema: ${errorText}`);
+    //     }
 
-        const savedSchema: SchemaItem = await response.json();
-        set((state) => ({
-          schemas: state.schemas.map((s, i) => (i === id ? savedSchema : s)),
-          loading: false,
-        }));
-      } catch (err: any) {
-        set({ error: err.message, loading: false });
-      }
-    },
+    //     const savedSchema: SchemaItem = await response.json();
+    //     set((state) => ({
+    //       schemas: state.schemas.map((s, i) => (i === id ? savedSchema : s)),
+    //       loading: false,
+    //     }));
+    //   } catch (err: any) {
+    //     set({ error: err.message, loading: false });
+    //   }
+    // },
 
     // Remove locally only, for now.
     removeSchema: (index: number) =>

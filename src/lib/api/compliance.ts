@@ -51,8 +51,9 @@ export const uploadSchema = async (
   clientDb: number,
   token: string,
 ) => {
+  console.log("Hello, this is compliance.ts", schemaJson, clientDb, token)
   const response = await fetch(
-    `${process.env.BACKEND_URL}/api/compliance/clientdbschema`,
+    `${process.env.BACKEND_URL}/api/compliance/clientdbschema/`,
     {
       method: "POST",
       headers: {
@@ -68,6 +69,7 @@ export const uploadSchema = async (
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.log("Response is", response);
     throw new Error(`Failed to upload schema: ${errorText}`);
   }
 
@@ -97,33 +99,33 @@ export const fetchSchemas = async (token: string) => {
   return data;
 };
 
-//To update a schema.
-export const updateSchema = async (
-  id: string,
-  schemaJson: string,
-  clientDb: number,
-  token: string,
-) => {
-  // console.log("we mad eit thsi FAR to api.ts", id, schemaJson, clientDb, token);
-  const response = await fetch(
-    `${process.env.BACKEND_URL}/api/compliance/clientdbschema/${id}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        schema_json: schemaJson,
-        client_db: clientDb, //Todo: figure out client DB.
-      }),
-    },
-  );
+//To update a schema. Disabled cuz you're not supposed to be able to update a schema.
+// export const updateSchema = async (
+//   id: string,
+//   schemaJson: string,
+//   clientDb: number,
+//   token: string,
+// ) => {
+//   // console.log("we mad eit thsi FAR to api.ts", id, schemaJson, clientDb, token);
+//   const response = await fetch(
+//     `${process.env.BACKEND_URL}/api/compliance/clientdbschema/${id}`,
+//     {
+//       method: "PUT",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//       body: JSON.stringify({
+//         schema_json: JSON.parse(schemaJson),
+//         client_db: clientDb, //Todo: figure out client DB.
+//       }),
+//     },
+//   );
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to update schema: ${errorText}`);
-  }
+//   if (!response.ok) {
+//     const errorText = await response.text();
+//     throw new Error(`Failed to update schema: ${errorText}`);
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };

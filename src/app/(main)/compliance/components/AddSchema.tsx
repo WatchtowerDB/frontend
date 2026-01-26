@@ -1,22 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TextField from "@mui/material/TextField";
 import ResponsiveDialogue from "@/components/ResponsiveDialog";
 import { DialogAction } from "@/types/DialogAction";
+import { useSchemaStore } from "../store/schemaStore";
 
-type EditSchemaDialogProps = {
+type AddSchemaDialogProps = {
   open: boolean;
-  initialJson: string;
   onClose: () => void;
-  onSave: (json: string) => void;
+  onSave: (json: string, clientDb: number) => void;
+  schemaJson: string | undefined;
+  clientDbValue: number | undefined;
 };
 
-export default function EditSchemaDialog({
+export default function AddSchemaDialog({
   open,
-  initialJson,
   onClose,
   onSave,
-}: EditSchemaDialogProps) {
-  const [json, setJson] = useState(initialJson);
+  schemaJson,
+  clientDbValue,
+}: AddSchemaDialogProps) {
+  // const schemas = useSchemaStore((state) => state.schemas);
+  // const selectedSchema = useSchemaStore((state) => state.selectedSchema);
+  // const schemaObj = schemas.find((s) => s.id === selectedSchema);
+  // const [json, setJson] = useState<string | undefined>(schemaObj?.schema_json);
+  const [json, setJson] = useState<string>();
+  const [clientDb, setClientDb] = useState<string>();
+  const [error, setError] = useState<{ json?: string; clientDb?: string }>({});
+
+  useEffect(() => {
+    if (open) {
+      // setJson(schemaJson || ""); // Fallback to empty string if prop is missing
+      // setClientDb(clientDbValue || 0);
+    }
+  }, [open, schemaJson, clientDbValue]);
 
   const actions: DialogAction[] = [
     {
@@ -27,7 +43,12 @@ export default function EditSchemaDialog({
     {
       label: "Save",
       color: "primary",
-      onClick: () => onSave(json),
+      onClick: () => {
+        setError({});
+        if (json !== undefined && clientDb !== undefined) {
+          onSave(json, +clientDb);
+        }
+      },
     },
   ];
 
@@ -35,21 +56,47 @@ export default function EditSchemaDialog({
     <ResponsiveDialogue
       open={open}
       onClose={onClose}
-      title="Edit Schema"
+      title="Add Schema"
       actions={actions}
       content={
-        <TextField
-          multiline
-          minRows={14}
-          fullWidth
-          value={json}
-          onChange={(e) => setJson(e.target.value)}
-          placeholder="Edit schema JSON here"
-          variant="outlined"
-          sx={{
-            fontFamily: "monospace",
-          }}
-        />
+        <>
+          <TextField
+            required
+            multiline
+            error={!!error.json}
+            helperText={error.json}
+            minRows={14}
+            fullWidth
+            value={json}
+            onChange={(e) => {
+              setJson(e.target.value);
+              setError((prev) => ({ ...prev, json: "" }));
+            }}
+            placeholder="Input the schema JSON here"
+            variant="outlined"
+            sx={{
+              fontFamily: "monospace",
+            }}
+          />
+          <TextField
+            required
+            type="number"
+            error={!!error.clientDb}
+            helperText={error.clientDb}
+            minRows={1}
+            fullWidth
+            value={clientDb}
+            onChange={(e) => {
+              setClientDb(e.target.value);
+              setError((prev) => ({ ...prev, clientDb: "" }));
+            }}
+            placeholder="Input the client DB number"
+            variant="outlined"
+            sx={{
+              fontFamily: "monospace",
+            }}
+          />
+        </>
       }
     />
   );

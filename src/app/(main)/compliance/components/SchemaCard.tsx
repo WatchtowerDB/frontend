@@ -1,10 +1,10 @@
 import Card from "@/components/Card";
 import React, { useEffect, useState } from "react";
 import SchemaIcon from "@mui/icons-material/Schema";
-import EditSquareIcon from "@mui/icons-material/EditSquare";
+import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useSchemaStore } from "../store/schemaStore";
 import SchemaList from "./SchemaList";
-import EditSchemaDialog from "./EditSchema";
+import AddSchemaDialog from "./AddSchema";
 
 type SchemaCardProps = {
   count: number;
@@ -19,20 +19,22 @@ function SchemaCard() {
 
   //The store functions
   const fetchSchemas = useSchemaStore((state) => state.fetchSchemas);
-  const updateSchema = useSchemaStore((state) => state.updateSchema);
+  const addSchema = useSchemaStore((state) => state.addSchema);
 
   //Editting related constants, dont mind em.
-  const [editOpen, setEditOpen] = useState<boolean>(false);
-  const [editingJson, setEditingJson] = useState<SchemaItem | null>(null);
+  const [addOpen, setAddOpen] = useState<boolean>(false);
+  const [addingJson, setAddingJson] = useState<string>();
+  const [addingClientDb, setAddingClientDb] = useState <number>();
 
   // Editting related functions
-  const handleEditClick = () => {
-    const schemaObj = schemas.find((s) => s.id === selectedSchema);
-    console.log("schemaobjis ", schemaObj);
-    if (!schemaObj) return;
-    setEditingJson(schemaObj); // hydrate the dialog
-    setEditOpen(true);
+  const handleAddClick = () => {
+    // const schemaObj = schemas.find((s) => s.id === selectedSchema);
+    // console.log("schemaobjis ", schemaObj);
+    // if (!schemaObj) return;
+    setAddingJson(""); // hydrate the dialog
+    setAddOpen(true);
   };
+
   // const handleEdit = async (newJson: SchemaItem) => {
   //   updateSchema(selectedSchema, newJson);
   //   setEditOpen(false);
@@ -44,8 +46,8 @@ function SchemaCard() {
 
   const actions: CardAction[] = [
     {
-      icon: <EditSquareIcon />,
-      onClick: () => handleEditClick(),
+      icon: <AddBoxIcon />,
+      onClick: () => handleAddClick(),
     },
   ];
   return (
@@ -56,15 +58,16 @@ function SchemaCard() {
         actions={actions}
         special={<SchemaList data={schemas} />}
       />
-      {editingJson && (
-        <EditSchemaDialog
-          open={editOpen}
-          schemaJson={editingJson.schema_json}
-          onClose={() => setEditOpen(false)}
-          onSave={(updatedJson) => {
-            console.log("The new json is", updatedJson)
-            updateSchema(selectedSchema, updatedJson, editingJson.client_db);
-            setEditOpen(false);
+      {addOpen &&  (
+        <AddSchemaDialog
+          open={addOpen}
+          schemaJson={addingJson}
+          clientDbValue={addingClientDb}
+          onClose={() => setAddOpen(false)}
+          onSave={(newJson, newClientDb) => {
+            console.log("The new json is", newJson);
+            addSchema(newJson, newClientDb);
+            setAddOpen(false);
           }}
         />
       )}

@@ -1,33 +1,22 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import TextField from "@mui/material/TextField";
 import ResponsiveDialogue from "@/components/ResponsiveDialog";
 import { DialogAction } from "@/types/DialogAction";
-import { useSchemaStore } from "../store/schemaStore";
 
 type EditSchemaDialogProps = {
   open: boolean;
+  initialJson: string;
   onClose: () => void;
   onSave: (json: string) => void;
-  schemaJson: string;
 };
 
 export default function EditSchemaDialog({
   open,
+  initialJson,
   onClose,
   onSave,
-  schemaJson,
 }: EditSchemaDialogProps) {
-  const schemas = useSchemaStore((state) => state.schemas);
-  const selectedSchema = useSchemaStore((state) => state.selectedSchema);
-  const schemaObj = schemas.find((s) => s.id === selectedSchema);
-  // const [json, setJson] = useState<string | undefined>(schemaObj?.schema_json);
-  const [json, setJson] = useState<string>(schemaJson);
-
-  useEffect(() => {
-    if (open) {
-      setJson(schemaJson);
-    }
-  }, [schemaJson, open]);
+  const [json, setJson] = useState(initialJson);
 
   const actions: DialogAction[] = [
     {
@@ -38,9 +27,8 @@ export default function EditSchemaDialog({
     {
       label: "Save",
       color: "primary",
-      onClick: () =>{ onSave(json)},
+      onClick: () => onSave(json),
     },
-    
   ];
 
   return (
