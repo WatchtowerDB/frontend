@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { runComplianceCheck, fetchAssertions } from "@/lib/compliance/api";
 import { useSchemaStore } from "./schemaStore";
 import { toast } from "sonner";
 

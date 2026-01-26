@@ -1,5 +1,5 @@
 import React from "react";
-import VerticalMenu from "./VerticalMenu";
+import VerticalMenu from "../../../components/VerticalMenu";
 
 function Overview() {
   return <div>My Overview is Cooked!</div>;

@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
-import { fetchAssertions, runComplianceCheck } from "@/lib/compliance/api";
+import { fetchAssertions, runComplianceCheck } from "@/lib/api/compliance";
+import { cookies } from "next/headers";
 
-function getTokenFromCookies(req: Request) {
-  const cookie = req.headers.get("cookie") || "";
-  const match = cookie.match(/authtoken=([^;]+)/);
-  return match ? match[1] : null;
+async function getTokenFromCookies() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access_token")?.value;
+  return token;
 }
+
+// const cookieStore = await cookies();
+// const token = cookieStore.get("access_token")?.value;
 
 //This is for fetching all the assertions.
 export async function GET(req: Request) {
   try {
-    const token = getTokenFromCookies(req);
+    const token = await getTokenFromCookies();
     if (!token) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -36,7 +40,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   console.log("Route.ts pipeline start reached");
   try {
-    const token = getTokenFromCookies(req);
+    const token = await getTokenFromCookies();
     if (!token) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,

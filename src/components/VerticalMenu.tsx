@@ -5,6 +5,7 @@ import GppGoodIcon from "@mui/icons-material/GppGood";
 import Logo from "./Logo";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
+import Logout from "./Logout";
 
 const menuItems = [
   { label: "Overview", icon: <Home />, path: "/" },
@@ -74,6 +75,7 @@ export default function VerticalMenu() {
       </nav>
       <div className="mt-5 h-0.5 w-[80%] self-center bg-gray-500 opacity-50 shadow-inner"></div>
       <div className="mt-auto">
+        <Logout />
         <ThemeToggle />
       </div>
     </aside>

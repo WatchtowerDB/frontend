@@ -15,7 +15,6 @@ export const fetchAssertions = async (token: string) => {
   }
 
   const data: AssertionsResponse = await response.json();
-  console.log(data);
   return data;
 };
 
@@ -26,8 +25,8 @@ export async function runComplianceCheck(
     schema: number;
   },
 ) {
-  console.log("We made it to api ts");
-  console.log("here damn", token, data)
+  // console.log("We made it to api ts");
+  // console.log("here damn", token, data)
   const res = await fetch(
     `${process.env.BACKEND_URL}/api/compliance/checks/`,
     {
@@ -94,7 +93,7 @@ export const fetchSchemas = async (token: string) => {
   const data: SchemaResponse = await response.json();
   // console.log("This has been fetched, and the data is OFFICIALLY, ", data.results.map((item) => item.schema_json));
   // return data.results.map((item) => item.schema_json);
-  console.log(data);
+  // console.log(data);
   return data;
 };
 
@@ -105,7 +104,7 @@ export const updateSchema = async (
   clientDb: number,
   token: string,
 ) => {
-  console.log("we mad eit thsi FAR to api.ts", id, schemaJson, clientDb, token);
+  // console.log("we mad eit thsi FAR to api.ts", id, schemaJson, clientDb, token);
   const response = await fetch(
     `${process.env.BACKEND_URL}/api/compliance/clientdbschema/${id}`,
     {

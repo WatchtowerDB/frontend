@@ -1,10 +1,15 @@
 import { create } from "zustand";
 
+// TODO: There's a massive likelihood that this whole store is useless. Get rid of it if by the end, it's completely uselsss.
+
 interface AuthState {
   token: string | null;
   setToken: (token: string) => void;
   clearToken: () => void;
   getToken: () => string | null;
+  isAuthenticated: boolean;
+  setAuthenticated: (v: boolean) => void;
+  user?: { id: string; name: string }; // TODO - make it display user on the bottom left.
 }
 
 // Helper to read token from localStorage on initialization
@@ -14,6 +19,8 @@ const getInitialToken = (): string | null => {
 };
 
 export const useAuthStore = create<AuthState>((set, get) => ({
+    isAuthenticated: false,
+  setAuthenticated: (v) => set({ isAuthenticated: v }),
   token: getInitialToken(),
 
   setToken: (token) => {
@@ -27,7 +34,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   clearToken: () => {
     set({ token: null });
     if (typeof window !== "undefined") {
-      localStorage.removeItem("token"); 
+      localStorage.removeItem("token");
     }
   },
 

@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useAuthStore } from "@/app/(auth)/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 
 export default function TokenInput() {
   const { token, setToken } = useAuthStore();

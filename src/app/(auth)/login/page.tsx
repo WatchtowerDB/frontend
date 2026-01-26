@@ -2,46 +2,88 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { TextField, Box, Button } from "@mui/material";
+import { TextField, Box, Button, useStepContext } from "@mui/material";
 import Logo from "@/components/Logo";
+import { useAuthStore } from "@/store/authStore";
 
 function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<{ email?: string; password?: string }>({});
+  const [error, setError] = useState<{ username?: string; password?: string }>(
+    {},
+  );
 
-  //   useEffect(() => {
-  //     const checkAuth = async () => {
-  //       const isAuth = !!(await isAuthenticated());
-  //       if (isAuth) router.push("/");
-  //     };
-  //     checkAuth();
-  //   }, []);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  //   const onLogin = async (e: React.FormEvent) => {
-  //     e.preventDefault();
-  //     setError({}); // reset errors
-  //     const success = await login(email, password);
+  const [showDebug, setShowDebug] = useState<boolean>(false);
+  const [healthData, setHealthData] = useState<string | null>(null);
 
-  //     if (success) {
-  //       router.push("/");
-  //     } else {
-  //       setError({
-  //         email: t("errors.login"),
-  //         password: t("errors.login"),
-  //       });
-  //     }
-  //   };
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isAuth = !!(await isAuthenticated);
+      console.log("is authenticated", isAuthenticated);
+      console.log("is auth", isAuth)
+      if (isAuth) router.push("/");
+    };
+    checkAuth();
+  }, []);
+
+  const checkHealth = async (e: any) => {
+    const res = await fetch("api/health", {
+      method: "GET",
+    });
+    const data = await res.json();
+    setHealthData(data);
+    console.log(healthData);
+  };
+
+  const onLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError({}); // reset errors
+    console.log("hey there", username, password);
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (response.ok) {
+      console.log("Login success", response);
+      router.push("/");
+    } else if (response.status === 401) {
+      console.log("Unauthorized", response);
+      setError({
+        username: "Invalid credentials",
+        password: "Invalid credentials",
+      });
+    } else {
+      console.log("Other error", response.status);
+      setError({
+        username: "Something went wrong, please try again later.",
+      });
+    }
+  };
 
   return (
     <div
       className="-z-10 flex h-screen max-h-screen min-h-screen flex-col items-center justify-center gap-y-2 transition-colors duration-300"
       style={{ backgroundColor: "background" }}
     >
+      {showDebug && (
+        <Box>
+          <h2>Backend check health.</h2>
+          <p>
+            temporarily to be used to check if the backend is running and
+            reachable or not. if not, check the env on the front end first.
+          </p>
+          {healthData && <span>{JSON.stringify(healthData)}</span>}
+          <Button onClick={checkHealth}>Check Health</Button>
+        </Box>
+      )}
       <Box
         component="form"
-        onSubmit={() => console.log("H!")} // should be onLogin
+        onSubmit={onLogin}
         className="relative flex flex-col items-center justify-center gap-y-10 rounded-2xl p-10 shadow-2xl transition-colors duration-300"
         sx={{
           maxHeight: 600,
@@ -61,11 +103,11 @@ function Login() {
 
         <div className="flex w-full flex-col gap-y-4">
           <TextField
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            label={"Email"}
-            error={!!error.email}
-            helperText={error.email}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            label={"Username"}
+            error={!!error.username}
+            helperText={error.username}
             sx={{ width: "100%" }}
             required
           />
@@ -95,6 +137,20 @@ function Login() {
             }}
           >
             Login
+          </Button>
+          <Button
+            onClick={() => setShowDebug((prev) => !prev)}
+            sx={{
+              transition: "color 0.3s ease, background-color 0.3s ease",
+              height: "120%",
+              width: "50%",
+              background: "text",
+              color: "text",
+              borderRadius: "30px",
+              "&:hover": { background: "idfk rn" },
+            }}
+          >
+            Check Health*
           </Button>
         </div>
       </Box>

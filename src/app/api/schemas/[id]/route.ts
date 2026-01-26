@@ -1,4 +1,4 @@
-import { updateSchema } from "@/lib/compliance/api";
+import { updateSchema } from "@/lib/api/compliance";
 
 // Helper to extract token from cookies
 function getTokenFromCookies(req: Request) {
