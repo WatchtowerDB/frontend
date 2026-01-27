@@ -59,10 +59,11 @@ export default function AddSchemaDialog({
       title="Add Schema"
       actions={actions}
       content={
-        <>
+        <div className="flex flex-col gap-2 p-2">
           <TextField
-            required
+            required={true}
             multiline
+            label={"Schema JSON"}
             error={!!error.json}
             helperText={error.json}
             minRows={14}
@@ -79,7 +80,8 @@ export default function AddSchemaDialog({
             }}
           />
           <TextField
-            required
+            required={true}
+            label={"Client DB"}
             type="number"
             error={!!error.clientDb}
             helperText={error.clientDb}
@@ -96,7 +98,7 @@ export default function AddSchemaDialog({
               fontFamily: "monospace",
             }}
           />
-        </>
+        </div>
       }
     />
   );

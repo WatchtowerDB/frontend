@@ -2,6 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import Assertion from "./Assertion";
 import { useComplianceStore } from "../store/complianceStore";
+import { useSchemaStore } from "../store/schemaStore";
 type AssertionsListProps = {
   assertions: AssertionItem[];
 };
@@ -16,11 +17,15 @@ const AssertionsList = () => {
   //   }),
   // );
   const fetchAssertions = useComplianceStore((state) => state.fetchAssertions);
+  const fetchAssertionsBySchema = useComplianceStore((state) => state.fetchAssertionsBySchema);
   const assertions = useComplianceStore((state) => state.assertions);
+  const selectedSchema = useSchemaStore((state)=> state.selectedSchema);
+   const selectSchema = useSchemaStore((state)=> state.selectSchema);
 
   useEffect(() => {
-    fetchAssertions();
-  }, [fetchAssertions]); // Todo, worry about the conditions here.
+    if (selectedSchema)
+    fetchAssertionsBySchema(selectedSchema);
+  }, [fetchAssertions, selectSchema]); // Todo, worry about the conditions here.
 
   return (
     <div className="bg-table h-full min-h-0 flex-1 rounded-md border border-gray-400 p-2 shadow-xl">

@@ -3,8 +3,12 @@ import React, { useEffect, useState } from "react";
 import GppMaybeIcon from "@mui/icons-material/GppMaybe";
 import CheckIcon from "@mui/icons-material/Check";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import ReplayCircleFilledIcon from "@mui/icons-material/ReplayCircleFilled";
 import { DialogAction } from "@/types/DialogAction";
 import { useComplianceStore } from "../store/complianceStore";
+import { useSchemaStore } from "../store/schemaStore";
+import { toast } from "sonner";
 
 type ViolationsCardProps = {
   count: number;
@@ -44,6 +48,10 @@ function ViolationsCard() {
   // Select actions
   const fetchAssertions = useComplianceStore((state) => state.fetchAssertions);
   const runCheck = useComplianceStore((state) => state.runCheck);
+  const fetchAssertionsBySchema = useComplianceStore(
+    (state) => state.fetchAssertionsBySchema,
+  );
+  const selectedSchema = useSchemaStore((state) => state.selectedSchema);
   const fetchAssertionsCount = useComplianceStore(
     (state) => state.fetchAssertionsCount,
   );
@@ -53,13 +61,26 @@ function ViolationsCard() {
   };
 
   useEffect(() => {
-    fetchAssertions();
-  }, [fetchAssertions]);
+  }, [fetchAssertionsBySchema]);
 
   const actions: CardAction[] = [
     {
-      icon: <RefreshIcon />,
+      icon: <PlayCircleIcon />,
       onClick: handleRunCheck,
+    },
+    {
+      icon: <ReplayCircleFilledIcon />,
+      onClick: async () => {
+      try {
+        // We await this so we can react to success or failure
+        await fetchAssertionsBySchema(selectedSchema);
+        toast.success("Assertions refreshed!");
+      } catch (err) {
+        // The error is already logged in the store, 
+        // but we notify the user here locally too.
+        toast.error("Failed to refresh assertions.");
+      }
+    },
     },
   ];
 

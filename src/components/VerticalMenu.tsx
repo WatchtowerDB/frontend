@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Home, Database, Settings, Shield } from "lucide-react";
+import { usePathname } from "next/navigation";
 import GppGoodIcon from "@mui/icons-material/GppGood";
 import Logo from "./Logo";
 import { useRouter } from "next/navigation";
@@ -8,15 +9,19 @@ import ThemeToggle from "./ThemeToggle";
 import Logout from "./Logout";
 
 const menuItems = [
-  { label: "Overview", icon: <Home />, path: "/" },
+  // { label: "Overview", icon: <Home />, path: "/" },
   { label: "Compliance", icon: <Shield />, path: "/compliance" },
   { label: "Database", icon: <Database />, path: "#" },
   { label: "Settings", icon: <Settings />, path: "/settings" },
 ];
 
 export default function VerticalMenu() {
+  const pathname = usePathname();
   const router = useRouter();
-  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [activeIndex, setActiveIndex] = useState<number>(() => {
+    const initialIndex = menuItems.findIndex((item) => item.path === pathname);
+    return initialIndex !== -1 ? initialIndex : 0;
+  });
   const [tempIndex, setTempIndex] = useState<number | null>(null);
 
   const handleClick = async (target: number, page: string) => {
@@ -33,6 +38,13 @@ export default function VerticalMenu() {
     setActiveIndex(target);
     router.push(page);
   };
+
+  useEffect(() => {
+    const currentIndex = menuItems.findIndex((item) => item.path === pathname);
+    if (currentIndex !== -1) {
+      setActiveIndex(currentIndex);
+    }
+  }, [pathname]);
 
   return (
     <aside className="bg-verticalbar transition-color flex h-full w-56 flex-col overflow-hidden border-r border-r-gray-400 p-4 duration-150">

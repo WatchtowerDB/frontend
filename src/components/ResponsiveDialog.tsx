@@ -41,10 +41,6 @@ const ResponsiveDialogue: React.FC<ResponsiveDialogueProps> = ({
         {title}
       </DialogTitle>
       <DialogContent
-        // sx={
-        //   {
-        //   }
-        // }
       >
         {content}
       </DialogContent>

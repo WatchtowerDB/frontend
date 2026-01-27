@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { fetchAssertions, runComplianceCheck } from "@/lib/api/compliance";
+import { NextResponse, NextRequest } from "next/server";
+import { fetchAssertions, fetchAssertionsBySchema, runComplianceCheck } from "@/lib/api/compliance";
 import { cookies } from "next/headers";
 
 async function getTokenFromCookies() {
@@ -11,28 +11,33 @@ async function getTokenFromCookies() {
 // const cookieStore = await cookies();
 // const token = cookieStore.get("access_token")?.value;
 
-//This is for fetching all the assertions.
-export async function GET(req: Request) {
+//This is for fetching all the assertions, or fetching by schema ID if it's given
+export async function GET(req: NextRequest) { //Todo, emphasize on using NextRequest vs just Request.
   try {
     const token = await getTokenFromCookies();
     if (!token) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const schemas = await fetchAssertions(token);
+    // 1. Check for the query parameter
+    const { searchParams } = new URL(req.url);
+    const schemaId = searchParams.get("schema_id");
 
-    return new Response(JSON.stringify(schemas), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    let data;
+
+    if (schemaId) {
+      // 2. If ID exists, call the filtered version
+      console.log(`Fetching assertions for schema: ${schemaId}`);
+      data = await fetchAssertionsBySchema(token, parseInt(schemaId));
+    } else {
+      // 3. Otherwise, fetch everything
+      console.log("Fetching all assertions");
+      data = await fetchAssertions(token);
+    }
+
+    return NextResponse.json(data, { status: 200 });
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 

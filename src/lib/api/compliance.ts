@@ -1,3 +1,29 @@
+//starts the pipeline
+export async function runComplianceCheck(
+  token: string,
+  data: {
+    framework: number;
+    schema: number;
+  },
+) {
+  // console.log("We made it to api ts");
+  // console.log("here damn", token, data)
+  const res = await fetch(`${process.env.BACKEND_URL}/api/compliance/checks/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // Cuz i think we will need this. WE DO NEED THIS.
+    },
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+
+  if (!res.ok) throw new Error("Failed to run compliance check");
+
+  return res.json();
+}
+
+//fetches all assertions.
 export const fetchAssertions = async (token: string) => {
   const response = await fetch(
     `${process.env.BACKEND_URL}/api/compliance/assertions`,
@@ -18,32 +44,29 @@ export const fetchAssertions = async (token: string) => {
   return data;
 };
 
-export async function runComplianceCheck(
+//fetchs assertions by specifically schema ID.
+export const fetchAssertionsBySchema = async (
   token: string,
-  data: {
-    framework: number;
-    schema: number;
-  },
-) {
-  // console.log("We made it to api ts");
-  // console.log("here damn", token, data)
-  const res = await fetch(
-    `${process.env.BACKEND_URL}/api/compliance/checks/`,
+  schemaId: number,
+) => {
+  const response = await fetch(
+    `${process.env.BACKEND_URL}/api/compliance/assertions?schema_id=${schemaId}`,
     {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Cuz i think we will need this. WE DO NEED THIS.
-      },
-      body: JSON.stringify(data),
       cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     },
   );
 
-  if (!res.ok) throw new Error("Failed to run compliance check");
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to fetch filtered assertions: ${errorText}`);
+  }
 
-  return res.json();
-}
+  const data: AssertionsResponse = await response.json();
+  return data;
+};
 
 // upload new schemas..
 export const uploadSchema = async (
@@ -51,7 +74,7 @@ export const uploadSchema = async (
   clientDb: number,
   token: string,
 ) => {
-  console.log("Hello, this is compliance.ts", schemaJson, clientDb, token)
+  console.log("Hello, this is compliance.ts", schemaJson, clientDb, token);
   const response = await fetch(
     `${process.env.BACKEND_URL}/api/compliance/clientdbschema/`,
     {

@@ -35,6 +35,7 @@ export const useSchemaStore = create<SchemaStoreType>()(
         console.log("fetchschemas say", get().schemas);
       } catch (err: any) {
         set({ error: err.message, loading: false });
+        throw err;
       }
     },
 
@@ -55,6 +56,7 @@ export const useSchemaStore = create<SchemaStoreType>()(
         await get().fetchSchemas();
       } catch (err: any) {
         set({ error: err.message, loading: false });
+        throw err;
       }
     },
 
@@ -86,13 +88,13 @@ export const useSchemaStore = create<SchemaStoreType>()(
     //   }
     // },
 
-    // Remove locally only, for now.
-    removeSchema: (index: number) =>
-      set((state) => ({
-        schemas: state.schemas.filter((_, i) => i !== index),
-      })),
+    // Not to be used yet, for schemas can not be removed.
+    // removeSchema: (index: number) =>
+    //   set((state) => ({
+    //     schemas: state.schemas.filter((_, i) => i !== index),
+    //   })),
 
-    clearSchemas: () => set({ schemas: [] }),
+    // clearSchemas: () => set({ schemas: [] }),
 
     selectSchema: (index: number) => {
       set({ selectedSchema: index });

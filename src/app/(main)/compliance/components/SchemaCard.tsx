@@ -1,7 +1,7 @@
 import Card from "@/components/Card";
 import React, { useEffect, useState } from "react";
 import SchemaIcon from "@mui/icons-material/Schema";
-import AddBoxIcon from '@mui/icons-material/AddBox';
+import AddBoxIcon from "@mui/icons-material/AddBox";
 import { useSchemaStore } from "../store/schemaStore";
 import SchemaList from "./SchemaList";
 import AddSchemaDialog from "./AddSchema";
@@ -24,7 +24,7 @@ function SchemaCard() {
   //Editting related constants, dont mind em.
   const [addOpen, setAddOpen] = useState<boolean>(false);
   const [addingJson, setAddingJson] = useState<string>();
-  const [addingClientDb, setAddingClientDb] = useState <number>();
+  const [addingClientDb, setAddingClientDb] = useState<number>();
 
   // Editting related functions
   const handleAddClick = () => {
@@ -58,16 +58,27 @@ function SchemaCard() {
         actions={actions}
         special={<SchemaList data={schemas} />}
       />
-      {addOpen &&  (
+      {addOpen && (
         <AddSchemaDialog
           open={addOpen}
           schemaJson={addingJson}
           clientDbValue={addingClientDb}
           onClose={() => setAddOpen(false)}
-          onSave={(newJson, newClientDb) => {
+          onSave={async (newJson, newClientDb) => {
+            // 1. Mark as async
             console.log("The new json is", newJson);
-            addSchema(newJson, newClientDb);
-            setAddOpen(false);
+
+            try {
+              // 2. Wait for the store action to actually finish
+              await addSchema(newJson, newClientDb);
+
+              // 3. This line only runs if addSchema SUCCEEDED
+              setAddOpen(false);
+            } catch (err) {
+              // 4. This runs if addSchema THREW an error
+              // We do NOT call setAddOpen(false) here, so the dialog stays open
+              console.error("Upload failed, keeping dialog open:", err);
+            }
           }}
         />
       )}
