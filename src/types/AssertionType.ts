@@ -1,10 +1,3 @@
-// type Violation = {
-//     query: string;
-//     violation: string;
-//     pci_dss_reference: string;
-//     remediation: string;
-// }
-
 type AssertionItem = {
     id: number;
     sql_query: string;

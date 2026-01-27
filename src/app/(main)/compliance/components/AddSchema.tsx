@@ -23,8 +23,8 @@ export default function AddSchemaDialog({
   // const selectedSchema = useSchemaStore((state) => state.selectedSchema);
   // const schemaObj = schemas.find((s) => s.id === selectedSchema);
   // const [json, setJson] = useState<string | undefined>(schemaObj?.schema_json);
-  const [json, setJson] = useState<string>();
-  const [clientDb, setClientDb] = useState<string>();
+  const [json, setJson] = useState<string>("");
+  const [clientDb, setClientDb] = useState<string>("");
   const [error, setError] = useState<{ json?: string; clientDb?: string }>({});
 
   useEffect(() => {
