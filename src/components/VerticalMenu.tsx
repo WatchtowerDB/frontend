@@ -47,7 +47,7 @@ export default function VerticalMenu() {
   }, [pathname]);
 
   return (
-    <aside className="bg-verticalbar transition-color flex h-full w-56 flex-col overflow-hidden border-r border-r-gray-400 p-4 duration-150">
+    <aside className="bg-verticalbar transition-color flex h-full w-56 flex-col overflow-hidden border-r border-r-border p-4 duration-150">
       {/* <Image
         src="/watchtowerwtext2.svg"
         alt="Watchtower"

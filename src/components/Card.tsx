@@ -30,7 +30,7 @@ export default function Card({
 }: CardProps) {
   return (
     <div
-      className={`relative flex flex-row items-center gap-6 rounded-md border border-gray-400 p-6 opacity-90 shadow-lg transition-all hover:shadow-xl ${bgColor}`}
+      className={`relative flex flex-row items-center gap-6 rounded-md border border-border p-6 opacity-90 shadow-lg transition-all hover:shadow-xl ${bgColor}`}
     >
       <div className="justify-start">
         <div className={`rounded-lg bg-blue-100 p-3`}>

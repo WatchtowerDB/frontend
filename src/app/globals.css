@@ -35,15 +35,18 @@
 :root {
   color-scheme: light dark; /* Follows system by default */
 
-  --background: light-dark(#f3f6fb, #030814);
-  --foreground: light-dark(#e3e3e3, #000433);
+  --background: light-dark(#f3f6fb, #282b2f);
+  --foreground: light-dark(#e3e3e3, #07171F);
   --verticalbar: light-dark(#ffffff, #0a1f29);
   /*Previously, dark vb was 101828*/
   --verticalbar-highlight: light-dark(#000000, #ffffff);
   --verticalbar-unselected: light-dark(#a1afb8, #a1afb8);
   --text: light-dark(#000000, #ffffff);
   --text-subtle: light-dark(#a3a3a3, #d6d6d6);
-  --table: light-dark(#ffffff, #000000);
+  --table: light-dark(#ffffff, #0a1f29);
+  --border: light-dark(#99a1af, #4c5057);
+  --assertion: light-dark(#f3f4f6, #07171F);
+  --assertion-hover: light-dark(#e5e7eb, #122532);
 }
 
 /* These overrides allow the toggle button to work */
@@ -64,6 +67,9 @@
   --color-text: var(--text);
   --color-text-subtle: var(--text-subtle);
   --color-table: var(--table);
+  --color-border: var(--border);
+  --color-assertion: var(--assertion);
+  --color-assertion-hover: var(--assertion-hover);
 
   /* --color-prose-body: var(--text);
   --color-prose-headings: var(--text);
