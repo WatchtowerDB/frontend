@@ -73,6 +73,7 @@ function ViolationsCard() {
       onClick: async () => {
       try {
         // We await this so we can react to success or failure
+        console.log("violationscard say selectedschema", selectedSchema)
         await fetchAssertionsBySchema(selectedSchema);
         toast.success("Assertions refreshed!");
       } catch (err) {
