@@ -122,6 +122,15 @@ export const fetchSchemas = async (token: string) => {
   );
 
   if (!response.ok) {
+    if (response.status === 401) {
+      const cookieStore = await cookies(); //TODO fix this bandage solution for logging in/out and refresh tokens.
+
+      cookieStore.delete("access_token");
+      cookieStore.delete("refresh_token");
+
+      return new Response(null, { status: 401 });
+    }
+
     const errorText = await response.text();
     throw new Error(`Failed to fetch schemas: ${errorText}`);
   }
