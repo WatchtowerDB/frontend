@@ -12,6 +12,7 @@ const Assertion: React.FC<AssertionProps> = ({ assertionData }) => {
       <button
         className="relative flex h-25 w-full items-center justify-between space-y-2 bg-gray-100 p-4 shadow-sm transition-transform duration-150 hover:z-10 hover:scale-[1.01] hover:cursor-pointer hover:bg-gray-200 hover:shadow-md"
         onClick={() => setIsAssertionDialogOpen(true)}
+        title="View assertion"
         style={
           {
             // backgroundColor: hovered ? taskOnHoverColor : backgroundColor,

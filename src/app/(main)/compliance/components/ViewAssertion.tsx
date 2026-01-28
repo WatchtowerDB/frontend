@@ -97,7 +97,7 @@ cipher_suite = Fernet(key)
             {assertionData ? (
               <article className="prose prose-slate prose-code:before:content-none prose-code:after:content-none /* Typography Colors */ prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 /* Code Styling (Technical Contrast) */ prose-code:text-indigo-600 prose-code:bg-indigo-50/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-medium /* List Styling */ prose-li:marker:text-slate-400 prose-pre:bg-foreground max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {fake}
+                  {assertionData}
                 </ReactMarkdown>
               </article>
             ) : (
