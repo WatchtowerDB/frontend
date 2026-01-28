@@ -67,6 +67,7 @@ export default function AddSchemaDialog({
             error={!!error.json}
             helperText={error.json}
             minRows={14}
+            maxRows={14}
             fullWidth
             value={json}
             onChange={(e) => {

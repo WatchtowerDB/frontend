@@ -39,22 +39,50 @@ export default function ViewAssertionDialog({
     },
   ];
 
-  const fake: string = `## Database Schema Overview
+  const fake: string = `
+### VIOLATION SUMMARY
+The compliance assertion has failed, indicating a **PCI-DSS v4.0.1** violation. Specifically, the assertion:
+\`SELECT card_number FROM operations.cardholder_data WHERE card_number IS NOT NULL AND card_number_masked IS NOT NULL AND card_number != card_number_masked;\` 
+returns rows where the card number is not the same as its masked version, which suggests that the card numbers are not properly masked.
 
-This document describes a sample database schema used for testing structured data ingestion and validation workflows. The schema represents a simplified enterprise system and is intended solely for development and evaluation purposes.
+### STANDARD REFERENCE
+The violation pertains to PCI-DSS v4.0.1 clauses:
+- **4.1 Data Security:** The card numbers are being stored in a non-masked format.
+- **4.2 Access Control:** The access to sensitive data is not appropriately controlled.
 
-### Entity Relationships
+### SECURITY IMPACT
+This violation poses a significant risk. If card numbers are not properly masked, they could be exposed to unauthorized individuals, leading to potential data breaches and identity theft.
 
-The schema includes core entities such as \`users\`, \`roles\`, and \`permissions\`, with clearly defined primary and foreign key relationships. These relationships enforce logical consistency while enabling flexible access control and role-based authorization.
+### REMEDIATION STEPS
 
-### Constraints and Validation Rules
+1. **Identify and Mask Card Numbers**
+Ensure all card numbers in \`operations.cardholder_data\` are properly masked.
 
-Several constraints are applied at the schema level, including non-null fields, unique identifiers, and referential integrity checks. These rules ensure data correctness and prevent the insertion of malformed or inconsistent records during runtime operations.
+\`\`\`sql
+UPDATE operations.cardholder_data
+SET card_number_masked = CONCAT('XXXX-XXXX-XXXX-', SUBSTRING(card_number, -4))
+WHERE card_number IS NOT NULL;
+\`\`\`
 
-### Audit and Compliance Metadata
+2. **Remove Unmasked Data**
+\`\`\`sql
+DELETE FROM operations.cardholder_data
+WHERE card_number IS NOT NULL AND card_number_masked IS NULL;
+\`\`\`
 
-To support compliance and traceability, the schema incorporates audit fields such as \`created_at\`, \`updated_at\`, and \`modified_by\`. These attributes enable historical tracking of changes and facilitate accountability during security reviews and compliance assessments.
+3. **Implement Encryption**
+If card numbers must be stored in a non-masked format, encrypt them at rest (e.g., AES-256).
+
+\`\`\`python
+from cryptography.fernet import Fernet
+
+# Encrypt card numbers example
+key = Fernet.generate_key()
+cipher_suite = Fernet(key)
+# ... logic to encrypt ...
+\`\`\`
 `;
+
   return (
     <ResponsiveDialogue
       open={open}
@@ -67,9 +95,9 @@ To support compliance and traceability, the schema incorporates audit fields suc
         <div className="flex flex-col gap-4">
           <div className="max-h-[70vh] overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/50 p-6 shadow-inner">
             {assertionData ? (
-              <article className="prose prose-slate /* Typography Colors */ prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 /* Code Styling (Technical Contrast) */ prose-code:text-indigo-600 prose-code:bg-indigo-50/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-medium /* List Styling */ prose-li:marker:text-slate-400 max-w-none">
+              <article className="prose prose-slate prose-code:before:content-none prose-code:after:content-none /* Typography Colors */ prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 /* Code Styling (Technical Contrast) */ prose-code:text-indigo-600 prose-code:bg-indigo-50/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-medium /* List Styling */ prose-li:marker:text-slate-400 prose-pre:bg-foreground max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {assertionData}
+                  {fake}
                 </ReactMarkdown>
               </article>
             ) : (
