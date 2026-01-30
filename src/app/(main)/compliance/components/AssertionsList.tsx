@@ -29,7 +29,7 @@ const AssertionsList = () => {
   }, [fetchAssertions, selectSchema]); // Todo, worry about the conditions here.
 
   return (
-    <div className="bg-table h-full min-h-0 flex-1 rounded-md border border-border shadow-xl">
+    <div className="bg-table border-border h-full min-h-0 flex-1 rounded-md border shadow-xl">
       <h2 className="ms-4 mt-4 mb-6 text-4xl">Assertions</h2>
       {/* <div className="m-2 -mt-4 items-center max-h-full"></div> */}
       <div className="mx-auto h-[80%] w-[95%] rounded-xl p-2">

@@ -89,24 +89,33 @@ cipher_suite = Fernet(key)
       onClose={onClose}
       title="View Assertion"
       actions={actions}
-      maxWidth="md"
+      maxWidth="xl"
       content={
-        // dark:border-slate-800 dark:bg-slate-900 acts as if it's dark despite it not being necessarily dark. TODO.
-        <div className="flex flex-col gap-4">
-          <div className="max-h-[70vh] overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/50 p-6 shadow-inner">
-            {assertionData ? (
-              <article className="prose prose-slate prose-code:before:content-none prose-code:after:content-none /* Typography Colors */ prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 /* Code Styling (Technical Contrast) */ prose-code:text-indigo-600 prose-code:bg-indigo-50/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-medium /* List Styling */ prose-li:marker:text-slate-400 prose-pre:bg-foreground max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {assertionData}
-                </ReactMarkdown>
-              </article>
-            ) : (
-              <p className="py-10 text-center text-slate-400 italic">
-                No assertion details available.
-              </p>
-            )}
+        <>
+          {/* // dark:border-slate-800 dark:bg-slate-900 acts as if it's dark
+          despite it not being necessarily dark. TODO. */}
+          <div className="flex flex-col gap-4">
+            <div className="max-h-[70vh] overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/50 p-6 shadow-inner">
+              {assertionData ? (
+                <article className="prose prose-slate prose-code:before:content-none prose-code:after:content-none /* Typography Colors */ prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 /* Code Styling (Technical Contrast) */ prose-code:text-indigo-600 prose-code:bg-indigo-50/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-medium /* List Styling */ prose-li:marker:text-slate-400 prose-pre:bg-foreground max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {assertionData}
+                  </ReactMarkdown>
+                </article>
+              ) : (
+                <p className="py-10 text-center text-slate-400 italic">
+                  No assertion details available.
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+          <p className="text-subtle m-3.5 text-center text-sm opacity-80">
+            All responses are AI-generated and may not always be accurate or
+            complete. They should be independently reviewed and verified by a
+            domain expert. WatchtowerDB is NOT responsible for any actions taken
+            based on these responses.
+          </p>
+        </>
       }
     />
   );
