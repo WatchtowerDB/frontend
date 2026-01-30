@@ -6,15 +6,26 @@ export async function POST(req: Request) {
   const body = await req.json();
   try {
     const data = await login(body.username, body.password);
+
+    const cookieOptions = {
+      httpOnly: true,
+      sameSite: "lax" as const,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    };
     // to better understand this, because it's beautiful, i will comment the explanation on every single flag
     cookieStore.set("access_token", data.access, {
-      httpOnly: true, // meaning JS can not read this cookie, purely for safety purposes.
-      sameSite: "lax", // cross-site requests, lax means its on top level navigation only
-      secure: process.env.NODE_ENV === "production", //if true, all cookies will ONLY be sent over HTTPS.
+      ...cookieOptions,
+      maxAge: 1800,
       //Since we are running on localhost (HTTP), most likely anyway, it will remain off.
       //I love next.js <3
-      path: "/", //cookies apply to all routes.
     });
+
+    cookieStore.set("refresh_token", data.refresh, {
+      ...cookieOptions,
+      maxAge: 2000, // TODO. Change this. This is 2000 for testing purposes. assume it's around 43200 (12h) for anything else.
+    });
+
     return Response.json({ ok: true });
   } catch (error: any) {
     //could define the error type, TODO ig.

@@ -20,14 +20,19 @@ export async function runComplianceCheck(
     cache: "no-store",
   });
 
-  if (!res.ok) throw new Error("Failed to run compliance check");
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error("UNAUTHORIZED");
+    }
+    throw new Error("Failed to run compliance check");
+  }
 
   return res.json();
 }
 
 //fetches all assertions.
 export const fetchAssertions = async (token: string) => {
-  const response = await fetch(
+  const res = await fetch(
     `${process.env.BACKEND_URL}/api/compliance/assertions`,
     {
       cache: "no-store", // ensures SSR fetch on every request. Which is good!
@@ -37,20 +42,15 @@ export const fetchAssertions = async (token: string) => {
     },
   );
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      const cookieStore = await cookies(); //TODO fix this bandage solution for logging in/out and refresh tokens.
-
-      cookieStore.delete("access_token");
-      cookieStore.delete("refresh_token");
-
-      return new Response(null, { status: 401 });
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error("UNAUTHORIZED");
     }
-    const errorText = await response.text();
+    const errorText = await res.text();
     throw new Error(`Failed to fetch assertions: ${errorText}`);
   }
 
-  const data: AssertionsResponse = await response.json();
+  const data: AssertionsResponse = await res.json();
   return data;
 };
 
@@ -59,8 +59,8 @@ export const fetchAssertionsBySchema = async (
   token: string,
   schemaId: number,
 ) => {
-  const response = await fetch(
-    `${process.env.BACKEND_URL}/api/compliance/assertions?schema_id=${schemaId}`,
+  const res = await fetch(
+    `${process.env.BACKEND_URL}/api/compliance/assertions?schema=${schemaId}`,
     {
       cache: "no-store",
       headers: {
@@ -69,12 +69,15 @@ export const fetchAssertionsBySchema = async (
     },
   );
 
-  if (!response.ok) {
-    const errorText = await response.text();
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error("UNAUTHORIZED");
+    }
+    const errorText = await res.text();
     throw new Error(`Failed to fetch filtered assertions: ${errorText}`);
   }
 
-  const data: AssertionsResponse = await response.json();
+  const data: AssertionsResponse = await res.json();
   return data;
 };
 
@@ -85,7 +88,7 @@ export const uploadSchema = async (
   token: string,
 ) => {
   console.log("Hello, this is compliance.ts", schemaJson, clientDb, token);
-  const response = await fetch(
+  const res = await fetch(
     `${process.env.BACKEND_URL}/api/compliance/clientdbschema/`,
     {
       method: "POST",
@@ -100,19 +103,22 @@ export const uploadSchema = async (
     },
   );
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.log("Response is", response);
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error("UNAUTHORIZED");
+    }
+    const errorText = await res.text();
+    console.log("Response is", res);
     throw new Error(`Failed to upload schema: ${errorText}`);
   }
 
-  return response.json();
+  return res.json();
 };
 
 // Fetch existing schemas from backend
 export const fetchSchemas = async (token: string) => {
   console.log("There's a consolel og in api.ts fetchscemas");
-  const response = await fetch(
+  const res = await fetch(
     `${process.env.BACKEND_URL}/api/compliance/clientdbschema`,
     {
       headers: {
@@ -121,20 +127,15 @@ export const fetchSchemas = async (token: string) => {
     },
   );
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      const cookieStore = await cookies(); //TODO fix this bandage solution for logging in/out and refresh tokens.
-
-      cookieStore.delete("access_token");
-      cookieStore.delete("refresh_token");
-
-      return new Response(null, { status: 401 });
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error("UNAUTHORIZED");
     }
 
-    const errorText = await response.text();
+    const errorText = await res.text();
     throw new Error(`Failed to fetch schemas: ${errorText}`);
   }
-  const data: SchemaResponse = await response.json();
+  const data: SchemaResponse = await res.json();
   // console.log("This has been fetched, and the data is OFFICIALLY, ", data.results.map((item) => item.schema_json));
   // return data.results.map((item) => item.schema_json);
   // console.log(data);

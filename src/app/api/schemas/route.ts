@@ -26,6 +26,9 @@ export async function GET(req: Request) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (err: any) {
+    if (err.message === "UNAUTHORIZED" || err.status === 401) {
+      return Response.json({ error: err.message }, { status: 401 });
+    }
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
@@ -65,6 +68,9 @@ export async function POST(req: Request) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (err: any) {
+    if (err.message === "UNAUTHORIZED" || err.status === 401) {
+      return Response.json({ error: err.message }, { status: 401 });
+    }
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
@@ -111,4 +117,3 @@ export async function POST(req: Request) {
 //     });
 //   }
 // }
-

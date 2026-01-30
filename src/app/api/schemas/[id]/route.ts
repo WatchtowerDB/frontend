@@ -1,4 +1,5 @@
-//Right now, this whole file is depricated. Updating schemas is not an option.
+//Right now, this whole file is depricated. Updating schemas is not an option. And it is very outdated.
+//If you are going to work with this file, consider rebuilding it from the ground up.
 
 // import { updateSchema } from "@/lib/api/compliance";
 

@@ -17,6 +17,6 @@ export async function login(username: string, password: string) {
   }
   return (await res.json()) as {
     access: string;
-    refresh?: string;
+    refresh: string;
   };
 }

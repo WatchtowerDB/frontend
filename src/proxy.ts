@@ -9,9 +9,7 @@ export function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  console.log("token and pathname are", token, pathname);
   if (token && pathname === "/login") {
-    console.log("It hsould redirect to dashboard now");
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
   // allow the request to continue
