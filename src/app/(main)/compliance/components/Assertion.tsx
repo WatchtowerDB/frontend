@@ -10,7 +10,7 @@ const Assertion: React.FC<AssertionProps> = ({ assertionData }) => {
   return (
     <>
       <button
-        className="relative flex h-25 w-full items-center justify-between space-y-2 bg-assertion p-4 shadow-sm transition-transform duration-150 hover:z-10 hover:scale-[1.01] hover:cursor-pointer hover:bg-assertion-hover hover:shadow-md"
+        className="bg-assertion hover:bg-assertion-hover relative flex h-25 w-full items-center justify-between space-y-2 p-4 shadow-sm transition-transform duration-150 hover:z-10 hover:scale-[1.01] hover:cursor-pointer hover:shadow-md"
         onClick={() => setIsAssertionDialogOpen(true)}
         title="View assertion"
         style={
@@ -51,6 +51,18 @@ const Assertion: React.FC<AssertionProps> = ({ assertionData }) => {
           {/* <button onClick={() => setIsAssertionDialogOpen(true)}>
               Show Assertion
             </button> */}
+          <div
+            className={`flex items-center space-x-2 rounded-full px-3 py-1 text-xs font-bold tracking-wider uppercase ${
+              assertionData.result
+                ? "border border-green-200 bg-green-100 text-green-700"
+                : "border border-red-200 bg-red-100 text-red-700"
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${assertionData.result ? "bg-green-500" : "bg-red-500"}`}
+            ></span>
+            <span>{assertionData.result ? "Passed" : "Failed"}</span>
+          </div>
         </div>
       </button>
       <ViewAssertionDialog

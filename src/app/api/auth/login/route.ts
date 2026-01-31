@@ -14,6 +14,7 @@ export async function POST(req: Request) {
       path: "/",
     };
     // to better understand this, because it's beautiful, i will comment the explanation on every single flag
+    console.log("THIS HAS BEEN TRIGGERED IN LOGIN/ROUTE!!!!");
     cookieStore.set("access_token", data.access, {
       ...cookieOptions,
       maxAge: 1800,
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
 
     cookieStore.set("refresh_token", data.refresh, {
       ...cookieOptions,
-      maxAge: 2000, // TODO. Change this. This is 2000 for testing purposes. assume it's around 43200 (12h) for anything else.
+      maxAge: 3600, // TODO. Change this. This is 2000 for testing purposes. assume it's around 43200 (12h) for anything else.
     });
 
     return Response.json({ ok: true });

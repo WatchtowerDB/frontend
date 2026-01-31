@@ -2,8 +2,8 @@ export async function request(url: string, options: RequestInit = {}): Promise<R
   const res = await fetch(url, options);
 
   if (res.status === 401) {
-    fetch("/api/logout", { method: "POST" }).finally(() => {
-      window.location.href = "/login";
+    fetch("/api/auth/logout", { method: "POST" }).finally(() => {
+      window.location.href = "/login?reason=expired";
     });
     return new Promise(() => {}); 
   }
