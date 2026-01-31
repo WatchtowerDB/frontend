@@ -22,7 +22,10 @@ export default function ViewAssertionDialog({
   // const schemaObj = schemas.find((s) => s.id === selectedSchema);
   // const [json, setJson] = useState<string | undefined>(schemaObj?.schema_json);
   const [data, setData] = useState<string | undefined>(assertionData);
-  const [error, setError] = useState<{ json?: string; clientDb?: string }>({});
+  const [error, setError] = useState<{
+    json?: string;
+    clientDb?: string;
+  }>({});
 
   //   useEffect(() => {
   //     if (open) {
@@ -97,7 +100,7 @@ cipher_suite = Fernet(key)
           <div className="flex flex-col gap-4">
             <div className="max-h-[70vh] overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/50 p-6 shadow-inner">
               {assertionData ? (
-                <article className="prose prose-slate prose-code:before:content-none prose-code:after:content-none /* Typography Colors */ prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 /* Code Styling (Technical Contrast) */ prose-code:text-indigo-600 prose-code:bg-indigo-50/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-medium /* List Styling */ prose-li:marker:text-slate-400 prose-pre:bg-foreground max-w-none">
+                <article className="prose prose-slate prose-code:before:content-none prose-code:after:content-none /* Typography Colors */ prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 /* Inline Code Styling */ prose-code:not(:where(pre *)):text-indigo-600 prose-code:not(:where(pre *)):bg-indigo-50/50 prose-code:not(:where(pre *)):px-1.5 prose-code:not(:where(pre *)):py-0.5 prose-code:not(:where(pre *)):rounded-md prose-code:not(:where(pre *)):font-medium /* Code Block Styling */ prose-pre:bg-foreground prose-pre:text-text /* List Styling */ prose-li:marker:text-slate-400 max-w-none">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {assertionData}
                   </ReactMarkdown>
