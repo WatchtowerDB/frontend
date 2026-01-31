@@ -16,7 +16,9 @@ export async function POST(req: Request) {
     //   path: "/",
     // });
 
-    return Response.json({ ok: true });
+    return Response.json(
+      { ok: true, access: data.access }, 
+    );
   } catch (error: any) {
     //could define the error type, TODO ig.
     if (error.message === "UNAUTHORIZED") {

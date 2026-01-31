@@ -10,12 +10,14 @@ export async function proxy(req: NextRequest) {
   // 1. THE "WHITELIST"
   // Allow login, logout, and the refresh endpoint to bypass the proxy
   if (pathname.startsWith("/api/auth") || pathname === "/login") {
+    console.log("12/13");
     return NextResponse.next();
   }
 
   // 2. ABSOLUTE LOGOUT
   // No tokens at all? Send them to login.
   if (!accessToken && !refreshToken) {
+    console.log("18/19");
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -32,9 +34,14 @@ export async function proxy(req: NextRequest) {
 
     if (refreshRes.ok) {
       const data = await refreshRes.json();
-      const response = NextResponse.next();
+      // const response = NextResponse.next();
 
+      const response = NextResponse.json(
+        { message: "TOKEN_REFRESHED" },
+        { status: 409 }, // 409 Conflict is often used to say "State changed, try again"
+      );
       // Relay the new token back to the browser
+      console.log("Hey Ya!", data)
       response.cookies.set("access_token", data.access, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
