@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { TextField, Box, Button, useStepContext } from "@mui/material";
+import { useRouter, useSearchParams } from "next/navigation";
+import { TextField, Box, Button, useStepContext, Alert } from "@mui/material";
 import Logo from "@/components/Logo";
 import { useAuthStore } from "@/store/authStore";
 
 function Login() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<{ username?: string; password?: string }>(
@@ -19,11 +20,13 @@ function Login() {
   const [showDebug, setShowDebug] = useState<boolean>(false);
   const [healthData, setHealthData] = useState<string | null>(null);
 
+  const reason = searchParams.get("reason");
+
   useEffect(() => {
     const checkAuth = async () => {
       const isAuth = !!(await isAuthenticated);
       console.log("is authenticated", isAuthenticated);
-      console.log("is auth", isAuth)
+      console.log("is auth", isAuth);
       if (isAuth) router.push("/");
     };
     checkAuth();
@@ -80,6 +83,11 @@ function Login() {
           {healthData && <span>{JSON.stringify(healthData)}</span>}
           <Button onClick={checkHealth}>Check Health</Button>
         </Box>
+      )}
+      {reason === "expired" && (
+        <Alert severity="info" sx={{ mb: 2, width: "100%", maxWidth: 600 }}>
+          Your session has expired. Please log in again.
+        </Alert>
       )}
       <Box
         component="form"

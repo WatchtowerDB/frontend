@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { useSchemaStore } from "./schemaStore";
 import { toast } from "sonner";
+import { request } from "@/hooks/request";
 
 interface ComplianceState {
   // Data
@@ -34,7 +35,7 @@ export const useComplianceStore = create<ComplianceState>((set, get) => ({
   fetchAssertions: async () => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("/api/assertions");
+      const res = await request("/api/assertions");
       if (!res.ok) throw new Error("Failed to fetch assertions");
       const data = await res.json();
       console.log("assertion fetched is", data);
@@ -53,7 +54,7 @@ export const useComplianceStore = create<ComplianceState>((set, get) => ({
 
     try {
       // 2. Pass the ID as a query parameter
-      const res = await fetch(`/api/assertions?schema_id=${schemaId}`);
+      const res = await request(`/api/assertions?schema_id=${schemaId}`);
 
       // 3. Robust Error Handling (Gold Standard)
       if (!res.ok) {
@@ -82,7 +83,7 @@ export const useComplianceStore = create<ComplianceState>((set, get) => ({
   fetchAssertionsCount: async () => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("/api/assertions");
+      const res = await request("/api/assertions");
       if (!res.ok) throw new Error("Failed to fetch assertions");
       const data = await res.json();
       set({ assertions: data, loading: false });
@@ -109,7 +110,7 @@ export const useComplianceStore = create<ComplianceState>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const res = await fetch("/api/assertions", {
+      const res = await request("/api/assertions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

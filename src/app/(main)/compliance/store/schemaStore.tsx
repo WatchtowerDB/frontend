@@ -1,3 +1,4 @@
+import { request } from "@/hooks/request";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
@@ -27,7 +28,7 @@ export const useSchemaStore = create<SchemaStoreType>()(
     fetchSchemas: async () => {
       set({ loading: true, error: null });
       try {
-        const response = await fetch("/api/schemas");
+        const response = await request("/api/schemas");
         if (!response.ok) throw new Error("Failed to fetch schemas");
         const data: SchemaResponse = await response.json();
         // const schemaStrings = data.results.map((item) => item.schema_json);
@@ -42,7 +43,7 @@ export const useSchemaStore = create<SchemaStoreType>()(
     addSchema: async (schemaJson: string, clientDb: number) => {
       set({ loading: true, error: null });
       try {
-        const response = await fetch("/api/schemas", {
+        const response = await request("/api/schemas", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

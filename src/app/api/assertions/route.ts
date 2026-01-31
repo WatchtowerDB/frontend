@@ -1,5 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
-import { fetchAssertions, fetchAssertionsBySchema, runComplianceCheck } from "@/lib/api/compliance";
+import {
+  fetchAssertions,
+  fetchAssertionsBySchema,
+  runComplianceCheck,
+} from "@/lib/api/compliance";
 import { cookies } from "next/headers";
 
 async function getTokenFromCookies() {
@@ -12,7 +16,8 @@ async function getTokenFromCookies() {
 // const token = cookieStore.get("access_token")?.value;
 
 //This is for fetching all the assertions, or fetching by schema ID if it's given
-export async function GET(req: NextRequest) { //Todo, emphasize on using NextRequest vs just Request.
+export async function GET(req: NextRequest) {
+  //Todo, emphasize on using NextRequest vs just Request.
   try {
     const token = await getTokenFromCookies();
     if (!token) {
@@ -37,6 +42,9 @@ export async function GET(req: NextRequest) { //Todo, emphasize on using NextReq
 
     return NextResponse.json(data, { status: 200 });
   } catch (err: any) {
+    if (err.message === "UNAUTHORIZED" || err.status === 401) {
+      return NextResponse.json({ error: err.message }, { status: 401 });
+    }
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
@@ -59,7 +67,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(result, { status: 201 });
-  } catch (err) {
+  } catch (err: any) {
+    if (err.message === "UNAUTHORIZED" || err.status === 401) {
+      return NextResponse.json({ error: err.message }, { status: 401 });
+    }
     console.error("Failed to start compliance check:", err);
     return NextResponse.json(
       { error: "Failed to start compliance check" },
