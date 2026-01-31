@@ -4,6 +4,8 @@ import { login } from "@/lib/api/auth";
 export async function POST(req: Request) {
   const cookieStore = await cookies();
   const body = await req.json();
+  const ACCESS_MAX_AGE = Number(process.env.ACCESS_TOKEN_MAX_AGE) || 1800;
+  const REFRESH_MAX_AGE = Number(process.env.REFRESH_TOKEN_MAX_AGE) || 3600; // TODO, Change this to your heart's content.
   try {
     const data = await login(body.username, body.password);
 
@@ -17,14 +19,14 @@ export async function POST(req: Request) {
     console.log("THIS HAS BEEN TRIGGERED IN LOGIN/ROUTE!!!!");
     cookieStore.set("access_token", data.access, {
       ...cookieOptions,
-      maxAge: 1800,
+      maxAge: ACCESS_MAX_AGE,
       //Since we are running on localhost (HTTP), most likely anyway, it will remain off.
       //I love next.js <3
     });
 
     cookieStore.set("refresh_token", data.refresh, {
       ...cookieOptions,
-      maxAge: 3600, // TODO. Change this. This is 2000 for testing purposes. assume it's around 43200 (12h) for anything else.
+      maxAge: REFRESH_MAX_AGE,
     });
 
     return Response.json({ ok: true });

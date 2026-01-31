@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 export async function proxy(req: NextRequest) {
   const accessToken = req.cookies.get("access_token")?.value;
   const refreshToken = req.cookies.get("refresh_token")?.value;
+  const ACCESS_MAX_AGE = Number(process.env.ACCESS_TOKEN_MAX_AGE) || 1800;
   const { pathname } = req.nextUrl;
 
   if (!accessToken && !refreshToken && pathname !== "/login") {
@@ -24,13 +25,15 @@ export async function proxy(req: NextRequest) {
 
       const exp = payload.exp * 1000;
       const buffer = 2 * 60 * 1000; // 2 minute buffer
-      
+
       if (Date.now() > exp - buffer) {
         console.log(" Proxy: Token expiring soon.");
         shouldRefresh = true;
       }
     } catch (e) {
-      console.error(" Proxy: Failed to parse JWT, forcing refresh as fallback.");
+      console.error(
+        " Proxy: Failed to parse JWT, forcing refresh as fallback.",
+      );
       shouldRefresh = true;
     }
   } else if (refreshToken) {
@@ -59,12 +62,14 @@ export async function proxy(req: NextRequest) {
           sameSite: "lax",
           secure: process.env.NODE_ENV === "production",
           path: "/",
-          maxAge: 1800,
+          maxAge: ACCESS_MAX_AGE,
         });
 
         return response;
       } else {
-        const loginRes = NextResponse.redirect(new URL("/login?reason=expired", req.url));
+        const loginRes = NextResponse.redirect(
+          new URL("/login?reason=expired", req.url),
+        );
         loginRes.cookies.delete("access_token");
         loginRes.cookies.delete("refresh_token");
         return loginRes;
