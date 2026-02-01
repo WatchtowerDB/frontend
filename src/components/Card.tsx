@@ -1,4 +1,4 @@
-import { Button, IconButton } from "@mui/material";
+import { Button, IconButton, Tooltip } from "@mui/material";
 import React from "react";
 
 type CardProps = {
@@ -30,7 +30,7 @@ export default function Card({
 }: CardProps) {
   return (
     <div
-      className={`relative flex flex-row items-center gap-6 rounded-md border border-border p-6 opacity-90 shadow-lg transition-all hover:shadow-xl ${bgColor}`}
+      className={`border-border relative flex flex-row items-center gap-6 rounded-md border p-6 opacity-90 shadow-lg transition-all hover:shadow-xl ${bgColor}`}
     >
       <div className="justify-start">
         <div className={`rounded-lg bg-blue-100 p-3`}>
@@ -55,14 +55,16 @@ export default function Card({
       {actions && (
         <div className="absolute -end-2.5 -bottom-0.5 mt-4">
           {actions.map((action, index) => (
-            <IconButton
-              key={index}
-              onClick={action?.onClick}
-              color={action?.color || "primary"}
-              sx={{ marginRight: 1 }}
-            >
-              {action?.icon}
-            </IconButton>
+            <Tooltip key={index} title={action?.label || ""}>
+              <IconButton
+                aria-label={action?.label}
+                onClick={action?.onClick}
+                color={action?.color || "primary"}
+                sx={{ marginRight: 1 }}
+              >
+                {action?.icon}
+              </IconButton>
+            </Tooltip>
           ))}
         </div>
       )}

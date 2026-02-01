@@ -5,10 +5,12 @@ import CheckIcon from "@mui/icons-material/Check";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import ReplayCircleFilledIcon from "@mui/icons-material/ReplayCircleFilled";
+import FlagCircleRoundedIcon from "@mui/icons-material/FlagCircleRounded";
 import { DialogAction } from "@/types/DialogAction";
 import { useComplianceStore } from "../store/complianceStore";
 import { useSchemaStore } from "../store/schemaStore";
 import { toast } from "sonner";
+import { request } from "@/hooks/request";
 
 type ViolationsCardProps = {
   count: number;
@@ -59,29 +61,57 @@ function ViolationsCard() {
     console.log("It starts...");
     runCheck(1);
   };
+  const handleModelInit = async () => {
+    try {
+      const res = await request("/api/model/init");
+      if (!res.ok) {
+        toast.error("Failed to initialize model");
+        throw new Error("Failed to fetch assertions");
+      }
+      const data = await res.json();
+      toast.success(
+        "Successfully started initializing the model. Status:",
+        data,
+      );
+    } catch (err: any) {
+      toast.error("Failed to initialize model, check console");
+      console.log(err);
+      throw err;
+    }
+  };
 
-  useEffect(() => {
-  }, [fetchAssertionsBySchema]);
+  useEffect(() => {}, [fetchAssertionsBySchema]);
 
   const actions: CardAction[] = [
     {
+      icon: <FlagCircleRoundedIcon />,
+      onClick: handleModelInit,
+      label: "Initialize Model"
+    },
+    {
       icon: <PlayCircleIcon />,
       onClick: handleRunCheck,
+      label: "Run Compliance Check"
     },
     {
       icon: <ReplayCircleFilledIcon />,
+      label: "Refresh Assertions",
       onClick: async () => {
-      try {
-        // We await this so we can react to success or failure
-        console.log("violationscard say selectedschema", selectedSchema)
-        await fetchAssertionsBySchema(selectedSchema);
-        toast.success("Assertions refreshed!");
-      } catch (err) {
-        // The error is already logged in the store, 
-        // but we notify the user here locally too.
-        toast.error("Failed to refresh assertions.");
-      }
-    },
+        try {
+          // We await this so we can react to success or failure
+          console.log("violationscard say selectedschema", selectedSchema);
+          if (!selectedSchema) {
+            toast.error("Select a schema first!");
+            return;
+          }
+          await fetchAssertionsBySchema(selectedSchema);
+          toast.success("Assertions refreshed!");
+        } catch (err) {
+          // The error is already logged in the store,
+          // but we notify the user here locally too.
+          toast.error("Failed to refresh assertions.");
+        }
+      },
     },
   ];
 
