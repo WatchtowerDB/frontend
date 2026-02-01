@@ -66,7 +66,7 @@ function ViolationsCard() {
       const res = await request("/api/model/init");
       if (!res.ok) {
         toast.error("Failed to initialize model");
-        throw new Error("Failed to fetch assertions");
+        return;
       }
       const data = await res.json();
       toast.success(
@@ -76,7 +76,7 @@ function ViolationsCard() {
     } catch (err: any) {
       toast.error("Failed to initialize model, check console");
       console.log(err);
-      throw err;
+      return;
     }
   };
 
