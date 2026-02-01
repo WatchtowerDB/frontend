@@ -6,8 +6,9 @@ export async function initializeModel(
 ) {
   // console.log("We made it to api ts");
   // console.log("here damn", token, data)
+  console.log("We made it to model");
   const res = await fetch(`${process.env.BACKEND_URL}/api/compliance/model/init/`, {
-    method: "POST",
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`, // Cuz i think we will need this. WE DO NEED THIS.

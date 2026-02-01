@@ -49,7 +49,7 @@ function ViolationsCard() {
 
   // Select actions
   const fetchAssertions = useComplianceStore((state) => state.fetchAssertions);
-  const runCheck = useComplianceStore((state) => state.runCheck);
+  const runCheck = useComplianceStore((state) => state.runCheck); 
   const fetchAssertionsBySchema = useComplianceStore(
     (state) => state.fetchAssertionsBySchema,
   );
@@ -63,7 +63,7 @@ function ViolationsCard() {
   };
   const handleModelInit = async () => {
     try {
-      const res = await request("/api/model/init");
+      const res = await request("/api/model/init", { method: "POST" });
       if (!res.ok) {
         toast.error("Failed to initialize model");
         return;
@@ -76,7 +76,7 @@ function ViolationsCard() {
     } catch (err: any) {
       toast.error("Failed to initialize model, check console");
       console.log(err);
-      return;
+      return; 
     }
   };
 
