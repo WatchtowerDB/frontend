@@ -63,7 +63,7 @@ function ViolationsCard() {
   };
   const handleModelInit = async () => {
     try {
-      const res = await request("/api/model/init", { method: "POST" });
+      const res = await request("/api/model/init", { method: "POST" }); // HOW IS POST WORKING?? TODO
       if (!res.ok) {
         toast.error("Failed to initialize model");
         return;
