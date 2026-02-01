@@ -70,8 +70,7 @@ function ViolationsCard() {
       }
       const data = await res.json();
       toast.success(
-        "Successfully started initializing the model. Status:",
-        data,
+        "Successfully started initializing the model.",
       );
     } catch (err: any) {
       toast.error("Failed to initialize model, check console");
