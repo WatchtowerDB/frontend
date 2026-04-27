@@ -10,6 +10,7 @@ import Logo from "@/components/Logo"
 import { LogOut, User } from "lucide-react"
 import { Button } from "../ui/button"
 import { APP_NAV } from "@/config/app-nav" // wherever you store it
+import ThemeToggle from "../ThemeToggle"
 
 export function Navbar() {
   return (
@@ -43,7 +44,7 @@ export function Navbar() {
         <div className="flex h-9 w-9 items-center justify-center rounded-full border border-dashed border-muted-foreground/50 text-muted-foreground">
           <User className="size-5" />
         </div>
-
+        <ThemeToggle/>
         <Button variant="outline" size="sm" className="gap-2">
           <LogOut className="size-4" />
           Logout
