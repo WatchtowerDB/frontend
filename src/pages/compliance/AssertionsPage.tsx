@@ -1,7 +1,6 @@
-import React from "react";
-import AssertionsList from "./components/AssertionsList";
-import { GenericSidebar } from "@/components/GenericSidebar";
-import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { GenericSidebar } from '@/components/GenericSidebar'
+import { SidebarInset } from '@/components/ui/sidebar'
+import AssertionsList from './components/AssertionsList'
 
 function AssertionsPage() {
   return (
@@ -9,7 +8,7 @@ function AssertionsPage() {
       <GenericSidebar
         children=<AssertionsList />
         className={
-          "group-data-[state=collapsed]:w-0 group-data-[state=collapsed]:border-0 w-[30vw]"
+          'w-[30vw] group-data-[state=collapsed]:w-0 group-data-[state=collapsed]:border-0'
         }
       />
       <SidebarInset>
@@ -19,7 +18,7 @@ function AssertionsPage() {
         </main>
       </SidebarInset>
     </div>
-  );
+  )
 }
 
-export default AssertionsPage;
+export default AssertionsPage

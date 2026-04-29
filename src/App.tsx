@@ -1,13 +1,13 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { MainLayout } from "@/layout/MainLayout";
+import { MainLayout } from '@/layout/MainLayout'
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 // import Home from './pages/Home';
-import Dashboard from "@/pages/dashboard/dashboard";
-import ComplianceLayout from "@/pages/compliance/ComplianceLayout";
-import Databases from "@/pages/Databases/Databases";
-import SummaryPage from "./pages/compliance/SummaryPage";
-import AssertionsPage from "./pages/compliance/AssertionsPage";
-import { ThemeProvider } from "./context/ThemeProvider";
-import Login from "./pages/login/Login";
+import ComplianceLayout from '@/pages/compliance/ComplianceLayout'
+import Dashboard from '@/pages/Dashboard/Dashboard'
+import Databases from '@/pages/Databases/Databases'
+import { ThemeProvider } from './context/ThemeProvider'
+import AssertionsPage from './pages/compliance/AssertionsPage'
+import SummaryPage from './pages/compliance/SummaryPage'
+import Login from './pages/login/Login'
 
 export default function App() {
   return (
@@ -34,9 +34,9 @@ export default function App() {
           </Route>
 
           {/* Routes OUTSIDE the layout (like a Login page) won't have the Navbar */}
-                      <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </Router>
     </ThemeProvider>
-  );
+  )
 }

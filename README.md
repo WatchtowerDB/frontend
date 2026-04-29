@@ -34,16 +34,21 @@ npm install
 ```
 
 ### Environment Variables
+
 Create a `.env.local` file in the project root with your IP:Port for the backend, (e.g.: http://localhost:8000):
+
 ```ini
 BACKEND_URL=http://localhost:8000
 ```
 
 ### Running the Frontend
+
 ```bash
 npm run dev
 ```
+
 The application will be available at:
+
 ```bash
 http://localhost:3000
 ```

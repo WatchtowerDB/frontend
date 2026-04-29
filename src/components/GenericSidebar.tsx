@@ -1,22 +1,18 @@
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-} from "@/components/ui/sidebar";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
 
 interface GenericSidebarProps {
-  children: React.ReactNode;
-  title?: string;
-  subtitle?: string;
-  className?: string;
+  children: React.ReactNode
+  title?: string
+  subtitle?: string
+  className?: string
 }
 
 export function GenericSidebar({
   children,
   title,
-  subtitle = "DB DATABASE",
+  subtitle = 'DB DATABASE',
   className,
 }: GenericSidebarProps) {
   return (
@@ -25,19 +21,14 @@ export function GenericSidebar({
         collapsible="icon"
         variant="sidebar"
         // We keep it static/h-full as per your setup, but allow custom overrides
-        className={cn(
-          "static! h-full! border-r bg-sidebar/50 backdrop-blur-sm",
-          className,
-        )}
+        className={cn('bg-sidebar/50 static! h-full! border-r backdrop-blur-sm', className)}
       >
         {/* Header only renders if a title is provided */}
         {title && (
-          <SidebarHeader className="h-13 mt-1 flex px-4 overflow-hidden transition-all duration-200 group-data-[state=collapsed]:h-0 group-data-[state=collapsed]:p-0 group-data-[state=collapsed]:border-none">
+          <SidebarHeader className="mt-1 flex h-13 overflow-hidden px-4 transition-all duration-200 group-data-[state=collapsed]:h-0 group-data-[state=collapsed]:border-none group-data-[state=collapsed]:p-0">
             <div className="flex flex-col items-start transition-opacity duration-200 group-data-[state=collapsed]:opacity-0">
-              <h2 className="font-bold tracking-tight whitespace-nowrap">
-                {title}
-              </h2>
-              <span className="text-xs font-medium text-on-surface-variant/60 uppercase tracking-widest">
+              <h2 className="font-bold tracking-tight whitespace-nowrap">{title}</h2>
+              <span className="text-on-surface-variant/60 text-xs font-medium tracking-widest uppercase">
                 {subtitle}
               </span>
             </div>
@@ -50,5 +41,5 @@ export function GenericSidebar({
         </SidebarContent>
       </Sidebar>
     </TooltipProvider>
-  );
+  )
 }

@@ -1,22 +1,22 @@
+import Logo from '@/components/Logo'
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
-import { Link } from "react-router-dom"
-import Logo from "@/components/Logo"
-import { LogOut, User } from "lucide-react"
-import { Button } from "../ui/button"
-import { APP_NAV } from "@/config/app-nav" // wherever you store it
-import ThemeToggle from "../ThemeToggle"
+} from '@/components/ui/navigation-menu'
+import { APP_NAV } from '@/config/app-nav' // wherever you store it
+import { LogOut, User } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import ThemeToggle from '../ThemeToggle'
+import { Button } from '../ui/button'
 
 export function Navbar() {
   return (
-    <NavigationMenu className="ps-5 flex justify-between w-full max-w-none">
+    <NavigationMenu className="flex w-full max-w-none justify-between ps-5">
       {/* Logo */}
-      <div className="mt-1 me-1">
+      <div className="me-1 mt-1">
         <Logo width={35} height={35} />
       </div>
 
@@ -25,10 +25,7 @@ export function Navbar() {
         <NavigationMenuList>
           {APP_NAV.map((item) => (
             <NavigationMenuItem key={item.title}>
-              <NavigationMenuLink
-                asChild
-                className={navigationMenuTriggerStyle()}
-              >
+              <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                 <Link to={item.url} className="flex items-center gap-2">
                   {/* {item.icon && <item.icon className="size-4" />} */}
                   {item.title}
@@ -40,11 +37,11 @@ export function Navbar() {
       </div>
 
       {/* Profile & Logout */}
-      <div className="ml-auto flex items-center gap-4 justify-end me-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-dashed border-muted-foreground/50 text-muted-foreground">
+      <div className="me-5 ml-auto flex items-center justify-end gap-4">
+        <div className="border-muted-foreground/50 text-muted-foreground flex h-9 w-9 items-center justify-center rounded-full border border-dashed">
           <User className="size-5" />
         </div>
-        <ThemeToggle/>
+        <ThemeToggle />
         <Button variant="outline" size="sm" className="gap-2">
           <LogOut className="size-4" />
           Logout
