@@ -4,10 +4,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
-import { Link, useLocation } from 'react-router-dom'
+} from "@/components/ui/sidebar"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
+import { Link, useLocation } from "react-router-dom"
 
 type SidebarItem = {
   title: string
@@ -29,10 +29,10 @@ export function AppSidebar({ config }: { config: SidebarConfig }) {
         collapsible="none"
         className={cn(
           // 1. Geometry & Position
-          'bg-sidebar/50 w-12 shrink-0 border-r backdrop-blur-sm',
-          'sticky top-12 h-[calc(100vh-4rem)]', // Adjust 64px/top-16 to your Navbar height
-          'flex flex-col items-center py-4', // Center everything for the rail look
-          'transition-none',
+          "bg-sidebar/50 w-12 shrink-0 border-r backdrop-blur-sm",
+          "sticky top-12 h-[calc(100vh-4rem)]", // Adjust 64px/top-16 to your Navbar height
+          "flex flex-col items-center py-4", // Center everything for the rail look
+          "transition-none",
         )}
       >
         <SidebarContent className="no-scrollbar w-full overflow-x-hidden overflow-y-auto">
@@ -48,19 +48,19 @@ export function AppSidebar({ config }: { config: SidebarConfig }) {
                     tooltip={item.title}
                     // 2. These are the "Icon Mode" mimic classes
                     className={cn(
-                      'flex size-9 items-center justify-center rounded-md transition-all duration-200',
-                      'p-0!', // Remove all default padding to center the icon
+                      "flex size-9 items-center justify-center rounded-md transition-all duration-200",
+                      "p-0!", // Remove all default padding to center the icon
                       isActive
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
-                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                     )}
                   >
                     <Link to={item.url} className="flex items-center justify-center">
                       {item.icon && (
                         <item.icon
                           className={cn(
-                            'size-[1.2rem] transition-colors',
-                            isActive ? 'text-primary' : 'text-muted-foreground/60',
+                            "size-[1.2rem] transition-colors",
+                            isActive ? "text-primary" : "text-muted-foreground/60",
                           )}
                         />
                       )}

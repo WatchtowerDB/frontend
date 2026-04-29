@@ -1,16 +1,16 @@
-import Logo from '@/components/Logo'
+import Logo from "@/components/Logo"
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu'
-import { APP_NAV } from '@/config/app-nav' // wherever you store it
-import { LogOut, User } from 'lucide-react'
-import { Link } from 'react-router-dom'
-import ThemeToggle from '../ThemeToggle'
-import { Button } from '../ui/button'
+} from "@/components/ui/navigation-menu"
+import { APP_NAV } from "@/config/app-nav" // wherever you store it
+import { LogOut, User } from "lucide-react"
+import { Link } from "react-router-dom"
+import ThemeToggle from "../ThemeToggle"
+import { Button } from "../ui/button"
 
 export function Navbar() {
   return (

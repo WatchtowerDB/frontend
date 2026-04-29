@@ -1,38 +1,38 @@
 // src/pages/compliance/AssertionsList.tsx
-import { DataList } from '@/components/DataList'
+import { DataList } from "@/components/DataList"
 
 type AssertionItem = {
   id: string
   name: string
   schema: string
-  status: 'pass' | 'fail'
+  status: "pass" | "fail"
 }
 
 // 🔥 Dummy data
 const MOCK_ASSERTIONS: AssertionItem[] = [
   {
-    id: '1',
-    name: 'User must have email',
-    schema: 'users',
-    status: 'pass',
+    id: "1",
+    name: "User must have email",
+    schema: "users",
+    status: "pass",
   },
   {
-    id: '2',
-    name: 'Order must have valid total',
-    schema: 'orders',
-    status: 'fail',
+    id: "2",
+    name: "Order must have valid total",
+    schema: "orders",
+    status: "fail",
   },
   {
-    id: '3',
-    name: 'Product must have price',
-    schema: 'products',
-    status: 'pass',
+    id: "3",
+    name: "Product must have price",
+    schema: "products",
+    status: "pass",
   },
   {
-    id: '4',
-    name: 'Customer must have address',
-    schema: 'customers',
-    status: 'fail',
+    id: "4",
+    name: "Customer must have address",
+    schema: "customers",
+    status: "fail",
   },
 ]
 
@@ -44,19 +44,19 @@ const AssertionsList = () => {
         emptyMessage="No assertions found."
         columns={[
           {
-            header: 'Assertion',
+            header: "Assertion",
             render: (a) => <span className="font-medium">{a.name}</span>,
           },
           {
-            header: 'Schema',
+            header: "Schema",
             render: (a) => <span className="text-muted-foreground">{a.schema}</span>,
           },
           {
-            header: 'Status',
+            header: "Status",
             render: (a) => (
               <span
                 className={`text-sm font-medium ${
-                  a.status === 'pass' ? 'text-green-600' : 'text-red-600'
+                  a.status === "pass" ? "text-green-600" : "text-red-600"
                 }`}
               >
                 {a.status.toUpperCase()}

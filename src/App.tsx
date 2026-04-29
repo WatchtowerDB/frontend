@@ -1,13 +1,13 @@
-import { MainLayout } from '@/layout/MainLayout'
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import { MainLayout } from "@/layout/MainLayout"
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
 // import Home from './pages/Home';
-import ComplianceLayout from '@/pages/compliance/ComplianceLayout'
-import Dashboard from '@/pages/Dashboard/Dashboard'
-import Databases from '@/pages/Databases/Databases'
-import { ThemeProvider } from './context/ThemeProvider'
-import AssertionsPage from './pages/compliance/AssertionsPage'
-import SummaryPage from './pages/compliance/SummaryPage'
-import Login from './pages/login/Login'
+import ComplianceLayout from "@/pages/compliance/ComplianceLayout"
+import Dashboard from "@/pages/Dashboard/Dashboard"
+import Databases from "@/pages/Databases/Databases"
+import { ThemeProvider } from "./context/ThemeProvider"
+import AssertionsPage from "./pages/compliance/AssertionsPage"
+import SummaryPage from "./pages/compliance/SummaryPage"
+import Login from "./pages/login/Login"
 
 export default function App() {
   return (

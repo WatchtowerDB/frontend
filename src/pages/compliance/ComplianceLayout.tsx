@@ -1,19 +1,19 @@
-import { AppSidebar } from '@/components/AppSidebar'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
-import { LayoutDashboard, List } from 'lucide-react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { AppSidebar } from "@/components/AppSidebar"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { LayoutDashboard, List } from "lucide-react"
+import { Outlet, useLocation } from "react-router-dom"
 
 const COMPLIANCE_NAV = {
-  title: 'Compliance',
+  title: "Compliance",
   items: [
     {
-      title: 'Summary',
-      url: '/compliance',
+      title: "Summary",
+      url: "/compliance",
       icon: LayoutDashboard,
     },
     {
-      title: 'Assertions',
-      url: '/compliance/assertions',
+      title: "Assertions",
+      url: "/compliance/assertions",
       icon: List,
     },
   ],
@@ -31,7 +31,7 @@ export default function ComplianceLayout() {
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
-          {currentItem?.title || 'Compliance Control'}
+          {currentItem?.title || "Compliance Control"}
         </header>
 
         {/* The actual page content */}

@@ -1,6 +1,6 @@
-import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
+import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
 interface GenericSidebarProps {
   children: React.ReactNode
@@ -12,7 +12,7 @@ interface GenericSidebarProps {
 export function GenericSidebar({
   children,
   title,
-  subtitle = 'DB DATABASE',
+  subtitle = "DB DATABASE",
   className,
 }: GenericSidebarProps) {
   return (
@@ -21,7 +21,7 @@ export function GenericSidebar({
         collapsible="icon"
         variant="sidebar"
         // We keep it static/h-full as per your setup, but allow custom overrides
-        className={cn('bg-sidebar/50 static! h-full! border-r backdrop-blur-sm', className)}
+        className={cn("bg-sidebar/50 static! h-full! border-r backdrop-blur-sm", className)}
       >
         {/* Header only renders if a title is provided */}
         {title && (

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils"
 
 type Column<T> = {
   header: string
@@ -12,7 +12,7 @@ type DataListProps<T> = {
   emptyMessage?: string
 }
 
-export function DataList<T>({ data, columns, emptyMessage = 'No data found.' }: DataListProps<T>) {
+export function DataList<T>({ data, columns, emptyMessage = "No data found." }: DataListProps<T>) {
   return (
     <div className="bg-background w-full rounded-md border">
       {/* Header */}
@@ -23,7 +23,7 @@ export function DataList<T>({ data, columns, emptyMessage = 'No data found.' }: 
         }}
       >
         {columns.map((col, i) => (
-          <div key={i} className={cn('px-2', col.className)}>
+          <div key={i} className={cn("px-2", col.className)}>
             {col.header}
           </div>
         ))}
@@ -41,7 +41,7 @@ export function DataList<T>({ data, columns, emptyMessage = 'No data found.' }: 
               }}
             >
               {columns.map((col, colIndex) => (
-                <div key={colIndex} className={cn('px-2', col.className)}>
+                <div key={colIndex} className={cn("px-2", col.className)}>
                   {col.render(item)}
                 </div>
               ))}

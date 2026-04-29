@@ -18,14 +18,14 @@ const Logo: React.FC<LogoProps> = ({ width = 200, height = 200, ...props }) => (
         <stop
           offset={0}
           style={{
-            stopColor: '#347d8e',
+            stopColor: "#347d8e",
             stopOpacity: 1,
           }}
         />
         <stop
           offset={1}
           style={{
-            stopColor: '#194d65',
+            stopColor: "#194d65",
             stopOpacity: 1,
           }}
         />
@@ -84,7 +84,7 @@ const Logo: React.FC<LogoProps> = ({ width = 200, height = 200, ...props }) => (
     <path
       d="M132.292 74.083 26.458 148.167l105.834 74.083Z"
       style={{
-        fill: '#347d8e',
+        fill: "#347d8e",
         fillOpacity: 1,
         strokeWidth: 0.313059,
       }}
@@ -93,7 +93,7 @@ const Logo: React.FC<LogoProps> = ({ width = 200, height = 200, ...props }) => (
     <path
       d="m132.292 222.25 105.833-74.083-105.833-74.084Z"
       style={{
-        fill: '#194d65',
+        fill: "#194d65",
         fillOpacity: 1,
         strokeWidth: 0.31306,
       }}
@@ -102,7 +102,7 @@ const Logo: React.FC<LogoProps> = ({ width = 200, height = 200, ...props }) => (
     <path
       d="M21.167 113.242v33.337l111.125-77.787V35.454l-15.875 11.113v16.668l-15.875 11.113V57.679L84.667 68.792V85.46L68.792 96.573V79.904L52.917 91.017v16.668l-15.875 11.113v-16.669z"
       style={{
-        fill: '#347d8e',
+        fill: "#347d8e",
         fillOpacity: 1,
         strokeWidth: 0.33205,
       }}
@@ -111,7 +111,7 @@ const Logo: React.FC<LogoProps> = ({ width = 200, height = 200, ...props }) => (
     <path
       d="M243.417 113.242v33.337L132.292 68.792V35.454l15.875 11.113v16.668l15.875 11.113V57.679l15.875 11.113V85.46l15.875 11.113V79.904l15.875 11.113v16.668l15.875 11.113v-16.669z"
       style={{
-        fill: '#194d65',
+        fill: "#194d65",
         fillOpacity: 1,
         strokeWidth: 0.33205,
       }}
