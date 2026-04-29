@@ -1,12 +1,13 @@
-// src/pages/compliance/ComplianceLayout.tsx
 import {
   SidebarProvider,
   SidebarTrigger,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar"; // Your generic component
+import { AppSidebar } from "@/components/AppSidebar";
 import { Outlet, useLocation } from "react-router-dom";
 import { LayoutDashboard, List } from "lucide-react";
+import { GenericSidebar } from "@/components/GenericSidebar";
+import AssertionsList from "./components/AssertionsList";
 
 const COMPLIANCE_NAV = {
   title: "Compliance",
@@ -14,12 +15,12 @@ const COMPLIANCE_NAV = {
     {
       title: "Summary",
       url: "/compliance",
-      icon: LayoutDashboard, // Gives it that "Command Center" feel
+      icon: LayoutDashboard,
     },
     {
-      title: "Queries",
-      url: "/compliance/queries",
-      icon: List, // Perfect for auditing and database searches
+      title: "Assertions",
+      url: "/compliance/assertions",
+      icon: List,
     },
   ],
 };
@@ -32,7 +33,7 @@ export default function ComplianceLayout() {
   );
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false} className="min-h-0 flex-1">
       <AppSidebar config={COMPLIANCE_NAV} />
       {/* The sidebar */}
       <SidebarInset>

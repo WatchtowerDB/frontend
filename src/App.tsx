@@ -5,8 +5,9 @@ import Dashboard from "@/pages/dashboard/dashboard";
 import ComplianceLayout from "@/pages/compliance/ComplianceLayout";
 import Databases from "@/pages/Databases/Databases";
 import SummaryPage from "./pages/compliance/SummaryPage";
-import QueriesPage from "./pages/compliance/QueriesPage";
+import AssertionsPage from "./pages/compliance/AssertionsPage";
 import { ThemeProvider } from "./context/ThemeProvider";
+import Login from "./pages/login/Login";
 
 export default function App() {
   return (
@@ -22,7 +23,7 @@ export default function App() {
               <Route index element={<SummaryPage />} />
 
               {/* The Sub-Route: Renders at /compliance/queries */}
-              <Route path="queries" element={<QueriesPage />} />
+              <Route path="assertions" element={<AssertionsPage />} />
             </Route>
 
             <Route path="/databases" element={<Databases />} />
@@ -33,7 +34,7 @@ export default function App() {
           </Route>
 
           {/* Routes OUTSIDE the layout (like a Login page) won't have the Navbar */}
-          {/* <Route path="/login" element={<Login />} /> */}
+                      <Route path="/login" element={<Login />} />
         </Routes>
       </Router>
     </ThemeProvider>

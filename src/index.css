@@ -119,12 +119,13 @@
 
 @layer base {
   * {
+    transition-property: background-color, border-color;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
-    transition:
-      background-color 0.3s ease,
   }
   html {
     @apply font-sans;
