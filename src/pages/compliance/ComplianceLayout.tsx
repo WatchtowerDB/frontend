@@ -8,7 +8,7 @@ const COMPLIANCE_NAV = {
   items: [
     {
       title: "Summary",
-      url: "/compliance",
+      url: "/compliance/summary",
       icon: LayoutDashboard,
     },
     {
@@ -22,7 +22,9 @@ const COMPLIANCE_NAV = {
 export default function ComplianceLayout() {
   const { pathname } = useLocation()
 
-  const currentItem = COMPLIANCE_NAV.items.find((item) => item.url === pathname)
+  const currentItem = COMPLIANCE_NAV.items.find(
+    (item) => item.url === pathname || item.url + "/" === pathname,
+  )
 
   return (
     <SidebarProvider defaultOpen={false} className="min-h-0 flex-1">
@@ -31,7 +33,7 @@ export default function ComplianceLayout() {
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
-          {currentItem?.title || "Compliance Control"}
+          {currentItem?.title || "ERROR"}
         </header>
 
         {/* The actual page content */}

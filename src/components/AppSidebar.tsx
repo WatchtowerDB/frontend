@@ -38,7 +38,7 @@ export function AppSidebar({ config }: { config: SidebarConfig }) {
         <SidebarContent className="no-scrollbar w-full overflow-x-hidden overflow-y-auto">
           <SidebarMenu className="flex flex-col items-center gap-2">
             {config.items.map((item) => {
-              const isActive = pathname === item.url
+              const isActive = pathname === item.url || pathname === item.url + "/"
 
               return (
                 <SidebarMenuItem key={item.title} className="flex justify-center">

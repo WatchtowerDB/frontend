@@ -1,5 +1,5 @@
 import { MainLayout } from "@/layout/MainLayout"
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom"
 // import Home from './pages/Home';
 import ComplianceLayout from "@/pages/compliance/ComplianceLayout"
 import Dashboard from "@/pages/Dashboard/Dashboard"
@@ -19,8 +19,11 @@ export default function App() {
 
             {/* Compliance Route:*/}
             <Route path="compliance" element={<ComplianceLayout />}>
-              {/* The Index Route: Renders at /compliance */}
-              <Route index element={<SummaryPage />} />
+              {/* Redirect /compliance and /compliance/ to /compliance/summary */}
+              <Route index element={<Navigate to="summary" replace />} />
+
+              {/* The Sub-Route: Renders at /compliance/summary */}
+              <Route path="summary" element={<SummaryPage />} />
 
               {/* The Sub-Route: Renders at /compliance/queries */}
               <Route path="assertions" element={<AssertionsPage />} />
