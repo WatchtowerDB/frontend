@@ -14,7 +14,7 @@ import { Button } from "../ui/button"
 
 export function Navbar() {
   return (
-    <NavigationMenu className="flex w-full max-w-none justify-between ps-5">
+    <NavigationMenu className="flex w-full max-w-none justify-between ps-2">
       {/* Logo */}
       <div className="me-1 mt-1">
         <Logo width={35} height={35} />
