@@ -1,7 +1,7 @@
 import axios from "axios"
 import { useAuthStore } from "../stores/useAuthStore"
 
-const refreshToken = localStorage.getItem("refresh_token")
+// const refreshToken = localStorage.getItem("refresh_token")
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
@@ -36,7 +36,8 @@ api.interceptors.response.use(
       try {
         const response = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/auth/refresh/`,
-          { refresh: refreshToken },
+          {}, // Come back here if things don't work, and remove this line entirely.
+          // { refresh: refreshToken },
           { withCredentials: true },
         )
 

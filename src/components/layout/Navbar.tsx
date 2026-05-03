@@ -6,7 +6,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { APP_NAV } from "@/config/app-nav" // wherever you store it
+import { APP_NAV } from "@/config/app-nav" // wherever you sthStore"
 import { User } from "lucide-react"
 import { Link } from "react-router-dom"
 import ThemeToggle from "../ThemeToggle"
