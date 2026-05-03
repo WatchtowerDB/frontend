@@ -4,12 +4,14 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-d
 import ComplianceLayout from "@/pages/compliance/ComplianceLayout"
 import Dashboard from "@/pages/dashboard/Dashboard"
 import Databases from "@/pages/databases/Databases"
+import { Toaster } from "./components/ui/sonner"
 import { AuthProvider } from "./context/AuthProvider"
 import { ProtectedRoute } from "./context/ProtectedRoute"
 import { ThemeProvider } from "./context/ThemeProvider"
 import AssertionsPage from "./pages/compliance/AssertionsPage"
 import SummaryPage from "./pages/compliance/SummaryPage"
 import Login from "./pages/login/Login"
+import NotFound from "./pages/not-found/NotFound"
 
 export default function App() {
   return (
@@ -43,8 +45,10 @@ export default function App() {
 
             {/* Routes OUTSIDE the layout (like a Login page) won't have the Navbar */}
             <Route path="/login" element={<Login />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>
+        <Toaster richColors closeButton position="top-right" />
       </AuthProvider>
     </ThemeProvider>
   )

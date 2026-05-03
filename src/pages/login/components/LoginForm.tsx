@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/useAuthStore"
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -23,6 +22,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -37,7 +37,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       await login(data)
     } catch (error) {
       console.error("Login failed:", error)
-      // Should probably have an error report here, so toastify or smth.
+      if (error === 401) {
+        setError("username", { type: "manual", message: "Invalid credentials" })
+        setError("password", { type: "manual", message: "Invalid credentials" })
+      }
     }
   }
 
@@ -51,7 +54,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="username">Username</FieldLabel>
+                <FieldLabel htmlFor="username" className={errors.password ? "text-red-600" : ""}>
+                  Username
+                </FieldLabel>
                 <Input
                   id="username"
                   type="username"
@@ -61,12 +66,17 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   required
                 />
                 {errors.username && (
-                  <p className="text-destructive mt-1 text-xs">{errors.username.message}</p>
+                  <FieldError
+                    className="text-destructive -mt-1 text-xs"
+                    errors={[{ message: errors.username.message }]}
+                  />
                 )}
               </Field>
               <Field>
                 <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <FieldLabel htmlFor="password" className={errors.password ? "text-red-600" : ""}>
+                    Password
+                  </FieldLabel>
                   {/* <a
                     href="#"
                     className="ml-auto text-sm underline-offset-4 hover:underline"
@@ -82,7 +92,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   required
                 />
                 {errors.password && (
-                  <p className="text-destructive mt-1 text-xs">{errors.password.message}</p>
+                  <FieldError
+                    className="text-destructive -mt-1 text-xs"
+                    errors={[{ message: errors.password.message }]}
+                  />
                 )}
               </Field>
               <Field>
