@@ -7,12 +7,15 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { APP_NAV } from "@/config/app-nav" // wherever you store it
-import { LogOut, User } from "lucide-react"
+import { User } from "lucide-react"
 import { Link } from "react-router-dom"
 import ThemeToggle from "../ThemeToggle"
-import { Button } from "../ui/button"
+import { Logout } from "./Logout"
 
 export function Navbar() {
+  // const { accessToken, setAccessToken } = useAuthStore()
+  // const refreshToken = localStorage.getItem("refresh_token")
+
   return (
     <NavigationMenu className="flex w-full max-w-none justify-between ps-2">
       {/* Logo */}
@@ -42,10 +45,25 @@ export function Navbar() {
           <User className="size-5" />
         </div>
         <ThemeToggle />
-        <Button variant="outline" size="sm" className="gap-2">
-          <LogOut className="size-4" />
-          Logout
-        </Button>
+      </div>
+      {/* <Button
+        variant="outline"
+        size="sm"
+        className="gap-2"
+        onClick={() => toast(accessToken + "and the refresh is" + String(refreshToken))}
+      >
+        Spit auth stuff
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-2"
+        onClick={() => setAccessToken(null)}
+      >
+        Kill access!
+      </Button> */}
+      <div className="mr-5">
+        <Logout />
       </div>
     </NavigationMenu>
   )
