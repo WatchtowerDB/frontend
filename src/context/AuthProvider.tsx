@@ -5,16 +5,11 @@ import { useAuthStore } from "../stores/useAuthStore"
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { setAccessToken, logout } = useAuthStore()
   const [isInitializing, setIsInitializing] = useState(true)
-  // const refreshToken = localStorage.getItem("refresh_token")
-
-  // Refer to the TODO in useAuthStore.ts. ^
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // if (!refreshToken) return logout()
-        // const response = await api.post("/auth/refresh/")
-        const response = await api.post("/auth/refresh/", {}) //come back here if it doesntw ork, uncomment line 16 and get rid of this line.
+        const response = await api.post("/auth/refresh/", {})
         const { access } = response.data
 
         setAccessToken(access)

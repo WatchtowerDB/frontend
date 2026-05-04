@@ -1,8 +1,5 @@
 import axios from "axios"
 import { useAuthStore } from "../stores/useAuthStore"
-
-// const refreshToken = localStorage.getItem("refresh_token")
-
 const api = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
   withCredentials: true,
@@ -15,13 +12,6 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
-
-// TODO: change the backend's authentication to support this better.
-// Since the backend demands the rerfresh token to be in a JSON format, this makes a security risk.
-// that allows XSS attacks. - due to the the existence of refreshToken (variable defined at line 4)
-// For now, refresh token will be stored within a localStorage cookie.
-// But I will leave the setup that allows to switch to httpOnly easily. I believe that the backend..
-// ..sould be able to handle the httpOnly storage.
 
 api.interceptors.response.use(
   (response) => response,
@@ -36,8 +26,7 @@ api.interceptors.response.use(
       try {
         const response = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/auth/refresh/`,
-          {}, // Come back here if things don't work, and remove this line entirely.
-          // { refresh: refreshToken },
+          {},
           { withCredentials: true },
         )
 
