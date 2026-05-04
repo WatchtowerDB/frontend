@@ -20,8 +20,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const response = await api.post("/auth/", credentials)
       console.log("Hello hello hello hello hello hello", response)
-      const { access, refresh } = response.data
-      localStorage.setItem("refresh_token", refresh)
+      const { access } = response.data
 
       set({
         accessToken: access,
@@ -37,7 +36,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAccessToken: (token) => set({ accessToken: token }),
 
   logout: () => {
-    localStorage.removeItem("refresh_token")
     set({ accessToken: null, userName: null, isAuthenticated: false })
     toast.info("You have been logged out.", {
       duration: 3000,
