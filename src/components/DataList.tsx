@@ -1,58 +1,69 @@
+import { Card } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import * as React from "react"
 
-type Column<T> = {
-  header: string
-  className?: string
-  render: (item: T) => React.ReactNode
-}
-
-type DataListProps<T> = {
+interface CardListProps<T> {
   data: T[]
-  columns: Column<T>[]
+  renderTitle: (item: T) => React.ReactNode
+  renderDescription?: (item: T) => React.ReactNode
+  renderBadge?: (item: T) => React.ReactNode
+  renderContent?: (item: T) => React.ReactNode
+  onItemClick?: (item: T) => void
   emptyMessage?: string
+  className?: string
 }
 
-export function DataList<T>({ data, columns, emptyMessage = "No data found." }: DataListProps<T>) {
+export function DataList<T>({
+  data,
+  renderTitle,
+  renderDescription,
+  renderBadge,
+  renderContent,
+  onItemClick,
+  emptyMessage = "Nothing found.",
+  className,
+}: CardListProps<T>) {
   return (
-    <div className="bg-background w-full rounded-md border">
-      {/* Header */}
-      <div
-        className="text-muted-foreground grid border-b px-4 py-2 text-sm font-medium"
-        style={{
-          gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))`,
-        }}
-      >
-        {columns.map((col, i) => (
-          <div key={i} className={cn("px-2", col.className)}>
-            {col.header}
-          </div>
-        ))}
-      </div>
-
-      {/* Body */}
-      <div className="divide-y">
+    <ScrollArea className={cn("bg-background h-full w-full border", className)}>
+      <div className="flex flex-col">
         {data.length > 0 ? (
-          data.map((item, rowIndex) => (
-            <div
-              key={rowIndex}
-              className="hover:bg-muted/50 grid items-center px-4 py-3 transition-colors"
-              style={{
-                gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))`,
-              }}
+          data.map((item, index) => (
+            <Card
+              key={index}
+              className={cn(
+                "rounded-none transition-all duration-200",
+                onItemClick && "hover:bg-accent hover:text-accent-foreground cursor-pointer",
+              )}
+              onClick={() => onItemClick?.(item)}
             >
-              {columns.map((col, colIndex) => (
-                <div key={colIndex} className={cn("px-2", col.className)}>
-                  {col.render(item)}
+              <div className="space-y-3 p-4">
+                {/* Header Row */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1 overflow-hidden">
+                    <div className="leading-none font-semibold tracking-tight">
+                      {renderTitle(item)}
+                    </div>
+                    {renderDescription && (
+                      <div className="text-muted-foreground text-xs">{renderDescription(item)}</div>
+                    )}
+                  </div>
+                  {renderBadge && <div className="shrink-0">{renderBadge(item)}</div>}
                 </div>
-              ))}
-            </div>
+
+                {/* Content Row */}
+                {renderContent && (
+                  <div className="text-muted-foreground text-sm">{renderContent(item)}</div>
+                )}
+              </div>
+            </Card>
           ))
         ) : (
-          <div className="text-muted-foreground flex items-center justify-center py-10 text-sm">
+          <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
             {emptyMessage}
           </div>
         )}
       </div>
-    </div>
+    </ScrollArea>
   )
 }
