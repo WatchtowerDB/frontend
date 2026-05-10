@@ -13,6 +13,7 @@ interface AssertionReportProps {
 }
 
 // Alert had variant: outline
+// We are keeping the fake variable for now, to test formatting and design.
 
 export default function AssertionReport({
   assertionId,
@@ -80,7 +81,9 @@ cipher_suite = Fernet(key)
           <ScrollArea className="h-full w-full">
             <div className="p-6">
               <article className="prose prose-slate dark:prose-invert prose-headings:font-bold prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-pre:bg-slate-950 prose-pre:text-slate-50 prose-pre:shadow-lg max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{fake}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {assertion.recommendation}
+                </ReactMarkdown>
               </article>
             </div>
           </ScrollArea>

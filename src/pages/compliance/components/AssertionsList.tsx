@@ -13,38 +13,10 @@ interface AssertionListProps {
   selectedId?: number | null
 }
 
-// 🔥 Dummy data
-// const MOCK_ASSERTIONS: AssertionItem[] = [
-//   {
-//     id: "1",
-//     name: "User must have email",
-//     schema: "users",
-//     status: "pass",
-//   },
-//   {
-//     id: "2",
-//     name: "Order must have valid total",
-//     schema: "orders",
-//     status: "fail",
-//   },
-//   {
-//     id: "3",
-//     name: "Product must have price",
-//     schema: "products",
-//     status: "pass",
-//   },
-//   {
-//     id: "4",
-//     name: "Customer must have address",
-//     schema: "customers",
-//     status: "fail",
-//   },
-// ]
-
 const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
   const { data, isLoading, isError, error } = useAssertions({
     // schema: selectedSchema ?? undefined,
-    // result: showOnlyFailures ? false : undefined, // Optional filter
+    // result: showOnlyFailures ? false : undefined, // Optional filter, likely to come in handy later.
   })
 
   if (isLoading) return <div className="animate-pulse p-4 text-xs">Scanning assertions...</div>

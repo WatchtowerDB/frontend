@@ -28,10 +28,10 @@ export function AppSidebar({ config }: { config: SidebarConfig }) {
       <Sidebar
         collapsible="none"
         className={cn(
-          // 1. Geometry & Position
+          // Geometry & Position
           "bg-sidebar/50 w-12 shrink-0 border-r backdrop-blur-sm",
-          "sticky top-12 h-full", // Adjust 64px/top-16 to your Navbar height
-          "flex flex-col items-center py-4", // Center everything for the rail look
+          "sticky top-12 h-full",
+          "flex flex-col items-center py-4",
           "transition-none",
         )}
       >
@@ -46,10 +46,9 @@ export function AppSidebar({ config }: { config: SidebarConfig }) {
                     asChild
                     isActive={isActive}
                     tooltip={item.title}
-                    // 2. These are the "Icon Mode" mimic classes
                     className={cn(
                       "flex size-9 items-center justify-center rounded-md transition-all duration-200",
-                      "p-0!", // Remove all default padding to center the icon
+                      "p-0!",
                       isActive
                         ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
                         : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
@@ -65,10 +64,10 @@ export function AppSidebar({ config }: { config: SidebarConfig }) {
                         />
                       )}
 
-                      {/* Keep this for accessibility, but it's invisible */}
+                      {/* for accessibility */}
                       <span className="sr-only">{item.title}</span>
 
-                      {/* 3. The Active Indicator (Vertical line) */}
+                      {/* The Active Indicator */}
                       {isActive && (
                         <div className="bg-primary absolute top-1/4 left-0 h-1/2 w-1 rounded-full" />
                       )}

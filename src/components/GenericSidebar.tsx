@@ -24,7 +24,6 @@ export function GenericSidebar({
       <Sidebar
         collapsible="offcanvas"
         variant="sidebar"
-        // We keep it static/h-full as per your setup, but allow custom overrides
         className={cn("bg-sidebar/50 static! h-full! border-r backdrop-blur-sm", className)}
       >
         {/* Header only renders if a title is provided */}
@@ -38,6 +37,7 @@ export function GenericSidebar({
             </div>
           </SidebarHeader>
         )}
+        {/* Header children, also optional. Likely will have search, filter, etc. */}
         {headerChildren && (
           <SidebarHeader className="mt-1 flex h-13 overflow-hidden px-4 transition-all duration-200 group-data-[state=collapsed]:h-0 group-data-[state=collapsed]:border-none group-data-[state=collapsed]:p-0">
             {headerChildren}

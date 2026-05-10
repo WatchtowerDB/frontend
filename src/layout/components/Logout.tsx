@@ -1,6 +1,6 @@
+import { Button } from "@/components/ui/button"
 import { useAuthStore } from "@/stores/useAuthStore"
 import { LogOut } from "lucide-react"
-import { Button } from "../ui/button"
 
 export function Logout() {
   const { logout } = useAuthStore()

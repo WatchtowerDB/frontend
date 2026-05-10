@@ -20,12 +20,6 @@ const COMPLIANCE_NAV = {
 }
 
 export default function ComplianceLayout() {
-  // const { pathname } = useLocation()
-
-  // const currentItem = COMPLIANCE_NAV.items.find(
-  //   (item) => item.url === pathname || item.url + "/" === pathname,
-  // )
-
   return (
     <SidebarProvider defaultOpen={true} className="h-full min-h-0 flex-1">
       <AppSidebar config={COMPLIANCE_NAV} />
