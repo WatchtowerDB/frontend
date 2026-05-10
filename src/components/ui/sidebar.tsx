@@ -507,15 +507,14 @@ function SidebarMenuButton({
   return (
     <Tooltip>
       <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent
-        side="right"
-        align="center"
-        hidden={state !== "collapsed" || isMobile}
-        {...tooltip}
-      />
+      <TooltipContent side="right" align="center" hidden={isMobile} {...tooltip} />
     </Tooltip>
   )
 }
+
+// Please note that originally, there was a hidden condition for TooltipContent, removed for convenience.
+// So a tooltip would appear anyway.
+//         hidden={state !== "collapsed" || isMobile}
 
 function SidebarMenuAction({
   className,

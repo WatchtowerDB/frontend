@@ -1,7 +1,12 @@
-import { DataList } from "@/components/DataList"
 import { Badge } from "@/components/ui/badge"
+import {
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
 import { useAssertions } from "@/hooks/useAssertions"
-import { type AssertionItem } from "@/types/compliance"
 
 interface AssertionListProps {
   onSelect?: (item: number) => void
@@ -47,22 +52,36 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
     return <div className="text-destructive p-4 text-xs">Failed to load: {error.message}</div>
 
   return (
-    <DataList<AssertionItem>
-      // className="max-w-screen"
-      data={data?.results || []}
-      onItemClick={(item) => onSelect?.(item.id)}
-      renderTitle={(item) => (
-        <span className="block truncate font-mono text-xs">{item.sql_query}</span>
-      )}
-      renderDescription={(item) => `ID: ${item.id} • Check: ${item.compliance_check}`}
-      renderBadge={(item) => (
-        <Badge variant={item.result ? "outline" : "destructive"}>
-          {item.result ? "Pass" : "Fail"}
-        </Badge>
-      )}
-      // renderContent={(item) => <p className="line-clamp-1 text-xs italic">{item.recommendation}</p>}
-      emptyMessage="No assertions found for this schema."
-    />
+    <SidebarGroup>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {data?.results.map((item) => (
+            <SidebarMenuItem key={item.id}>
+              <SidebarMenuButton
+                asChild
+                isActive={selectedId === item.id}
+                className="h-auto flex-col items-start gap-1 border-b p-0 last:border-b-0"
+              >
+                <button
+                  onClick={() => onSelect?.(item.id)}
+                  className="flex w-full flex-col items-start gap-1 p-4"
+                >
+                  <div className="flex w-full items-center justify-between">
+                    <span className="truncate text-left font-mono text-xs">{item.sql_query}</span>
+                    <Badge variant={item.result ? "outline" : "destructive"} className="ml-2">
+                      {item.result ? "Pass" : "Fail"}
+                    </Badge>
+                  </div>
+                  <span className="text-muted-foreground text-left text-[10px]">
+                    ID: {item.id} • {item.compliance_check}
+                  </span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
   )
 }
 

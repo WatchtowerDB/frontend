@@ -27,17 +27,11 @@ export default function ComplianceLayout() {
   // )
 
   return (
-    <SidebarProvider defaultOpen={false} className="min-h-0 flex-1">
+    <SidebarProvider defaultOpen={true} className="h-full min-h-0 flex-1">
       <AppSidebar config={COMPLIANCE_NAV} />
       {/* The sidebar */}
-      <SidebarInset>
-        {/* <header className="flex h-16 shrink-0 items-center gap-2 px-4">
-          <SidebarTrigger className="-ml-1" />
-          {currentItem?.title || "ERROR"}
-        </header> */}
-
-        {/* The actual page content */}
-        <main className="p-6">
+      <SidebarInset className="min-h-0 overflow-hidden">
+        <main className="h-full">
           <Outlet />
         </main>
       </SidebarInset>

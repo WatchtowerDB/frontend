@@ -30,7 +30,7 @@ export function AppSidebar({ config }: { config: SidebarConfig }) {
         className={cn(
           // 1. Geometry & Position
           "bg-sidebar/50 w-12 shrink-0 border-r backdrop-blur-sm",
-          "sticky top-12 h-[calc(100vh-4rem)]", // Adjust 64px/top-16 to your Navbar height
+          "sticky top-12 h-full", // Adjust 64px/top-16 to your Navbar height
           "flex flex-col items-center py-4", // Center everything for the rail look
           "transition-none",
         )}

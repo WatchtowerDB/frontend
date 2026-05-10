@@ -1,5 +1,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useAssertions } from "@/hooks/useAssertions"
 import { InfoIcon } from "lucide-react"
 import ReactMarkdown from "react-markdown"
@@ -65,31 +67,37 @@ cipher_suite = Fernet(key)
   const assertion = data?.results.find((a) => a.id === assertionId)
 
   return (
-    <Card className="w-full border-slate-200 shadow-sm dark:border-slate-800">
-      <CardHeader className="border-b bg-slate-50/50 py-4 dark:bg-slate-900/50">
-        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+    <Card className="flex h-full flex-col border-slate-200 shadow-sm dark:border-slate-800">
+      <CardHeader className="flex-none border-b py-4">
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+          <SidebarTrigger />
+          {title}
+        </CardTitle>
       </CardHeader>
 
-      <CardContent className="pt-6">
-        <div className="max-h-[75vh] overflow-y-auto px-1">
-          {assertion ? (
-            <article className="prose prose-slate dark:prose-invert prose-headings:font-bold prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-pre:bg-slate-950 prose-pre:text-slate-50 prose-pre:shadow-lg prose-code:before:content-none prose-code:after:content-none max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{fake}</ReactMarkdown>
-            </article>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-400 italic">
-              <InfoIcon className="mb-2 h-8 w-8 opacity-20" />
-              <p>Select an assertion to view its audit intelligence.</p>
+      <CardContent className="min-h-0 flex-1 p-0">
+        {assertion ? (
+          <ScrollArea className="h-full w-full">
+            <div className="p-6">
+              <article className="prose prose-slate dark:prose-invert prose-headings:font-bold prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-pre:bg-slate-950 prose-pre:text-slate-50 prose-pre:shadow-lg max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{fake}</ReactMarkdown>
+              </article>
             </div>
-          )}
-        </div>
+          </ScrollArea>
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center py-20 text-slate-400 italic">
+            <InfoIcon className="mb-2 h-8 w-8 opacity-20" />
+            <p>Select an assertion to view its audit intelligence.</p>
+          </div>
+        )}
       </CardContent>
 
-      <CardFooter className="border-t bg-slate-50/30 py-3 dark:bg-slate-900/30">
+      <CardFooter className="flex-none border-t bg-slate-50/30 py-3 dark:bg-slate-900/30">
         <Alert className="border-none bg-transparent p-0">
-          <AlertDescription className="text-muted-foreground text-center text-xs leading-relaxed">
-            All audit insights are AI-generated for WatchtowerDB. Verify critical remediation steps
-            with a security professional.
+          <AlertDescription className="text-muted-foreground text-center text-[10px] leading-relaxed tracking-widest uppercase">
+            All responses are AI-generated and may not always be accurate or complete. They should
+            be independently reviewed and verified by a domain expert. WatchtowerDB is NOT
+            responsible for any actions taken based on these responses.
           </AlertDescription>
         </Alert>
       </CardFooter>

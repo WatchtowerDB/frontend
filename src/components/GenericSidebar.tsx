@@ -1,9 +1,12 @@
 import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import type React from "react"
+import { ScrollArea } from "./ui/scroll-area"
 
 interface GenericSidebarProps {
   children: React.ReactNode
+  headerChildren?: React.ReactNode
   title?: string
   subtitle?: string
   className?: string
@@ -11,6 +14,7 @@ interface GenericSidebarProps {
 
 export function GenericSidebar({
   children,
+  headerChildren,
   title,
   subtitle = "DB DATABASE",
   className,
@@ -18,7 +22,7 @@ export function GenericSidebar({
   return (
     <TooltipProvider delayDuration={0}>
       <Sidebar
-        collapsible="icon"
+        collapsible="offcanvas"
         variant="sidebar"
         // We keep it static/h-full as per your setup, but allow custom overrides
         className={cn("bg-sidebar/50 static! h-full! border-r backdrop-blur-sm", className)}
@@ -34,10 +38,16 @@ export function GenericSidebar({
             </div>
           </SidebarHeader>
         )}
+        {headerChildren && (
+          <SidebarHeader className="mt-1 flex h-13 overflow-hidden px-4 transition-all duration-200 group-data-[state=collapsed]:h-0 group-data-[state=collapsed]:border-none group-data-[state=collapsed]:p-0">
+            {headerChildren}
+          </SidebarHeader>
+        )}
 
-        <SidebarContent className="overflow-x-hidden">
-          {/* This is where your custom components or menus will live */}
-          {children}
+        <SidebarContent className="min-h-0 flex-1 overflow-hidden">
+          <ScrollArea className="h-full w-full">
+            <div className="flex w-full min-w-0 flex-col">{children}</div>
+          </ScrollArea>
         </SidebarContent>
       </Sidebar>
     </TooltipProvider>
