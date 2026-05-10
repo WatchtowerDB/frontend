@@ -1,4 +1,5 @@
 import Logo from "@/components/Logo"
+import ThemeToggle from "@/components/ThemeToggle"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -9,7 +10,6 @@ import {
 import { APP_NAV } from "@/config/app-nav"
 import { User } from "lucide-react"
 import { Link } from "react-router-dom"
-import ThemeToggle from "../ThemeToggle"
 import { Logout } from "./Logout"
 
 export function Navbar() {
