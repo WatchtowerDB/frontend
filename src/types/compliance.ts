@@ -10,3 +10,39 @@ export interface AssertionItem {
   schema: number
   compliance_check: number
 }
+
+// Client Database object
+export interface ClientDB {
+  id: number
+  name: string
+  connection_string: string
+}
+
+export interface ClientDBCreate {
+  name: string
+  connection_string: string
+}
+
+export interface ClientDBPatch {
+  name?: string
+  connection_string?: string
+}
+
+// Client Database Schema object
+export interface ClientDBSchema {
+  id: number
+  client_db: number
+  sql_definition: string
+  created_at: string
+}
+
+export interface ClientDBSchemaCreate {
+  client_db: number
+  sql_definition: string
+}
+
+// For uploading schema
+export interface ClientDBSchemaUpload {
+  client_db: number
+  sql_file: File
+}
