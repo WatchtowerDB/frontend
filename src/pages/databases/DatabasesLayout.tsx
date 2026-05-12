@@ -23,9 +23,7 @@ export default function DatabasesLayout() {
   return (
     <SidebarProvider defaultOpen={true} className="h-full min-h-0 flex-1">
       <AppSidebar config={DATABASES_NAV} />
-      <main className="h-full">
-        <Outlet />
-      </main>
+      <Outlet />
     </SidebarProvider>
   )
 }
