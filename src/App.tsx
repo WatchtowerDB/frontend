@@ -3,7 +3,8 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-d
 // import Home from './pages/Home';
 import ComplianceLayout from "@/pages/compliance/ComplianceLayout"
 import Dashboard from "@/pages/dashboard/Dashboard"
-import Databases from "@/pages/databases/Databases"
+import ClientDBPage from "@/pages/databases/ClientDBPage"
+import DatabasesLayout from "@/pages/databases/DatabasesLayout"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Toaster } from "./components/ui/sonner"
@@ -47,7 +48,14 @@ export default function App() {
                     <Route path="assertions" element={<AssertionsPage />} />
                   </Route>
 
-                  <Route path="/databases" element={<Databases />} />
+                  <Route path="databases" element={<DatabasesLayout />}>
+                    {/* Redirect /databases and /databases/ to /databases/clientdbs */}
+                    <Route index element={<Navigate to="clientdbs" replace />} />
+
+                    <Route path="clientdbs" element={<ClientDBPage />} />
+
+                    <Route path="schemas" element={<h2>Schemas</h2>} />
+                  </Route>
                   <Route path="/standards" element={<h2>Standards</h2>} />
                   <Route path="/settings" element={<h2>Settings</h2>} />
                   <Route path="/help" element={<h2>Help</h2>} />
