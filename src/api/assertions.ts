@@ -9,6 +9,9 @@ export interface AssertionFilters {
   compliance_framework?: number
   result?: boolean
   schema?: number
+  // Pagination
+  page?: number
+  page_size?: number
 }
 
 // To retrieve ALL assertions

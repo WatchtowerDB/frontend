@@ -6,6 +6,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useAssertions } from "@/hooks/useAssertions"
+import { useAssertionStore } from "@/stores/useAssertionStore"
 
 interface AssertionListProps {
   onSelect?: (item: number) => void
@@ -13,10 +14,15 @@ interface AssertionListProps {
 }
 
 const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
-  const { data, isLoading, isError, error } = useAssertions({
-    // schema: selectedSchema ?? undefined,
-    // result: showOnlyFailures ? false : undefined, // Optional filter, likely to come in handy later.
-  })
+  const { assertions, totalPages, totalCount, isLoading, isError, error, isFetching } =
+    useAssertions()
+
+  const page = useAssertionStore((s) => s.page)
+  const setPage = useAssertionStore((s) => s.setPage)
+
+  if (isLoading) return <div className="animate-pulse p-4 text-xs">Scanning assertions...</div>
+  if (isError)
+    return <div className="text-destructive p-4 text-xs">Failed to load: {error.message}</div>
 
   const mockAssertions = {
     results: [
@@ -63,48 +69,81 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
     ],
   }
 
-  if (isLoading) return <div className="animate-pulse p-4 text-xs">Scanning assertions...</div>
-  if (isError)
-    return <div className="text-destructive p-4 text-xs">Failed to load: {error.message}</div>
+  // if (isLoading) return <div className="animate-pulse p-4 text-xs">Scanning assertions...</div>
+  // if (isError)
+  //   return <div className="text-destructive p-4 text-xs">Failed to load: {error.message}</div>
 
   return (
-    <SidebarGroup>
-      <SidebarGroupContent>
-        <SidebarMenu className="gap-1">
-          {/* There's bound to be a cleaner way to do this than putting a gap-1 here.*/}
-          {mockAssertions.results.map((item) => (
-            <SidebarMenuItem key={item.id}>
-              <SidebarMenuButton
-                asChild
-                isActive={selectedId === item.id}
-                className="h-auto flex-col items-start gap-1 border-b p-0 last:border-b-0"
-              >
-                <button
-                  onClick={() => onSelect?.(item.id)}
-                  className={`flex w-full flex-col items-start gap-1 p-4 backdrop-blur-sm ${
-                    item.result
-                      ? "border-l-4 border-emerald-500 bg-linear-to-br from-emerald-500/15 via-emerald-500/5 via-10% to-transparent to-15%"
-                      : "border-l-4 border-red-500 bg-linear-to-br from-red-500/15 via-red-500/5 via-10% to-transparent to-15%"
-                  }`}
+    <div className="relative flex flex-col">
+      {isFetching && <div className="text-muted-foreground px-4 py-1 text-[10px]">Updating…</div>}
+
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <SidebarMenu
+            className={`gap-1 transition-opacity duration-150 ${isFetching ? "opacity-60" : "opacity-100"}`}
+          >
+            {assertions.map((item) => (
+              <SidebarMenuItem key={item.id}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={selectedId === item.id}
+                  className="h-auto flex-col items-start gap-1 border-b p-0 last:border-b-0"
                 >
-                  <div className="flex w-full items-center justify-between">
-                    <span className="truncate text-left font-mono text-xs">
-                      {item.id} • {item.sql_query}
+                  <button
+                    onClick={() => onSelect?.(item.id)}
+                    className={`flex w-full flex-col items-start gap-1 p-4 backdrop-blur-sm ${
+                      item.result
+                        ? "border-l-4 border-emerald-500 bg-linear-to-br from-emerald-500/15 via-emerald-500/5 via-10% to-transparent to-15%"
+                        : "border-l-4 border-red-500 bg-linear-to-br from-red-500/15 via-red-500/5 via-10% to-transparent to-15%"
+                    }`}
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <span className="truncate text-left font-mono text-xs">
+                        {item.id} • {item.sql_query}
+                      </span>
+                    </div>
+                    <span className="text-muted-foreground text-left text-[10px]">
+                      {item.compliance_check}
                     </span>
-                    {/* <Badge variant={item.result ? "outline" : "destructive"} className="ml-2">
-                      {item.result ? "Pass" : "Fail"}
-                    </Badge> */}
-                  </div>
-                  <span className="text-muted-foreground text-left text-[10px]">
-                    {item.compliance_check}
-                  </span>
-                </button>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      {/* Pagination — only renders if there's more than one page */}
+      {/* {totalPages > 1 && (
+        <div className="flex items-center justify-between border-t px-4 py-2 absolute inset-x-0 bottom-0">
+          <span className="text-muted-foreground text-[10px]">
+            Page {page} of {totalPages} · {totalCount} total
+          </span>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              disabled={page <= 1 || isFetching}
+              onClick={() => setPage(page - 1)}
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              disabled={page >= totalPages || isFetching}
+              onClick={() => setPage(page + 1)}
+              aria-label="Next page"
+            >
+              <ChevronRight className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      )} */}
+    </div>
   )
 }
 

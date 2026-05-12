@@ -77,11 +77,11 @@ cipher_suite = Fernet(key)
         </h2>
       </div>
 
-      {/* Scrollable body + sticky footer overlay */}
       <div className="relative min-h-0 flex-1">
         <ScrollArea className="h-full w-full">
           {assertion ? (
-            <div className="p-6 pb-20">
+            <div className="p-6">
+              {/* The SQL Query */}
               <div className="relative mb-6">
                 <span className="absolute inset-s-3 top-2 font-mono text-[10px] tracking-widest text-slate-500 uppercase">
                   SQL
@@ -90,6 +90,7 @@ cipher_suite = Fernet(key)
                   <code>{assertion.sql_query}</code>
                 </pre>
               </div>
+              {/* The Assertion Report */}
               <article className="prose prose-slate dark:prose-invert prose-headings:font-bold prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-pre:bg-slate-950 prose-pre:text-slate-50 prose-pre:shadow-lg prose-pre:border-2 max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{fake}</ReactMarkdown>
               </article>
@@ -101,17 +102,15 @@ cipher_suite = Fernet(key)
             </div>
           )}
         </ScrollArea>
-
-        {/* Alert overlays the bottom of the scroll area */}
-        <div className="absolute inset-x-0 bottom-0 border-t bg-white px-6 transition-colors duration-200 dark:bg-slate-950">
-          <Alert className="rounded-none border-none bg-transparent p-0 py-3">
-            <AlertDescription className="text-muted-foreground text-center text-[10px] leading-relaxed tracking-widest uppercase">
-              All responses are AI-generated and may not always be accurate or complete. They should
-              be independently reviewed and verified by a domain expert. WatchtowerDB is NOT
-              responsible for any actions taken based on these responses.
-            </AlertDescription>
-          </Alert>
-        </div>
+      </div>
+      <div className="border-t bg-white px-6 transition-colors duration-200 dark:bg-slate-950">
+        <Alert className="rounded-none border-none bg-transparent p-0 py-3">
+          <AlertDescription className="text-muted-foreground text-center text-[10px] leading-relaxed tracking-widest uppercase">
+            All responses are AI-generated and may not always be accurate or complete. They should
+            be independently reviewed and verified by a domain expert. WatchtowerDB is NOT
+            responsible for any actions taken based on these responses.
+          </AlertDescription>
+        </Alert>
       </div>
     </div>
   )

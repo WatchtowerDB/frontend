@@ -2,6 +2,7 @@ import { type AssertionFilters } from "@/api/assertions"
 import { create } from "zustand"
 
 export const ASSERTIONS_PAGE_SIZE = 20
+// This store is gorgeous.
 
 interface AssertionFilterState {
   // --- Filter selections ---
@@ -48,13 +49,13 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
   (set, get) => ({
     ...initialFilterState,
 
-    // Each setter that changes a filter resets page to 1.
+    // These setters change the page to 1 immediately.
     setClientDb: (id) => set({ clientDb: id, page: 1 }),
     setSchema: (id) => set({ schema: id, page: 1 }),
     setComplianceFramework: (id) => set({ complianceFramework: id, page: 1 }),
     setResult: (result) => set({ result, page: 1 }),
 
-    // Search state does NOT reset page however.
+    // Search state does NOT reset page however, if needed, I will change that.
     setFilterSearch: (query) => set({ filterSearch: query }),
     setAssertionSearch: (query) => set({ assertionSearch: query }),
 
