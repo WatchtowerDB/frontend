@@ -14,7 +14,7 @@ function AssertionsPage() {
       />
       <SidebarInset className="min-h-0 flex-1 overflow-hidden">
         {/* The actual page content */}
-        <main className="h-full p-6">
+        <main className="h-full p-1">
           <AssertionReport assertionId={selectedId} />
         </main>
       </SidebarInset>
