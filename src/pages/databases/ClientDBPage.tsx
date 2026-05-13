@@ -60,14 +60,16 @@ export default function ClientDBPage() {
             <TableBody>
               {rows.map((db) => {
                 const rowClassName = db.isDeleted
-                  ? "bg-rose-50"
+                  ? "bg-rose-50 dark:bg-red-900"
                   : db.isNew
-                    ? "bg-emerald-50"
+                    ? "bg-emerald-50 dark:bg-emerald-800"
                     : db.hasLocalChanges
-                      ? "bg-amber-50"
+                      ? "bg-amber-50 dark:bg-yellow-800"
                       : ""
 
-                const textClassName = db.isDeleted ? "line-through text-rose-900/80" : ""
+                const textClassName = db.isDeleted
+                  ? "line-through text-rose-900/80 dark:text-white"
+                  : ""
 
                 return (
                   <TableRow key={db.id} className={rowClassName}>
@@ -81,25 +83,10 @@ export default function ClientDBPage() {
                           onChange={(e) => updateField(db.id, "name", e.target.value)}
                         />
                       ) : (
-                        <div className="flex items-center gap-2">
-                          {/* Sorry this is a bit messy, I was drafting out ideas */}
-                          <span className={textClassName}>
-                            {db.name ||
-                              "IF YOU CAN SEE THIS, THEN I FORGOT TO IMPLEMENT INPUT VALIDATION :D"}
-                          </span>
-                          {db.isNew ? (
-                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
-                              New
-                            </span>
-                          ) : db.hasLocalChanges ? (
-                            <span className="font-bold text-amber-700">*</span>
-                          ) : null}
-                          {db.isDeleted ? (
-                            <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-800">
-                              Deleted
-                            </span>
-                          ) : null}
-                        </div>
+                        <span className={textClassName}>
+                          {db.name ||
+                            "IF YOU CAN SEE THIS, THEN I FORGOT TO IMPLEMENT INPUT VALIDATION :D"}
+                        </span>
                       )}
                     </TableCell>
                     <TableCell>
