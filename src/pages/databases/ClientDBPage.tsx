@@ -81,12 +81,11 @@ export default function ClientDBPage() {
                         <Input
                           value={db.name}
                           onChange={(e) => updateField(db.id, "name", e.target.value)}
+                          placeholder="e.g., Production"
+                          required
                         />
                       ) : (
-                        <span className={textClassName}>
-                          {db.name ||
-                            "IF YOU CAN SEE THIS, THEN I FORGOT TO IMPLEMENT INPUT VALIDATION :D"}
-                        </span>
+                        <span className={textClassName}>{db.name}</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -94,12 +93,11 @@ export default function ClientDBPage() {
                         <Input
                           value={db.connection_string}
                           onChange={(e) => updateField(db.id, "connection_string", e.target.value)}
+                          placeholder="e.g., postgresql://user:password@localhost:5432/database"
+                          required
                         />
                       ) : (
-                        <span className={textClassName}>
-                          {db.connection_string ||
-                            "IF YOU CAN SEE THIS, THEN I FORGOT TO IMPLEMENT INPUT VALIDATION :D"}
-                        </span>
+                        <span className={textClassName}>{db.connection_string}</span>
                       )}
                     </TableCell>
                     <TableCell className="flex justify-end pr-3">
@@ -109,7 +107,11 @@ export default function ClientDBPage() {
                         </Button>
                       ) : db.isEditing ? (
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={() => saveEdit(db.id)}>
+                          <Button
+                            size="sm"
+                            onClick={() => saveEdit(db.id)}
+                            disabled={!db.name?.trim() || !db.connection_string?.trim()}
+                          >
                             Done
                           </Button>
                           <Button size="sm" variant="outline" onClick={() => cancelEdit(db.id)}>
@@ -154,7 +156,16 @@ export default function ClientDBPage() {
             <Button variant="outline" onClick={resetState} disabled={isPending}>
               Cancel All
             </Button>
-            <Button onClick={applyChanges} disabled={isPending}>
+            <Button
+              onClick={applyChanges}
+              disabled={
+                isPending ||
+                rows.some((db) => db.isEditing) ||
+                rows.some(
+                  (db) => !db.isDeleted && (!db.name?.trim() || !db.connection_string?.trim()),
+                )
+              }
+            >
               Apply Changes
             </Button>
           </div>
