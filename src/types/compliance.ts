@@ -46,3 +46,21 @@ export interface ClientDBSchemaUpload {
   client_db: number
   sql_file: File
 }
+
+// Frameworks object
+export interface Framework {
+  id: number
+  name: string
+  description: string
+  version: string
+}
+
+export interface ClientDBCreate {
+  name: string
+  connection_string: string
+}
+
+export interface ClientDBPatch {
+  name?: string
+  connection_string?: string
+}
