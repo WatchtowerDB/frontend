@@ -150,7 +150,7 @@ export default function ClientDBPage() {
                 <button
                   onClick={addNewDB}
                   // TODO: fix this shit
-                  className="m-0 flex w-full items-center justify-center border-t-2 border-dashed border-gray-300 p-0 dark:border-gray-600"
+                  className="m-0 flex h-11 w-full items-center justify-center border-t-2 border-dashed border-gray-300 p-0 dark:border-gray-700"
                   disabled={isPending}
                 >
                   <Plus className="h-4 w-4" />
