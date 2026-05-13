@@ -50,10 +50,10 @@ export default function ClientDBPage() {
         <Table className="border">
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Connection String</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead className="w-[5%] pl-3">ID</TableHead>
+              <TableHead className="w-[25%]">Name</TableHead>
+              <TableHead className="w-[60%]">Connection String</TableHead>
+              <TableHead className="w-[10%] pr-3 text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -70,7 +70,7 @@ export default function ClientDBPage() {
 
               return (
                 <TableRow key={db.id} className={rowClassName}>
-                  <TableCell className="text-muted-foreground font-mono">
+                  <TableCell className="text-muted-foreground pl-3 font-mono">
                     {db.isNew ? "" : db.id}
                   </TableCell>
                   <TableCell>
@@ -114,7 +114,7 @@ export default function ClientDBPage() {
                       </span>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="flex justify-end pr-3">
                     {db.isDeleted ? (
                       <Button size="sm" variant="outline" onClick={() => restoreDB(db.id)}>
                         Undo
