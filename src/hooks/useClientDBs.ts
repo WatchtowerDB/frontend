@@ -83,6 +83,13 @@ export const useClientDBs = (): UseClientDBsResult => {
   }
 
   const startEditing = (id: number) => {
+    const isNewRow = created.some((db) => db.id === id)
+
+    if (isNewRow) {
+      setCreated((prev) => prev.map((db) => (db.id === id ? { ...db, isEditing: true } : db)))
+      return
+    }
+
     setEditing((prev) => ({ ...prev, [id]: true }))
   }
 
