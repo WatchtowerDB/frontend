@@ -39,14 +39,14 @@ export default function ClientDBPage() {
   }
 
   return (
-    <div className="h-full w-full flex-col p-8">
+    <div className="flex h-full w-full flex-col p-8">
       <header>
         <h1 className="text-2xl font-bold">Client Databases</h1>
         <p className="text-foreground">
           Manage the client databases that WTCE can connect to for testing.
         </p>
       </header>
-      <main className="flex h-full w-full flex-col pt-4">
+      <main className="flex h-full min-h-0 w-full flex-col pt-4">
         <Table className="border">
           <TableHeader>
             <TableRow>
