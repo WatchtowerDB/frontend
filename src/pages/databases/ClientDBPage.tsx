@@ -24,6 +24,7 @@ export default function ClientDBPage() {
     addNewDB,
     startEditing,
     saveEdit,
+    revertRow,
     cancelEdit,
     updateField,
     removeDB,
@@ -181,14 +182,14 @@ export default function ClientDBPage() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => cancelEdit(db.id)}
-                                    aria-label="Undo Changes"
+                                    onClick={() => revertRow(db.id)}
+                                    aria-label="Discard Changes"
                                   >
                                     <History className="h-4 w-4" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>Undo Changes</p>
+                                  <p>Discard Changes</p>
                                 </TooltipContent>
                               </Tooltip>
                             ) : (
@@ -263,9 +264,6 @@ export default function ClientDBPage() {
         </div>
 
         <div className={cn("mt-4 flex justify-end gap-2", hasChanges ? "" : "invisible")}>
-          <Button variant="outline" onClick={resetState} disabled={isPending}>
-            Cancel All
-          </Button>
           <Button
             onClick={applyChanges}
             disabled={
@@ -275,8 +273,12 @@ export default function ClientDBPage() {
                 (db) => !db.isDeleted && (!db.name?.trim() || !db.connection_string?.trim()),
               )
             }
+            aria-label="Apply"
           >
-            Apply Changes
+            Apply
+          </Button>
+          <Button variant="outline" onClick={resetState} disabled={isPending} aria-label="Cancel">
+            Cancel
           </Button>
         </div>
       </main>

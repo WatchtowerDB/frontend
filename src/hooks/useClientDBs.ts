@@ -18,6 +18,7 @@ export interface UseClientDBsResult {
   addNewDB: () => void
   startEditing: (id: number) => void
   saveEdit: (id: number) => void
+  revertRow: (id: number) => void
   cancelEdit: (id: number) => void
   updateField: (id: number, field: keyof ClientDBCreate, value: string) => void
   removeDB: (id: number) => void
@@ -44,6 +45,7 @@ export const useClientDBs = (): UseClientDBsResult => {
   const [edited, setEdited] = useState<Record<number, ClientDB>>({})
   const [editing, setEditing] = useState<Record<number, boolean>>({})
   const [deleted, setDeleted] = useState<Set<number>>(new Set())
+  const [snapshots, setSnapshots] = useState<Record<number, ClientDB | undefined>>({})
 
   const createMutation = useMutation({ mutationFn: createClientDB })
 
@@ -92,10 +94,13 @@ export const useClientDBs = (): UseClientDBsResult => {
     const isNewRow = created.some((db) => db.id === id)
 
     if (isNewRow) {
+      const current = created.find((db) => db.id === id)
+      if (current) setSnapshots((prev) => ({ ...prev, [id]: { ...current } }))
       setCreated((prev) => prev.map((db) => (db.id === id ? { ...db, isEditing: true } : db)))
       return
     }
 
+    setSnapshots((prev) => ({ ...prev, [id]: edited[id] }))
     setEditing((prev) => ({ ...prev, [id]: true }))
   }
 
@@ -104,22 +109,60 @@ export const useClientDBs = (): UseClientDBsResult => {
 
     if (isNewRow) {
       setCreated((prev) => prev.map((db) => (db.id === id ? { ...db, isEditing: false } : db)))
-      return
+    } else {
+      setEditing((prev) => ({ ...prev, [id]: false }))
     }
 
+    setSnapshots((prev) => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
+  }
+
+  const revertRow = (id: number) => {
     setEditing((prev) => ({ ...prev, [id]: false }))
+    setEdited((prev) => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
+    setSnapshots((prev) => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
   }
 
   const cancelEdit = (id: number) => {
-    const newIndex = created.findIndex((db) => db.id === id)
+    const isNewRow = created.some((db) => db.id === id)
+    const snapshot = snapshots[id]
+    const snapshotExists = id in snapshots
 
-    if (newIndex !== -1) {
-      setCreated((prev) => prev.filter((db) => db.id !== id))
-      return
+    if (isNewRow) {
+      if (snapshotExists && snapshot) {
+        setCreated((prev) =>
+          prev.map((db) => (db.id === id ? { ...db, ...snapshot, isEditing: false } : db)),
+        )
+      } else {
+        setCreated((prev) => prev.filter((db) => db.id !== id))
+      }
+    } else {
+      setEditing((prev) => ({ ...prev, [id]: false }))
+      if (snapshotExists) {
+        setEdited((prev) => {
+          const next = { ...prev }
+          if (snapshot) {
+            next[id] = snapshot
+          } else {
+            delete next[id]
+          }
+          return next
+        })
+      }
     }
 
-    setEditing((prev) => ({ ...prev, [id]: false }))
-    setEdited((prev) => {
+    setSnapshots((prev) => {
       const next = { ...prev }
       delete next[id]
       return next
@@ -177,6 +220,7 @@ export const useClientDBs = (): UseClientDBsResult => {
     setCreated([])
     setEdited({})
     setEditing({})
+    setSnapshots({})
     setDeleted(new Set())
   }
 
@@ -208,6 +252,7 @@ export const useClientDBs = (): UseClientDBsResult => {
     addNewDB,
     startEditing,
     saveEdit,
+    revertRow,
     cancelEdit,
     updateField,
     removeDB,
