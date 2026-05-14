@@ -56,6 +56,35 @@ export const useClientDBs = (): UseClientDBsResult => {
 
   const deleteMutation = useMutation({ mutationFn: deleteClientDB })
 
+  // Helper to check if a row was created locally (not yet on server)
+  const isNewRow = (id: number) => created.some((db) => db.id === id)
+
+  // Restore a row's snapshot (previous edits or clean state) and return whether a snapshot existed
+  const restoreSnapshot = (id: number): boolean => {
+    const snapshot = snapshots[id]
+    if (!(id in snapshots)) return false
+
+    if (snapshot) {
+      setEdited((prev) => ({ ...prev, [id]: snapshot }))
+    } else {
+      setEdited((prev) => {
+        const next = { ...prev }
+        delete next[id]
+        return next
+      })
+    }
+    return true
+  }
+
+  // Clear snapshot for an ID
+  const clearSnapshot = (id: number) => {
+    setSnapshots((prev) => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
+  }
+
   // Merge server data with local edits and UI state flags
   const existingRows = useMemo(() => {
     if (!data) return []
@@ -94,9 +123,7 @@ export const useClientDBs = (): UseClientDBsResult => {
   }
 
   const startEditing = (id: number) => {
-    const isNewRow = created.some((db) => db.id === id)
-
-    if (isNewRow) {
+    if (isNewRow(id)) {
       // Save current state before editing, for cancel to restore
       const current = created.find((db) => db.id === id)
       if (current) setSnapshots((prev) => ({ ...prev, [id]: { ...current } }))
@@ -110,20 +137,14 @@ export const useClientDBs = (): UseClientDBsResult => {
   }
 
   const saveEdit = (id: number) => {
-    const isNewRow = created.some((db) => db.id === id)
-
-    if (isNewRow) {
+    if (isNewRow(id)) {
       setCreated((prev) => prev.map((db) => (db.id === id ? { ...db, isEditing: false } : db)))
     } else {
       setEditing((prev) => ({ ...prev, [id]: false }))
     }
 
     // Clear snapshot since changes are now "committed" locally
-    setSnapshots((prev) => {
-      const next = { ...prev }
-      delete next[id]
-      return next
-    })
+    clearSnapshot(id)
   }
 
   const revertRow = (id: number) => {
@@ -134,22 +155,16 @@ export const useClientDBs = (): UseClientDBsResult => {
       delete next[id]
       return next
     })
-    setSnapshots((prev) => {
-      const next = { ...prev }
-      delete next[id]
-      return next
-    })
+    clearSnapshot(id)
   }
 
   const cancelEdit = (id: number) => {
-    const isNewRow = created.some((db) => db.id === id)
-    const snapshot = snapshots[id]
-    const snapshotExists = id in snapshots
+    if (isNewRow(id)) {
+      const snapshot = snapshots[id]
 
-    if (isNewRow) {
       // If we have a snapshot, it means this row was previously saved as draft, so restore it
       // If no snapshot, it was never saved, so just remove it entirely
-      if (snapshotExists && snapshot) {
+      if (id in snapshots && snapshot) {
         setCreated((prev) =>
           prev.map((db) => (db.id === id ? { ...db, ...snapshot, isEditing: false } : db)),
         )
@@ -158,31 +173,14 @@ export const useClientDBs = (): UseClientDBsResult => {
       }
     } else {
       setEditing((prev) => ({ ...prev, [id]: false }))
-      // Restore pre-edit state if there was one (either previous edits or clean state)
-      if (snapshotExists) {
-        setEdited((prev) => {
-          const next = { ...prev }
-          if (snapshot) {
-            next[id] = snapshot // Restore previous edits
-          } else {
-            delete next[id] // Row was clean, so remove all edits
-          }
-          return next
-        })
-      }
+      restoreSnapshot(id)
     }
 
-    setSnapshots((prev) => {
-      const next = { ...prev }
-      delete next[id]
-      return next
-    })
+    clearSnapshot(id)
   }
 
   const updateField = (id: number, field: keyof ClientDBCreate, value: string) => {
-    const isNewRow = created.some((db) => db.id === id)
-
-    if (isNewRow) {
+    if (isNewRow(id)) {
       setCreated((prev) => prev.map((db) => (db.id === id ? { ...db, [field]: value } : db)))
       return
     }
@@ -202,9 +200,7 @@ export const useClientDBs = (): UseClientDBsResult => {
   }
 
   const removeDB = (id: number) => {
-    const isNewRow = created.some((db) => db.id === id)
-
-    if (isNewRow) {
+    if (isNewRow(id)) {
       // Unsaved rows just get removed from local state
       setCreated((prev) => prev.filter((db) => db.id !== id))
       return
