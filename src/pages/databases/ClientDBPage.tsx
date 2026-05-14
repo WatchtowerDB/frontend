@@ -10,9 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useClientDBs } from "@/hooks/useClientDBs"
 import { cn } from "@/lib/utils"
-import { Edit, Plus, Trash2 } from "lucide-react"
+import { Check, Edit, History, Plus, Trash2, Undo2, X } from "lucide-react"
 
 export default function ClientDBPage() {
   const {
@@ -107,33 +108,109 @@ export default function ClientDBPage() {
                       )}
                     </TableCell>
                     <TableCell className="flex justify-end pr-3">
-                      {db.isDeleted ? (
-                        <Button size="sm" variant="outline" onClick={() => restoreDB(db.id)}>
-                          Undo
-                        </Button>
-                      ) : db.isEditing ? (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => saveEdit(db.id)}
-                            disabled={!db.name?.trim() || !db.connection_string?.trim()}
-                          >
-                            Done
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => cancelEdit(db.id)}>
-                            Cancel
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => startEditing(db.id)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="destructive" onClick={() => removeDB(db.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
+                      <TooltipProvider>
+                        {db.isDeleted ? (
+                          <Tooltip delayDuration={500}>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => restoreDB(db.id)}
+                                aria-label="Undo Deletion"
+                              >
+                                <Undo2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Undo Deletion</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : db.isEditing ? (
+                          <div className="flex gap-2">
+                            <Tooltip delayDuration={500}>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  onClick={() => saveEdit(db.id)}
+                                  disabled={!db.name?.trim() || !db.connection_string?.trim()}
+                                  aria-label="Save"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Save</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            <Tooltip delayDuration={500}>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => cancelEdit(db.id)}
+                                  aria-label="Cancel"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Cancel</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Tooltip delayDuration={500}>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => startEditing(db.id)}
+                                  aria-label="Edit"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Edit</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            {db.hasLocalChanges && !db.isNew ? (
+                              <Tooltip delayDuration={500}>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => cancelEdit(db.id)}
+                                    aria-label="Undo Changes"
+                                  >
+                                    <History className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Undo Changes</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <Tooltip delayDuration={500}>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => removeDB(db.id)}
+                                    aria-label="Delete"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Delete</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </div>
+                        )}
+                      </TooltipProvider>
                     </TableCell>
                   </TableRow>
                 )
