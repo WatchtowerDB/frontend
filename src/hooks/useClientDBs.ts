@@ -41,11 +41,12 @@ export const useClientDBs = (): UseClientDBsResult => {
     queryFn: () => getClientDBs({ page }),
   })
 
-  const [created, setCreated] = useState<EditableClientDB[]>([])
-  const [edited, setEdited] = useState<Record<number, ClientDB>>({})
-  const [editing, setEditing] = useState<Record<number, boolean>>({})
-  const [deleted, setDeleted] = useState<Set<number>>(new Set())
-  const [snapshots, setSnapshots] = useState<Record<number, ClientDB | undefined>>({})
+  // Local state tracks all changes before they're applied to server
+  const [created, setCreated] = useState<EditableClientDB[]>([]) // New rows not yet on server
+  const [edited, setEdited] = useState<Record<number, ClientDB>>({}) // id -> modified fields
+  const [editing, setEditing] = useState<Record<number, boolean>>({}) // Which rows are in edit mode
+  const [deleted, setDeleted] = useState<Set<number>>(new Set()) // IDs marked for deletion
+  const [snapshots, setSnapshots] = useState<Record<number, ClientDB | undefined>>({}) // Pre-edit state for undo/cancel
 
   const createMutation = useMutation({ mutationFn: createClientDB })
 
@@ -55,6 +56,7 @@ export const useClientDBs = (): UseClientDBsResult => {
 
   const deleteMutation = useMutation({ mutationFn: deleteClientDB })
 
+  // Merge server data with local edits and UI state flags
   const existingRows = useMemo(() => {
     if (!data) return []
 
@@ -68,6 +70,7 @@ export const useClientDBs = (): UseClientDBsResult => {
     }))
   }, [data, deleted, edited, editing])
 
+  // New rows appended at the end
   const rows = useMemo(() => [...existingRows, ...created], [created, existingRows])
 
   const hasChanges = useMemo(
@@ -94,12 +97,14 @@ export const useClientDBs = (): UseClientDBsResult => {
     const isNewRow = created.some((db) => db.id === id)
 
     if (isNewRow) {
+      // Save current state before editing, for cancel to restore
       const current = created.find((db) => db.id === id)
       if (current) setSnapshots((prev) => ({ ...prev, [id]: { ...current } }))
       setCreated((prev) => prev.map((db) => (db.id === id ? { ...db, isEditing: true } : db)))
       return
     }
 
+    // Save current edited state (or undefined if clean) as snapshot for cancel
     setSnapshots((prev) => ({ ...prev, [id]: edited[id] }))
     setEditing((prev) => ({ ...prev, [id]: true }))
   }
@@ -113,6 +118,7 @@ export const useClientDBs = (): UseClientDBsResult => {
       setEditing((prev) => ({ ...prev, [id]: false }))
     }
 
+    // Clear snapshot since changes are now "committed" locally
     setSnapshots((prev) => {
       const next = { ...prev }
       delete next[id]
@@ -121,6 +127,7 @@ export const useClientDBs = (): UseClientDBsResult => {
   }
 
   const revertRow = (id: number) => {
+    // Discard all local changes for this row
     setEditing((prev) => ({ ...prev, [id]: false }))
     setEdited((prev) => {
       const next = { ...prev }
@@ -140,6 +147,8 @@ export const useClientDBs = (): UseClientDBsResult => {
     const snapshotExists = id in snapshots
 
     if (isNewRow) {
+      // If we have a snapshot, it means this row was previously saved as draft, so restore it
+      // If no snapshot, it was never saved, so just remove it entirely
       if (snapshotExists && snapshot) {
         setCreated((prev) =>
           prev.map((db) => (db.id === id ? { ...db, ...snapshot, isEditing: false } : db)),
@@ -149,13 +158,14 @@ export const useClientDBs = (): UseClientDBsResult => {
       }
     } else {
       setEditing((prev) => ({ ...prev, [id]: false }))
+      // Restore pre-edit state if there was one (either previous edits or clean state)
       if (snapshotExists) {
         setEdited((prev) => {
           const next = { ...prev }
           if (snapshot) {
-            next[id] = snapshot
+            next[id] = snapshot // Restore previous edits
           } else {
-            delete next[id]
+            delete next[id] // Row was clean, so remove all edits
           }
           return next
         })
@@ -177,10 +187,10 @@ export const useClientDBs = (): UseClientDBsResult => {
       return
     }
 
+    // For existing rows, build complete object: server data + previous edits + new change
     const original = data?.results.find((db) => db.id === id)
     if (!original) return
 
-    // Build a full updated object
     const nextValue = {
       ...original,
       ...(edited[id] ?? {}),
@@ -195,10 +205,12 @@ export const useClientDBs = (): UseClientDBsResult => {
     const isNewRow = created.some((db) => db.id === id)
 
     if (isNewRow) {
+      // Unsaved rows just get removed from local state
       setCreated((prev) => prev.filter((db) => db.id !== id))
       return
     }
 
+    // Mark for deletion, clear any pending edits
     setDeleted((prev) => new Set(prev).add(id))
     setEditing((prev) => ({ ...prev, [id]: false }))
     setEdited((prev) => {
@@ -209,6 +221,7 @@ export const useClientDBs = (): UseClientDBsResult => {
   }
 
   const restoreDB = (id: number) => {
+    // Simply unmark from deletion set
     setDeleted((prev) => {
       const next = new Set(prev)
       next.delete(id)
@@ -224,6 +237,7 @@ export const useClientDBs = (): UseClientDBsResult => {
     setDeleted(new Set())
   }
 
+  // Execute all pending changes in parallel, then refresh data from server
   const applyChanges = async () => {
     const createOps = created.map((db) =>
       createMutation.mutateAsync({ name: db.name, connection_string: db.connection_string }),
