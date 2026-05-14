@@ -24,14 +24,20 @@ export interface UseClientDBsResult {
   restoreDB: (id: number) => void
   applyChanges: () => Promise<void>
   resetState: () => void
+  page: number
+  totalCount: number
+  hasNext: boolean
+  hasPrevious: boolean
+  setPage: (page: number) => void
 }
 
 export const useClientDBs = (): UseClientDBsResult => {
   const queryClient = useQueryClient()
+  const [page, setPage] = useState(1)
 
   const { data, isLoading } = useQuery({
-    queryKey: ["clientdbs"],
-    queryFn: () => getClientDBs(),
+    queryKey: ["clientdbs", page],
+    queryFn: () => getClientDBs({ page }),
   })
 
   const [created, setCreated] = useState<EditableClientDB[]>([])
@@ -208,5 +214,10 @@ export const useClientDBs = (): UseClientDBsResult => {
     restoreDB,
     applyChanges,
     resetState,
+    page,
+    totalCount: data?.count ?? 0,
+    hasNext: Boolean(data?.next),
+    hasPrevious: Boolean(data?.previous),
+    setPage,
   }
 }

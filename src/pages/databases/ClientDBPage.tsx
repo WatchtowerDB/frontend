@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useClientDBs } from "@/hooks/useClientDBs"
+import { cn } from "@/lib/utils"
 import { Edit, Plus, Trash2 } from "lucide-react"
 
 export default function ClientDBPage() {
@@ -28,6 +29,11 @@ export default function ClientDBPage() {
     restoreDB,
     applyChanges,
     resetState,
+    page,
+    totalCount,
+    hasNext,
+    hasPrevious,
+    setPage,
   } = useClientDBs()
 
   if (isLoading) {
@@ -47,8 +53,8 @@ export default function ClientDBPage() {
         </p>
       </header>
       <main className="flex h-full min-h-0 w-full flex-col pt-4">
-        <div className="relative max-h-full w-full overflow-y-auto border">
-          <Table noWrapper className="border-collapse">
+        <div className="relative w-full flex-1 overflow-y-auto border">
+          <Table noWrapper className="min-h-full w-full border-collapse">
             <TableHeader className="bg-background sticky top-0">
               <TableRow>
                 <TableHead className="w-[5%] pl-3">ID</TableHead>
@@ -134,12 +140,12 @@ export default function ClientDBPage() {
               })}
             </TableBody>
             {/* Ghost cell for adding a new database */}
-            <TableFooter className="sticky bottom-0 border-none backdrop-blur-[128px]">
-              <TableRow>
-                <TableCell colSpan={4} className="w-full p-0">
+            <TableFooter className="sticky bottom-0 h-full border-none backdrop-blur-[128px]">
+              <TableRow className="h-full">
+                <TableCell colSpan={4} className="h-full w-full p-0">
                   <button
                     onClick={addNewDB}
-                    className="m-0 flex h-11 w-full items-center justify-center border-t-2 border-dashed border-gray-300 p-0 dark:border-gray-700"
+                    className="m-0 flex h-full min-h-11 w-full items-center justify-center border-t-2 border-dashed border-gray-300 p-0 dark:border-gray-700"
                     disabled={isPending}
                   >
                     <Plus className="h-4 w-4" />
@@ -151,25 +157,51 @@ export default function ClientDBPage() {
           </Table>
         </div>
 
-        {hasChanges && (
-          <div className="mt-4 flex justify-end gap-2">
-            <Button variant="outline" onClick={resetState} disabled={isPending}>
-              Cancel All
-            </Button>
-            <Button
-              onClick={applyChanges}
-              disabled={
-                isPending ||
-                rows.some((db) => db.isEditing) ||
-                rows.some(
-                  (db) => !db.isDeleted && (!db.name?.trim() || !db.connection_string?.trim()),
-                )
-              }
-            >
-              Apply Changes
-            </Button>
+        {/* Pagination Controls */}
+        <div className="mt-4 flex items-center justify-between px-2">
+          <p className="text-muted-foreground text-sm">
+            Showing {rows.length} records (Total {totalCount})
+          </p>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium">Page {page}</span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page - 1)}
+                disabled={!hasPrevious || isPending}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page + 1)}
+                disabled={!hasNext || isPending}
+              >
+                Next
+              </Button>
+            </div>
           </div>
-        )}
+        </div>
+
+        <div className={cn("mt-4 flex justify-end gap-2", hasChanges ? "" : "invisible")}>
+          <Button variant="outline" onClick={resetState} disabled={isPending}>
+            Cancel All
+          </Button>
+          <Button
+            onClick={applyChanges}
+            disabled={
+              isPending ||
+              rows.some((db) => db.isEditing) ||
+              rows.some(
+                (db) => !db.isDeleted && (!db.name?.trim() || !db.connection_string?.trim()),
+              )
+            }
+          >
+            Apply Changes
+          </Button>
+        </div>
       </main>
     </div>
   )
