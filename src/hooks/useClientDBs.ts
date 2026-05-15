@@ -1,7 +1,7 @@
 import { createClientDB, deleteClientDB, getClientDBs, updateClientDB } from "@/api/clientdb"
 import { type ClientDB, type ClientDBCreate } from "@/types/compliance"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useMemo, useState } from "react"
+import { useState } from "react"
 
 export interface EditableClientDB extends ClientDB {
   isEditing?: boolean
@@ -86,26 +86,20 @@ export const useClientDBs = (): UseClientDBsResult => {
   }
 
   // Merge server data with local edits and UI state flags
-  const existingRows = useMemo(() => {
-    if (!data) return []
-
-    return data.results.map((db) => ({
-      ...db,
-      ...edited[db.id], // Overlay draft edits on top of server state without modifying original cache
-      isEditing: editing[db.id] ?? false, // Attach UI metadata
-      isNew: false,
-      isDeleted: deleted.has(db.id),
-      hasLocalChanges: Boolean(edited[db.id]) || deleted.has(db.id),
-    }))
-  }, [data, deleted, edited, editing])
+  const existingRows = data
+    ? data.results.map((db) => ({
+        ...db,
+        ...edited[db.id], // Overlay draft edits on top of server state without modifying original cache
+        isEditing: editing[db.id] ?? false, // Attach UI metadata
+        isNew: false,
+        isDeleted: deleted.has(db.id),
+        hasLocalChanges: Boolean(edited[db.id]) || deleted.has(db.id),
+      }))
+    : []
 
   // New rows appended at the end
-  const rows = useMemo(() => [...existingRows, ...created], [created, existingRows])
-
-  const hasChanges = useMemo(
-    () => created.length > 0 || Object.keys(edited).length > 0 || deleted.size > 0,
-    [created.length, edited, deleted.size],
-  )
+  const rows = [...existingRows, ...created]
+  const hasChanges = created.length > 0 || Object.keys(edited).length > 0 || deleted.size > 0
 
   const isPending = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
 
