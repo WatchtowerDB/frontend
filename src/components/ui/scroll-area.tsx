@@ -16,7 +16,7 @@ function ScrollArea({
     >
       <ScrollAreaPrimitive.Viewport
         data-slot="scroll-area-viewport"
-        className="focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1 [&>div]:!block"
+        className="focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1 [&>div]:!flex [&>div]:!min-h-full [&>div]:!flex-col"
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
@@ -30,6 +30,8 @@ function ScrollArea({
 // The original is:
 //         className="focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1"
 // And it was changed due to an issue where the content would escape the intended viewport.
+// and then [&>div]:!flex [&>div]:!flex-col [&>div]:!min-h-full was added to replace [&>div]:!block
+// TODO: viewportClassnames to clean this mess up, if ever needed.
 
 function ScrollBar({
   className,
