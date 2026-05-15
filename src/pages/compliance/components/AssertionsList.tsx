@@ -6,7 +6,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useAssertions } from "@/hooks/useAssertions"
-import { useAssertionStore } from "@/stores/useAssertionStore"
 
 interface AssertionListProps {
   onSelect?: (item: number) => void
@@ -14,11 +13,7 @@ interface AssertionListProps {
 }
 
 const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
-  const { assertions, totalPages, totalCount, isLoading, isError, error, isFetching } =
-    useAssertions()
-
-  const page = useAssertionStore((s) => s.page)
-  const setPage = useAssertionStore((s) => s.setPage)
+  const { assertions, isLoading, isError, error, isFetching } = useAssertions()
 
   if (isLoading) return <div className="animate-pulse p-4 text-xs">Scanning assertions...</div>
   if (isError)
@@ -69,10 +64,6 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
     ],
   }
 
-  // if (isLoading) return <div className="animate-pulse p-4 text-xs">Scanning assertions...</div>
-  // if (isError)
-  //   return <div className="text-destructive p-4 text-xs">Failed to load: {error.message}</div>
-
   return (
     <div className="relative flex flex-col">
       {isFetching && <div className="text-muted-foreground px-4 py-1 text-[10px]">Updating…</div>}
@@ -112,37 +103,6 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
-
-      {/* Pagination — only renders if there's more than one page */}
-      {/* {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t px-4 py-2 absolute inset-x-0 bottom-0">
-          <span className="text-muted-foreground text-[10px]">
-            Page {page} of {totalPages} · {totalCount} total
-          </span>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              disabled={page <= 1 || isFetching}
-              onClick={() => setPage(page - 1)}
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              disabled={page >= totalPages || isFetching}
-              onClick={() => setPage(page + 1)}
-              aria-label="Next page"
-            >
-              <ChevronRight className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
-      )} */}
     </div>
   )
 }

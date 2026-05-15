@@ -92,7 +92,9 @@ cipher_suite = Fernet(key)
               </div>
               {/* The Assertion Report */}
               <article className="prose prose-slate dark:prose-invert prose-headings:font-bold prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-pre:bg-slate-950 prose-pre:text-slate-50 prose-pre:shadow-lg prose-pre:border-2 max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{fake}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {assertion.recommendation}
+                </ReactMarkdown>
               </article>
             </div>
           ) : (

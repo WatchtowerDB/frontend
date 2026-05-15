@@ -12,6 +12,7 @@ export default function AssertionsFooter() {
 
   return (
     <>
+      {/* Pagination used in the Assertions List */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between border-t px-4 py-2">
           <span className="text-muted-foreground text-[10px]">
