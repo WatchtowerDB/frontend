@@ -41,6 +41,7 @@ export default function ClientDBPage() {
     restoreDB,
     applyChanges,
     resetState,
+    totalPages,
     page,
     totalCount,
     hasNext,
@@ -250,7 +251,9 @@ export default function ClientDBPage() {
             Showing {rows.length} records (Total {totalCount})
           </p>
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium">Page {page}</span>
+            <span className="text-sm font-medium">
+              Page {page} of {totalPages}
+            </span>
             <div className="flex gap-2">
               <Button
                 variant="outline"

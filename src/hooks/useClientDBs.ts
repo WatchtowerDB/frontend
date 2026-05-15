@@ -26,6 +26,7 @@ export interface UseClientDBsResult {
   applyChanges: () => Promise<void>
   resetState: () => void
   page: number
+  totalPages: number
   totalCount: number
   hasNext: boolean
   hasPrevious: boolean
@@ -33,6 +34,7 @@ export interface UseClientDBsResult {
 }
 
 export const useClientDBs = (): UseClientDBsResult => {
+  const PAGE_SIZE = Number(import.meta.env.VITE_PAGE_COUNT) || 20
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
 
@@ -264,6 +266,7 @@ export const useClientDBs = (): UseClientDBsResult => {
     applyChanges,
     resetState,
     page,
+    totalPages: Math.ceil((data?.count ?? 0) / PAGE_SIZE),
     totalCount: data?.count ?? 0,
     hasNext: Boolean(data?.next),
     hasPrevious: Boolean(data?.previous),
