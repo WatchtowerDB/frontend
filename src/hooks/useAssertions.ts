@@ -1,5 +1,5 @@
 import { getAssertions } from "@/api/assertions"
-import { ASSERTIONS_PAGE_SIZE, useAssertionStore } from "@/stores/useAssertionStore"
+import { PAGE_SIZE, useAssertionStore } from "@/stores/useAssertionStore"
 import { useQuery } from "@tanstack/react-query"
 import { useShallow } from "zustand/shallow"
 
@@ -15,7 +15,7 @@ export const useAssertions = () => {
     placeholderData: (prev) => prev, // Keep previous page data visible while the next page loads. New thing to learn.
   })
 
-  const totalPages = query.data ? Math.ceil(query.data.count / ASSERTIONS_PAGE_SIZE) : 0
+  const totalPages = query.data ? Math.ceil(query.data.count / PAGE_SIZE) : 0
 
   return {
     ...query,
