@@ -29,7 +29,7 @@ interface AssertionFilterActions {
   setPage: (page: number) => void
 
   // Derives the AssertionFilters object the hook expects.
-  getApiFilters: () => AssertionFilters & { page: number; page_size: number }
+  getApiFilters: () => AssertionFilters & { page: number }
 
   // Resets filters.
   resetFilters: () => void
@@ -71,7 +71,6 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
         ...(complianceFramework !== null && { compliance_framework: complianceFramework }),
         ...(result !== null && { result }),
         page,
-        page_size: PAGE_SIZE,
       }
     },
 
