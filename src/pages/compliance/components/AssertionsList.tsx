@@ -26,51 +26,6 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
   if (isError)
     return <div className="text-destructive p-4 text-xs">Failed to load: {error.message}</div>
 
-  const mockAssertions = {
-    results: [
-      {
-        id: 1,
-        sql_query:
-          "SELECT card_number FROM operations.cardholder_data WHERE card_number IS NOT NULL AND card_number != card_number_masked;",
-        result: false,
-        compliance_check: "PCI-DSS v4.0.1 § 4.1 – Card number masking",
-        recommendation: "## VIOLATION SUMMARY\nCard numbers are stored unmasked...",
-      },
-      {
-        id: 2,
-        sql_query:
-          "SELECT 1 FROM operations.audit_log WHERE last_reviewed < NOW() - INTERVAL '90 days';",
-        result: false,
-        compliance_check: "PCI-DSS v4.0.1 § 10.7 – Audit log review frequency",
-        recommendation: "",
-      },
-      {
-        id: 3,
-        sql_query:
-          "SELECT 1 FROM operations.cardholder_data WHERE encryption_status = 'encrypted';",
-        result: true,
-        compliance_check: "PCI-DSS v4.0.1 § 3.5 – Data encryption at rest",
-        recommendation: "",
-      },
-      {
-        id: 4,
-        sql_query:
-          "SELECT 1 FROM access_control.user_roles WHERE role = 'admin' AND mfa_enabled = true;",
-        result: true,
-        compliance_check: "PCI-DSS v4.0.1 § 8.4 – MFA for administrative access",
-        recommendation: "",
-      },
-      {
-        id: 5,
-        sql_query:
-          "SELECT 1 FROM network.firewall_rules WHERE rule_reviewed_at < NOW() - INTERVAL '1 year';",
-        result: false,
-        compliance_check: "PCI-DSS v4.0.1 § 1.2 – Firewall rule review",
-        recommendation: "",
-      },
-    ],
-  }
-
   return (
     <div className="relative flex flex-col">
       {isFetching && <div className="text-muted-foreground px-4 py-1 text-[10px]">Updating…</div>}
@@ -111,7 +66,7 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                         </span>
                       </div>
                       <span className="text-muted-foreground text-left text-[10px]">
-                        {item.compliance_check}
+                        Client DB: {item.client_db}
                       </span>
                     </button>
                   </SidebarMenuButton>
