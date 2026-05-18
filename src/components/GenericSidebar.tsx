@@ -1,4 +1,4 @@
-import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import type React from "react"
@@ -7,6 +7,7 @@ import { ScrollArea } from "./ui/scroll-area"
 interface GenericSidebarProps {
   children: React.ReactNode
   headerChildren?: React.ReactNode
+  footerChildren?: React.ReactNode
   title?: string
   subtitle?: string
   className?: string
@@ -15,6 +16,7 @@ interface GenericSidebarProps {
 export function GenericSidebar({
   children,
   headerChildren,
+  footerChildren,
   title,
   subtitle = "DB DATABASE",
   className,
@@ -49,6 +51,9 @@ export function GenericSidebar({
             <div className="flex w-full min-w-0 flex-col">{children}</div>
           </ScrollArea>
         </SidebarContent>
+        {footerChildren && (
+          <SidebarFooter className="mx-1 border-t p-0"> {footerChildren}</SidebarFooter>
+        )}
       </Sidebar>
     </TooltipProvider>
   )

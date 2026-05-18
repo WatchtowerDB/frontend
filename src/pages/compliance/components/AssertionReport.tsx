@@ -1,5 +1,5 @@
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useAssertions } from "@/hooks/useAssertions"
@@ -11,9 +11,6 @@ interface AssertionReportProps {
   assertionId: number | null
   title?: string
 }
-
-// Alert had variant: outline
-// We are keeping the fake variable for now, to test formatting and design.
 
 export default function AssertionReport({
   assertionId,
@@ -62,48 +59,61 @@ cipher_suite = Fernet(key)
 # ... logic to encrypt ...
 \`\`\`
 `
-
   const { data } = useAssertions()
-
   const assertion = data?.results.find((a) => a.id === assertionId)
 
   return (
-    <Card className="flex h-full flex-col border-slate-200 shadow-sm dark:border-slate-800">
-      <CardHeader className="flex-none border-b py-4">
-        <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+    <div className="flex h-full flex-col">
+      {/* Header */}
+      <div className="flex-none border-b px-6 py-4">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
           <SidebarTrigger />
           {title}
-        </CardTitle>
-      </CardHeader>
+          {assertion ? (
+            <Badge variant={assertion.result ? "outline" : "destructive"} className="ml-2">
+              {assertion.result ? "Pass" : "Fail"}
+            </Badge>
+          ) : null}
+        </h2>
+      </div>
 
-      <CardContent className="min-h-0 flex-1 p-0">
-        {assertion ? (
-          <ScrollArea className="h-full w-full">
+      <div className="relative min-h-0 flex-1">
+        <ScrollArea className="h-full w-full">
+          {assertion ? (
             <div className="p-6">
-              <article className="prose prose-slate dark:prose-invert prose-headings:font-bold prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-pre:bg-slate-950 prose-pre:text-slate-50 prose-pre:shadow-lg max-w-none">
+              {/* The SQL Query */}
+              <div className="relative mb-6">
+                <span className="absolute inset-s-3 top-2 font-mono text-[10px] tracking-widest text-slate-500 uppercase">
+                  SQL
+                </span>
+                <pre className="overflow-x-auto rounded-md border-2 bg-slate-950 p-4 pt-7 text-sm break-all whitespace-pre-wrap text-slate-50 shadow-lg">
+                  <code>{assertion.sql_query}</code>
+                </pre>
+              </div>
+              {/* The Assertion Report */}
+              <article className="prose prose-slate dark:prose-invert prose-headings:font-bold prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-pre:bg-slate-950 prose-pre:text-slate-50 prose-pre:shadow-lg prose-pre:border-2 max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {assertion.recommendation}
                 </ReactMarkdown>
               </article>
             </div>
-          </ScrollArea>
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center py-20 text-slate-400 italic">
-            <InfoIcon className="mb-2 h-8 w-8 opacity-20" />
-            <p>Select an assertion to view its audit intelligence.</p>
-          </div>
-        )}
-      </CardContent>
-
-      <CardFooter className="flex-none border-t bg-slate-50/30 py-3 dark:bg-slate-900/30">
-        <Alert className="border-none bg-transparent p-0">
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center py-20 text-slate-400 italic">
+              <InfoIcon className="mb-2 h-8 w-8 opacity-20" />
+              <p>Select an assertion to view its audit intelligence.</p>
+            </div>
+          )}
+        </ScrollArea>
+      </div>
+      <div className="border-t bg-white px-6 transition-colors duration-200 dark:bg-slate-950">
+        <Alert className="rounded-none border-none bg-transparent p-0 py-3">
           <AlertDescription className="text-muted-foreground text-center text-[10px] leading-relaxed tracking-widest uppercase">
             All responses are AI-generated and may not always be accurate or complete. They should
             be independently reviewed and verified by a domain expert. WatchtowerDB is NOT
             responsible for any actions taken based on these responses.
           </AlertDescription>
         </Alert>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   )
 }
