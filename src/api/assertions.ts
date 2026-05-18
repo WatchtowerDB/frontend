@@ -11,7 +11,6 @@ export interface AssertionFilters {
   schema?: number
   // Pagination
   page?: number
-  page_size?: number
 }
 
 // To retrieve ALL assertions
