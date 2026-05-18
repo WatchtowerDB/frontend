@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useAssertions } from "@/hooks/useAssertions"
+import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 import { InfoIcon } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
@@ -61,6 +62,14 @@ cipher_suite = Fernet(key)
 `
   const { data } = useAssertions()
   const assertion = data?.results.find((a) => a.id === assertionId)
+  const liveAssertions = useComplianceCheckStore((s) => s.liveAssertions)
+  const live = assertionId ? liveAssertions[assertionId] : null
+
+  const recommendation = live?.recommendation || assertion?.recommendation || ""
+  const isStreaming = live && !live.streamingDone
+
+  const result =
+    live?.status === "passed" ? true : live?.status === "failed" ? false : assertion?.result
 
   return (
     <div className="flex h-full flex-col">
@@ -70,7 +79,7 @@ cipher_suite = Fernet(key)
           <SidebarTrigger />
           {title}
           {assertion ? (
-            <Badge variant={assertion.result ? "outline" : "destructive"} className="ml-2">
+            <Badge variant={result ? "outline" : "destructive"} className="ml-2">
               {assertion.result ? "Pass" : "Fail"}
             </Badge>
           ) : null}
@@ -92,9 +101,8 @@ cipher_suite = Fernet(key)
               </div>
               {/* The Assertion Report */}
               <article className="prose prose-slate dark:prose-invert prose-headings:font-bold prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-pre:bg-slate-950 prose-pre:text-slate-50 prose-pre:shadow-lg prose-pre:border-2 max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {assertion.recommendation}
-                </ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{recommendation}</ReactMarkdown>
+                {isStreaming && <span className="animate-pulse">▍</span>}
               </article>
             </div>
           ) : (

@@ -4,6 +4,7 @@ import { useState } from "react"
 import AssertionReport from "./components/AssertionReport"
 import AssertionsFooter from "./components/AssertionsFooter"
 import AssertionsList from "./components/AssertionsList"
+import { RunCheckButton } from "./components/RunCheckButton"
 
 function AssertionsPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -11,6 +12,7 @@ function AssertionsPage() {
     <div className="flex h-full w-full">
       <GenericSidebar
         children=<AssertionsList onSelect={setSelectedId} selectedId={selectedId} />
+        headerChildren=<RunCheckButton />
         footerChildren=<AssertionsFooter />
         className="w-[30vw] group-data-[state=collapsed]:w-0 group-data-[state=collapsed]:border-0"
       />
