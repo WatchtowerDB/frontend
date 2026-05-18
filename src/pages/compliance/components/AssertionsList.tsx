@@ -58,7 +58,7 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                         result
                           ? "border-l-4 border-emerald-500 bg-linear-to-br from-emerald-500/15 via-emerald-500/5 via-10% to-transparent to-15%"
                           : "border-l-4 border-red-500 bg-linear-to-br from-red-500/15 via-red-500/5 via-10% to-transparent to-15%"
-                      }`}
+                      } ${selectedId === item.id ? "dark:bg-accent! bg-neutral-200/60!" : ""}`}
                     >
                       <div className="flex w-full items-center justify-between">
                         <span className="truncate text-left font-mono text-xs">
