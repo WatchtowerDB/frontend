@@ -23,7 +23,7 @@ export function useComplianceStream(checkId: number | null) {
 
         onmessage(e) {
           const event = JSON.parse(e.data)
-          const type: string = event.type
+          const type: string = e.event || event.type
           const data = event.data
           const subject: string | undefined = event.subject
           const assertionId = subject ? Number(subject.split("/")[1]) : null
