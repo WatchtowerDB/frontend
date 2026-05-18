@@ -54,13 +54,3 @@ export interface Framework {
   description: string
   version: string
 }
-
-export interface ClientDBCreate {
-  name: string
-  connection_string: string
-}
-
-export interface ClientDBPatch {
-  name?: string
-  connection_string?: string
-}

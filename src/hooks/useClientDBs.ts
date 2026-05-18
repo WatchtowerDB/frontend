@@ -34,7 +34,7 @@ export interface UseClientDBsResult {
 }
 
 export const useClientDBs = (): UseClientDBsResult => {
-  const PAGE_SIZE = Number(import.meta.env.VITE_PAGE_COUNT) || 20
+  const PAGE_SIZE = Number(import.meta.env.VITE_DEFAULT_PAGE_SIZE) || 20
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
 

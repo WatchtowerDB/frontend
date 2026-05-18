@@ -1,7 +1,7 @@
 import { type AssertionFilters } from "@/api/assertions"
 import { create } from "zustand"
 
-export const PAGE_SIZE = Number(import.meta.env.VITE_PAGE_COUNT) || 20
+export const PAGE_SIZE = Number(import.meta.env.VITE_DEFAULT_PAGE_SIZE) || 20
 // This store is gorgeous.
 
 interface AssertionFilterState {
