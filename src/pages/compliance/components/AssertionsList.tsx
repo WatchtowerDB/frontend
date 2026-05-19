@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -6,7 +7,9 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useAssertions } from "@/hooks/useAssertions"
+import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useComplianceStream } from "@/hooks/useComplianceStream"
+import { useFrameworks } from "@/hooks/useFrameworks"
 import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 
 interface AssertionListProps {
@@ -20,6 +23,16 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
   const liveAssertions = useComplianceCheckStore((s) => s.liveAssertions)
   const phase = useComplianceCheckStore((s) => s.phase)
 
+  // Used for differentiating between assertions.
+  const { data: frameworks } = useFrameworks()
+  const { data: clientDBs } = useAllClientDBs()
+  const frameworkMap = frameworks?.results
+    ? Object.fromEntries(frameworks.results.map((f) => [f.id, f.name]))
+    : {}
+  const clientdbMap = clientDBs?.results
+    ? Object.fromEntries(clientDBs.results.map((f) => [f.id, f.name]))
+    : {}
+
   useComplianceStream(activeCheckId) // opens SSE when a check is running
 
   if (isLoading) return <div className="animate-pulse p-4 text-xs">Scanning assertions...</div>
@@ -28,6 +41,7 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
 
   return (
     <div className="relative flex flex-col">
+      <Button onClick={() => console.log(frameworks)}>Kill a man</Button>
       {isFetching && <div className="text-muted-foreground px-4 py-1 text-[10px]">Updating…</div>}
       {phase !== "idle" && phase !== "complete" && (
         <div className="text-muted-foreground animate-pulse px-4 py-1 text-[10px] capitalize">
@@ -66,7 +80,9 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                         </span>
                       </div>
                       <span className="text-muted-foreground text-left text-[10px]">
-                        Client DB: {item.client_db}
+                        Database: {clientdbMap[item.client_db] ?? "—"} • Framework:{" "}
+                        {frameworkMap[item.compliance_framework] ?? "—"}
+                        {/* const assertion = data?.results.find((a) => a.id === assertionId) */}
                       </span>
                     </button>
                   </SidebarMenuButton>

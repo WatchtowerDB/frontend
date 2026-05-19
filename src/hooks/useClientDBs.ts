@@ -273,3 +273,13 @@ export const useClientDBs = (): UseClientDBsResult => {
     setPage,
   }
 }
+
+// Lightweight fetch all for the meantime. I do not like it either but it doesn't make sense
+// to have the assertions list unclear. It'll be used for the filters too.
+export function useAllClientDBs() {
+  return useQuery({
+    queryKey: ["clientdbs", "all"],
+    queryFn: () => getClientDBs(),
+    staleTime: 1000 * 60 * 30,
+  })
+}
