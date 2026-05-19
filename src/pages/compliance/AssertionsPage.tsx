@@ -3,8 +3,8 @@ import { SidebarInset } from "@/components/ui/sidebar"
 import { useState } from "react"
 import AssertionReport from "./components/AssertionReport"
 import AssertionsFooter from "./components/AssertionsFooter"
+import AssertionsHeader from "./components/AssertionsHeader"
 import AssertionsList from "./components/AssertionsList"
-import SidebarHeader from "./components/SidebarHeader"
 
 function AssertionsPage() {
   // TODO: Change headerChildren and footerChildren components to be same name yknow.
@@ -13,7 +13,7 @@ function AssertionsPage() {
     <div className="flex h-full w-full">
       <GenericSidebar
         children=<AssertionsList onSelect={setSelectedId} selectedId={selectedId} />
-        headerChildren=<SidebarHeader />
+        headerChildren=<AssertionsHeader />
         footerChildren=<AssertionsFooter />
         className="w-[30vw] group-data-[state=collapsed]:w-0 group-data-[state=collapsed]:border-0"
       />
