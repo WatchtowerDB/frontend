@@ -1,9 +1,7 @@
-import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 import api from "./axiosInstance"
 
 import { type PaginatedResponse } from "@/types/api"
 import { type AssertionItem } from "@/types/compliance"
-import { useMutation } from "@tanstack/react-query"
 
 export interface AssertionFilters {
   check?: number
@@ -40,15 +38,4 @@ export const runComplianceCheck = async (frameworkId: number, schemaId: number) 
     schema: schemaId,
   })
   return response.data
-}
-
-export function useRunComplianceCheck() {
-  const { setActiveCheckId, reset } = useComplianceCheckStore()
-
-  return useMutation({
-    mutationFn: ({ frameworkId, schemaId }: { frameworkId: number; schemaId: number }) =>
-      runComplianceCheck(frameworkId, schemaId),
-    onMutate: () => reset(), // clear previous run state
-    onSuccess: (data) => setActiveCheckId(data.id), // data.id is what your backend returns
-  })
 }

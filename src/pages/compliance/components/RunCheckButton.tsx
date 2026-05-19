@@ -1,4 +1,4 @@
-import { useRunComplianceCheck } from "@/api/assertions"
+import { useRunComplianceCheck } from "@/hooks/useChecks"
 
 export function RunCheckButton() {
   const { mutate, isPending } = useRunComplianceCheck()
