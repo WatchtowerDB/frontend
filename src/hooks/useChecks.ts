@@ -19,7 +19,10 @@ export function useRunComplianceCheck() {
   return useMutation({
     mutationFn: ({ frameworkId, schemaId }: { frameworkId: number; schemaId: number }) =>
       runComplianceCheck(frameworkId, schemaId),
-    onMutate: () => reset(),
+    onMutate: (variables) => {
+      console.log("Now, it shall run a compliance check with the following: ", variables)
+      reset()
+    },
     onSuccess: (data) => {
       setActiveCheckId(data.id)
       queryClient.invalidateQueries({ queryKey: ["checks", "list"] })

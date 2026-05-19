@@ -4,15 +4,16 @@ import { useState } from "react"
 import AssertionReport from "./components/AssertionReport"
 import AssertionsFooter from "./components/AssertionsFooter"
 import AssertionsList from "./components/AssertionsList"
-import { RunCheckButton } from "./components/RunCheckButton"
+import SidebarHeader from "./components/SidebarHeader"
 
 function AssertionsPage() {
+  // TODO: Change headerChildren and footerChildren components to be same name yknow.
   const [selectedId, setSelectedId] = useState<number | null>(null)
   return (
     <div className="flex h-full w-full">
       <GenericSidebar
         children=<AssertionsList onSelect={setSelectedId} selectedId={selectedId} />
-        headerChildren=<RunCheckButton />
+        headerChildren=<SidebarHeader />
         footerChildren=<AssertionsFooter />
         className="w-[30vw] group-data-[state=collapsed]:w-0 group-data-[state=collapsed]:border-0"
       />
