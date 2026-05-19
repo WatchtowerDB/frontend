@@ -3,8 +3,10 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useAssertions } from "@/hooks/useAssertions"
+import { cn } from "@/lib/utils"
 import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 import { InfoIcon } from "lucide-react"
+import { useEffect, useRef } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
@@ -27,6 +29,44 @@ export default function AssertionReport({
 
   const result =
     live?.status === "passed" ? true : live?.status === "failed" ? false : assertion?.result
+
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const userHasScrolledUp = useRef(false)
+
+  // Auto-scrolling side effect targeting Radix's viewport architecture
+  useEffect(() => {
+    // 1. Reset the scroll lock whenever a brand new stream fires up
+    if (isStreaming) {
+      userHasScrolledUp.current = false
+    }
+
+    if (!bottomRef.current) return
+    const scrollViewport = bottomRef.current.closest("[data-radix-scroll-area-viewport]")
+    if (!scrollViewport) return
+
+    // 2. Define the user interaction tracker
+    const handleScroll = () => {
+      const target = scrollViewport as HTMLDivElement
+      const distanceFromBottom = target.scrollHeight - target.scrollTop - target.clientHeight
+      userHasScrolledUp.current = distanceFromBottom > 20
+    }
+
+    // 3. Bind the browser listener securely
+    scrollViewport.addEventListener("scroll", handleScroll)
+
+    // 4. Force the viewport down if the user hasn't broken the lock
+    if (isStreaming && !userHasScrolledUp.current) {
+      scrollViewport.scrollTo({
+        top: scrollViewport.scrollHeight,
+        behavior: "auto",
+      })
+    }
+
+    // 5. Clean up the event listener before the next token evaluation or unmount
+    return () => {
+      scrollViewport.removeEventListener("scroll", handleScroll)
+    }
+  }, [assertionId, recommendation, isStreaming])
 
   return (
     <div className="flex h-full flex-col">
@@ -57,10 +97,26 @@ export default function AssertionReport({
                 </pre>
               </div>
               {/* The Assertion Report */}
-              <article className="prose prose-slate dark:prose-invert prose-headings:font-bold prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-pre:bg-slate-950 prose-pre:text-slate-50 prose-pre:shadow-lg prose-pre:border-2 max-w-none">
+              <article
+                className={cn(
+                  "prose prose-slate dark:prose-invert",
+                  "prose-headings:font-bold",
+                  "prose-code:text-indigo-600 dark:prose-code:text-indigo-400",
+                  "prose-pre:bg-slate-950 prose-pre:text-slate-50",
+                  "prose-pre:shadow-lg prose-pre:border-2",
+                  "max-w-none",
+                  isStreaming && [
+                    "[&_p:last-child]:after:content-['▍']",
+                    "[&_p:last-child]:after:inline-block",
+                    "[&_p:last-child]:after:ml-1",
+                    "[&_p:last-child]:after:text-indigo-500",
+                    "[&_p:last-child]:after:animate-pulse",
+                  ],
+                )}
+              >
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{recommendation}</ReactMarkdown>
-                {isStreaming && <span className="animate-pulse">▍</span>}
               </article>
+              <div ref={bottomRef} className="h-2" />
             </div>
           ) : (
             <div className="flex h-full flex-col items-center justify-center py-20 text-slate-400 italic">

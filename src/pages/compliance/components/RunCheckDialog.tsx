@@ -178,11 +178,7 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
 
             <DialogFooter>
               <Button type="submit" disabled={isWorking}>
-                {resolvingSchema
-                  ? "Locating Latest Schema…"
-                  : isMutationPending
-                    ? "Starting…"
-                    : "Run Check"}
+                {resolvingSchema ? "Loading…" : isMutationPending ? "Starting…" : "Run Check"}
               </Button>
             </DialogFooter>
           </form>

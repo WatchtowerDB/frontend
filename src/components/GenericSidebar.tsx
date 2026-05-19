@@ -41,7 +41,7 @@ export function GenericSidebar({
         )}
         {/* Header children, also optional. Likely will have search, filter, etc. */}
         {headerChildren && (
-          <SidebarHeader className="mt-1 flex h-13 overflow-hidden px-4 transition-all duration-200 group-data-[state=collapsed]:h-0 group-data-[state=collapsed]:border-none group-data-[state=collapsed]:p-0">
+          <SidebarHeader className="mt-1 flex h-13 min-w-0 overflow-hidden px-4 transition-all duration-200 group-data-[state=collapsed]:h-0 group-data-[state=collapsed]:border-none group-data-[state=collapsed]:p-0">
             {headerChildren}
           </SidebarHeader>
         )}
