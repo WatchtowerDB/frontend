@@ -1,5 +1,6 @@
-import { getAssertions } from "@/api/assertions"
+import { getAssertionById, getAssertions } from "@/api/assertions"
 import { PAGE_SIZE, useAssertionStore } from "@/stores/useAssertionStore"
+import type { AssertionItem } from "@/types/compliance"
 import { useQuery } from "@tanstack/react-query"
 import { useShallow } from "zustand/shallow"
 
@@ -23,4 +24,17 @@ export const useAssertions = () => {
     assertions: query.data?.results ?? [],
     totalCount: query.data?.count ?? 0,
   }
+}
+
+export const useAssertionDetails = (id: number | null) => {
+  return useQuery({
+    queryKey: ["assertions", "detail", id],
+    queryFn: () => {
+      if (!id) throw new Error("An ID is required to fetch a specific assertion.")
+      return getAssertionById(id) as Promise<AssertionItem>
+    },
+
+    enabled: id !== null && id !== undefined && !isNaN(id),
+    staleTime: 1000 * 60 * 5,
+  })
 }

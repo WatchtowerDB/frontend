@@ -13,6 +13,8 @@ export function useComplianceStream(checkId: number | null) {
 
     const controller = new AbortController()
 
+    const currentActiveAssertionId: number | null = null
+
     fetchEventSource(
       `${import.meta.env.VITE_BACKEND_URL}/api/compliance/checks/${checkId}/stream/`,
       {
@@ -58,17 +60,27 @@ export function useComplianceStream(checkId: number | null) {
           }
         },
         async onopen(response) {
-          console.log("SSE open status:", response.status)
-          console.log("SSE content-type:", response.headers.get("content-type"))
-          if (!response.ok) {
-            const body = await response.text()
-            console.log("SSE error body:", body)
+          if (response.ok) {
+            return // Absolute green light
+          } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+            // If it's a client error, throw an error to halt the automatic retry loop completely!
+            throw new Error("Fatal client streaming error.")
           }
         },
         onerror(err) {
+          // This approach is so an error would tell the streaming that it's done.
           setPhase("error")
+          if (currentActiveAssertionId) {
+            upsertLiveAssertion(currentActiveAssertionId, { streamingDone: true })
+          } else {
+            const freshLiveAssertions = useComplianceCheckStore.getState().liveAssertions
+            Object.keys(freshLiveAssertions).forEach((id) => {
+              upsertLiveAssertion(Number(id), { streamingDone: true })
+            })
+          }
           throw err
         },
+        // TODO: Replace this when Robin implements better support for last-event-id!
       },
     )
 

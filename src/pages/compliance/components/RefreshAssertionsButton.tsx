@@ -14,9 +14,9 @@ export function RefreshAssertionsButton() {
       new Promise((resolve) => setTimeout(resolve, 600)),
 
       queryClient.invalidateQueries({
-        queryKey: ["assertions", "list"],
+        queryKey: ["assertions"],
       }),
-      // Injecting a 600ms artificial delay.
+      // Injecting a 600ms artificial delay. Truthfully this is purely visual and only on the button lmao
     ])
     setIsRefreshing(false)
   }
