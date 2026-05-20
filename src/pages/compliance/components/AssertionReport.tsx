@@ -50,8 +50,6 @@ export default function AssertionReport({
 
   // These are used to clarify whether or not it should be rendering a report.
   // (In case it passes, it shouldn't. In case streaming fails, it shouldnt.)
-  const isPassedSystem = assertion && assertion.result === true
-  const shouldRenderReport = isStreaming || (assertion && assertion.result === false)
   const recommendation = isStreaming
     ? live?.recommendation || ""
     : assertion?.recommendation || "No report available."
