@@ -108,11 +108,10 @@ export default function AssertionReport({
               console.log("phase is", livePhase)
             }}
           >
-            Kill a MAN
+            Console log
           </Button>
           <SidebarTrigger />
           {title}
-          {String(isStreaming)}
           {assertion ? (
             <Badge variant={result ? "outline" : "destructive"} className="ml-2">
               {result ? "Pass" : "Fail"}

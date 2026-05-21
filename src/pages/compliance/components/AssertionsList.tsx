@@ -66,7 +66,7 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                       console.log("live is", live)
                     }}
                   >
-                    Kill a man AGAIN
+                    Console log
                   </button>
 
                   <SidebarMenuItem key={item.id}>
@@ -77,24 +77,23 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                     >
                       <button
                         onClick={() => onSelect?.(item.id)}
-                        className={`flex w-full flex-col items-start gap-1 p-4 backdrop-blur-sm ${
+                        className={`flex w-full flex-row items-center justify-between p-4 text-left backdrop-blur-sm ${
                           result
                             ? "border-l-4 border-emerald-500 bg-linear-to-br from-emerald-500/15 via-emerald-500/5 via-10% to-transparent to-15%"
                             : "border-l-4 border-red-500 bg-linear-to-br from-red-500/15 via-red-500/5 via-10% to-transparent to-15%"
                         } ${selectedId === item.id ? "dark:bg-accent! bg-neutral-200/60!" : ""}`}
                       >
-                        <div className="flex w-full items-center justify-between">
-                          <span className="truncate text-left font-mono text-xs">
+                        <div className="flex min-w-0 flex-1 flex-col gap-1 pr-2">
+                          <span className="truncate font-mono text-xs">
                             {item.id} • {item.sql_query}
                           </span>
+                          <span className="text-muted-foreground text-[10px]">
+                            Database: {clientdbMap[item.client_db] ?? "—"} • Framework:{" "}
+                            {frameworkMap[item.compliance_framework] ?? "—"}
+                          </span>
                         </div>
-                        <span className="text-muted-foreground text-left text-[10px]">
-                          Database: {clientdbMap[item.client_db] ?? "—"} • Framework:{" "}
-                          {frameworkMap[item.compliance_framework] ?? "—"}
-                          {/* const assertion = data?.results.find((a) => a.id === assertionId) */}
-                        </span>
                         {isAssertionLoading && (
-                          <Loader2 className="absolute end-0 top-1/2 h-12 w-12 shrink-0 animate-spin text-indigo-500" />
+                          <Loader2 className="text-primary h-6! w-6! shrink-0 animate-spin" />
                         )}
                       </button>
                     </SidebarMenuButton>
