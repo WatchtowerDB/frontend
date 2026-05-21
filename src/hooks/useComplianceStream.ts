@@ -32,38 +32,53 @@ export function useComplianceStream(checkId: number | null) {
 
           if (type.endsWith("phase.update")) {
             const { step, status } = data
+            console.log("data is", data, "type is", type)
             if (step === "assertion_generation" && status === "started") setPhase("generating")
             if (step === "assertion_generation" && status === "completed") {
               setPhase("executing")
-              queryClient.invalidateQueries({ queryKey: ["assertions", "list"] })
+              queryClient.invalidateQueries({ queryKey: ["assertions"] })
             }
             if (step === "execution" && status === "started") setPhase("executing")
             if (step === "analysis" && status === "started") setPhase("analyzing")
-          }
 
+            if (step === "analysis" && status === "completed") {
+              // the defacto realizer of "done streaming"
+              setPhase("complete")
+              queryClient.invalidateQueries({ queryKey: ["assertions"] })
+              controller.abort()
+            }
+          }
           if (type.endsWith("assertion.result") && assertionId) {
+            const passed = data.status === "passed"
             upsertLiveAssertion(assertionId, {
-              status: data.status === "passed" ? "passed" : "failed",
+              status: passed ? "passed" : "failed",
+              streamingDone: passed ? true : false, // passed = done immediately, failed = wait for stream
+              // queryClient.invalidateQueries({ queryKey: ["assertions", "detail", assertionId] })
+              // put this back in case something messes up in terms of how pass and fail and subsequent report showing is handled.
             })
           }
 
           if (type.endsWith("recommendation.stream") && assertionId) {
             if (data.event === "token") appendToken(assertionId, data.content)
-            if (data.event === "complete") upsertLiveAssertion(assertionId, { streamingDone: true })
+            if (data.event === "complete") {
+              upsertLiveAssertion(assertionId, { streamingDone: true })
+              queryClient.invalidateQueries({ queryKey: ["assertions", "detail", assertionId] })
+            }
             if (data.event === "error") upsertLiveAssertion(assertionId, { streamingDone: true })
           }
 
           if (type.endsWith("system.status") && data.status === "completed") {
+            // Practically useless, but a safety net.
             setPhase("complete")
-            queryClient.invalidateQueries({ queryKey: ["assertions", "list"] })
+            queryClient.invalidateQueries({ queryKey: ["assertions"] })
             controller.abort()
           }
         },
         async onopen(response) {
           if (response.ok) {
-            return // Absolute green light
+            return // Green light.
           } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-            // If it's a client error, throw an error to halt the automatic retry loop completely!
+            // If it's a client error, throw an error to halt the automatic retry loop completely
             throw new Error("Fatal client streaming error.")
           }
         },

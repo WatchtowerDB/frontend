@@ -50,9 +50,7 @@ export default function AssertionReport({
 
   // These are used to clarify whether or not it should be rendering a report.
   // (In case it passes, it shouldn't. In case streaming fails, it shouldnt.)
-  const recommendation = isStreaming
-    ? live?.recommendation || ""
-    : assertion?.recommendation || "No report available."
+  const recommendation = assertion?.recommendation ?? live?.recommendation ?? ""
   const viewState = deriveViewState({ assertionId, assertion, livePhase, isStreaming })
 
   // SO HERE IS THE THING. BOTH ACCEPT AND (while streaming) ASSERTION RETURN NULL.
@@ -107,13 +105,14 @@ export default function AssertionReport({
         <h2 className="flex items-center gap-2 text-lg font-semibold">
           <Button
             onClick={() => {
-              console.log("phase is", viewState)
+              console.log("phase is", livePhase)
             }}
           >
             Kill a MAN
           </Button>
           <SidebarTrigger />
           {title}
+          {String(isStreaming)}
           {assertion ? (
             <Badge variant={result ? "outline" : "destructive"} className="ml-2">
               {result ? "Pass" : "Fail"}
@@ -183,11 +182,7 @@ export default function AssertionReport({
                         ],
                       )}
                     >
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {viewState === "streaming"
-                          ? (live?.recommendation ?? "")
-                          : (assertion?.recommendation ?? "No report available.")}
-                      </ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{recommendation}</ReactMarkdown>
                     </article>
                     <div ref={bottomRef} className="h-2" />
                   </div>

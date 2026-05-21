@@ -10,6 +10,7 @@ import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useComplianceStream } from "@/hooks/useComplianceStream"
 import { useFrameworks } from "@/hooks/useFrameworks"
 import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
+import { Loader2 } from "lucide-react"
 
 interface AssertionListProps {
   onSelect?: (item: number) => void
@@ -54,37 +55,51 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
           >
             {assertions.map((item) => {
               const live = liveAssertions[item.id]
+              const isAssertionLoading = live && !live.streamingDone
               const result =
                 live?.status === "passed" ? true : live?.status === "failed" ? false : item.result
 
               return (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={selectedId === item.id}
-                    className="h-auto flex-col items-start gap-1 border-b p-0 last:border-b-0"
+                <>
+                  <button
+                    onClick={() => {
+                      console.log("live is", live)
+                    }}
                   >
-                    <button
-                      onClick={() => onSelect?.(item.id)}
-                      className={`flex w-full flex-col items-start gap-1 p-4 backdrop-blur-sm ${
-                        result
-                          ? "border-l-4 border-emerald-500 bg-linear-to-br from-emerald-500/15 via-emerald-500/5 via-10% to-transparent to-15%"
-                          : "border-l-4 border-red-500 bg-linear-to-br from-red-500/15 via-red-500/5 via-10% to-transparent to-15%"
-                      } ${selectedId === item.id ? "dark:bg-accent! bg-neutral-200/60!" : ""}`}
+                    Kill a man AGAIN
+                  </button>
+
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={selectedId === item.id}
+                      className="h-auto flex-col items-start gap-1 border-b p-0 last:border-b-0"
                     >
-                      <div className="flex w-full items-center justify-between">
-                        <span className="truncate text-left font-mono text-xs">
-                          {item.id} • {item.sql_query}
+                      <button
+                        onClick={() => onSelect?.(item.id)}
+                        className={`flex w-full flex-col items-start gap-1 p-4 backdrop-blur-sm ${
+                          result
+                            ? "border-l-4 border-emerald-500 bg-linear-to-br from-emerald-500/15 via-emerald-500/5 via-10% to-transparent to-15%"
+                            : "border-l-4 border-red-500 bg-linear-to-br from-red-500/15 via-red-500/5 via-10% to-transparent to-15%"
+                        } ${selectedId === item.id ? "dark:bg-accent! bg-neutral-200/60!" : ""}`}
+                      >
+                        <div className="flex w-full items-center justify-between">
+                          <span className="truncate text-left font-mono text-xs">
+                            {item.id} • {item.sql_query}
+                          </span>
+                        </div>
+                        <span className="text-muted-foreground text-left text-[10px]">
+                          Database: {clientdbMap[item.client_db] ?? "—"} • Framework:{" "}
+                          {frameworkMap[item.compliance_framework] ?? "—"}
+                          {/* const assertion = data?.results.find((a) => a.id === assertionId) */}
                         </span>
-                      </div>
-                      <span className="text-muted-foreground text-left text-[10px]">
-                        Database: {clientdbMap[item.client_db] ?? "—"} • Framework:{" "}
-                        {frameworkMap[item.compliance_framework] ?? "—"}
-                        {/* const assertion = data?.results.find((a) => a.id === assertionId) */}
-                      </span>
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                        {isAssertionLoading && (
+                          <Loader2 className="absolute end-0 top-1/2 h-12 w-12 shrink-0 animate-spin text-indigo-500" />
+                        )}
+                      </button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </>
               )
             })}
           </SidebarMenu>
