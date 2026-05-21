@@ -36,6 +36,8 @@ function deriveViewState(params: {
   if (isStreaming) return "streaming" // currently generating tokens
   if (assertion?.result === false) return "failed" // completed failure report, show the report
   return "loading" // is just loading. waiting for first token.
+
+  // TODO: if it's empty, assume it's loading. confirm by refreshing mid stream.
 }
 
 export default function AssertionReport({

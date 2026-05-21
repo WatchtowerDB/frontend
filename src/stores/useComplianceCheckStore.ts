@@ -17,6 +17,7 @@ interface ComplianceCheckState {
   setPhase: (phase: PipelinePhase) => void
   upsertLiveAssertion: (id: number, patch: Partial<LiveAssertion>) => void
   appendToken: (id: number, token: string) => void
+  resetPhase: () => void
   reset: () => void
 }
 
@@ -53,6 +54,7 @@ export const useComplianceCheckStore = create<ComplianceCheckState>((set) => ({
         },
       },
     })),
+  resetPhase: () => set({ phase: "idle" }),
 
   reset: () => set({ activeCheckId: null, phase: "idle", liveAssertions: {} }),
 }))

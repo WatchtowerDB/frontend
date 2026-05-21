@@ -25,20 +25,26 @@ function timeAgo(date: Date): string {
 export function AssertionsStatus({ className }: AssertionsStatusProps) {
   const { isLoading, isError, error, isFetching } = useAssertions()
   const phase = useComplianceCheckStore((s) => s.phase)
+  const resetPhase = useComplianceCheckStore((s) => s.resetPhase)
   const { data: latestCheck } = useLatestCheck()
   const viewState: ViewState = (() => {
     if (phase === "error" || isError) return "error"
-    if (isFetching) return "fetching"
     if (phase !== "idle" && phase !== "complete") return "streaming"
     if (phase === "complete") return "complete"
+    if (isFetching) return "fetching"
     return "idle"
   })()
   const [displayState, setDisplayState] = useState<ViewState>("idle")
 
+  // TODO: make it so thei ndicator doesnt tie in with the refresh
+
   useEffect(() => {
     if (viewState === "complete") {
       startTransition(() => setDisplayState("complete"))
-      const t = setTimeout(() => startTransition(() => setDisplayState("idle")), 2000)
+      const t = setTimeout(() => {
+        startTransition(() => setDisplayState("idle"))
+        resetPhase()
+      }, 2000)
       return () => clearTimeout(t)
     }
 
