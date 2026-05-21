@@ -1,5 +1,5 @@
 import { useAssertions } from "@/hooks/useAssertions"
-import { useChecks } from "@/hooks/useChecks"
+import { useChecks, useLatestCheck } from "@/hooks/useChecks"
 import { cn } from "@/lib/utils"
 import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 import { AlertCircleIcon, CheckIcon } from "lucide-react"
@@ -26,7 +26,7 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
   const { isLoading, isError, error, isFetching } = useAssertions()
   const phase = useComplianceCheckStore((s) => s.phase)
   const { data } = useChecks()
-  const lastRan = data?.results.at(-1)?.date ? new Date(data.results.at(-1)!.date) : null
+  const { data: latestCheck } = useLatestCheck()
   const viewState: ViewState = (() => {
     if (phase === "error" || isError) return "error"
     if (isFetching) return "fetching"
@@ -52,7 +52,7 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
         <>
           <span className="bg-muted-foreground/40 size-1.5 shrink-0 rounded-full" />
           <span className="text-muted-foreground text-[10px]">
-            {lastRan ? `Last ran: ${timeAgo(lastRan)}` : ""}
+            {latestCheck?.date ? `Last ran: ${timeAgo(new Date(latestCheck?.date))}` : ""}
           </span>
         </>
       )}

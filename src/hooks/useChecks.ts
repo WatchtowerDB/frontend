@@ -1,5 +1,5 @@
 import { runComplianceCheck } from "@/api/assertions"
-import { getChecks } from "@/api/check"
+import { getChecks, getLatestCheck } from "@/api/check"
 import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
@@ -9,6 +9,14 @@ export function useChecks() {
     queryFn: () => getChecks(),
     staleTime: 0, // The checks are dynamic and change often enough.
     placeholderData: (prev) => prev,
+  })
+}
+
+export function useLatestCheck() {
+  return useQuery({
+    queryKey: ["checks", "latest"],
+    queryFn: () => getLatestCheck(),
+    staleTime: 0,
   })
 }
 

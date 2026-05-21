@@ -24,3 +24,9 @@ export const getCheckById = async (id: number): Promise<Check> => {
   const response = await api.get<Check>(`/api/compliance/checks/${id}/`)
   return response.data
 }
+
+// Retrieve the latest compliance check.
+export const getLatestCheck = async (): Promise<Check> => {
+  const response = await api.get<Check>(`/api/compliance/checks/latest/`)
+  return response.data
+}

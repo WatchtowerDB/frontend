@@ -25,7 +25,6 @@ export default function AssertionsHeader({ className }: AssertionsHeaderProps) {
 
   return (
     <div className={cn("w-full", className)}>
-      <AssertionsStatus />
       {/* {viewState === "fetching" && (
         <h2 className="text-muted-foreground animate-pulse px-4 py-1 text-[10px]">Updating…</h2>
       )}
@@ -41,6 +40,7 @@ export default function AssertionsHeader({ className }: AssertionsHeaderProps) {
         </Button>
         <RefreshAssertionsButton />
       </div>
+      <AssertionsStatus />
 
       <RunCheckDialog open={isRunDialogOpen} onOpenChange={setIsRunDialogOpen} />
     </div>

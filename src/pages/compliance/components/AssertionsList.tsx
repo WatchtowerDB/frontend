@@ -93,7 +93,7 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                           </span>
                         </div>
                         {isAssertionLoading && (
-                          <Loader2 className="text-primary h-6! w-6! shrink-0 animate-spin" />
+                          <Loader2 className="text-primary h-6! w-6! shrink-0 animate-spin self-center" />
                         )}
                       </button>
                     </SidebarMenuButton>
