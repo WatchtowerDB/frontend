@@ -87,7 +87,8 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                             {item.id} • {item.sql_query}
                           </span>
                           <span className="text-muted-foreground text-[10px]">
-                            Database: {clientdbMap[item.client_db] ?? "—"} • Framework:{" "}
+                            Check: {item.compliance_check} • Database:{" "}
+                            {clientdbMap[item.client_db] ?? "—"} • Framework:{" "}
                             {frameworkMap[item.compliance_framework] ?? "—"}
                           </span>
                         </div>
