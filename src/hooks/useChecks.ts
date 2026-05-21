@@ -7,7 +7,7 @@ export function useChecks() {
   return useQuery({
     queryKey: ["checks", "list"],
     queryFn: () => getChecks(),
-    staleTime: 0, // The checks are dynamic and change often enough.
+    staleTime: 0,
     placeholderData: (prev) => prev,
   })
 }
@@ -22,17 +22,14 @@ export function useLatestCheck() {
 
 export function useRunComplianceCheck() {
   const queryClient = useQueryClient()
-  const { setActiveCheckId, reset } = useComplianceCheckStore()
+  const addActiveCheck = useComplianceCheckStore((s) => s.addActiveCheck)
 
   return useMutation({
     mutationFn: ({ frameworkId, schemaId }: { frameworkId: number; schemaId: number }) =>
       runComplianceCheck(frameworkId, schemaId),
-    onMutate: (variables) => {
-      console.log("Now, it shall run a compliance check with the following: ", variables)
-      reset()
-    },
     onSuccess: (data) => {
-      setActiveCheckId(data.id)
+      // Register the new check — the stream hook picks it up automatically.
+      addActiveCheck(data.id)
       queryClient.invalidateQueries({ queryKey: ["checks", "list"] })
     },
   })

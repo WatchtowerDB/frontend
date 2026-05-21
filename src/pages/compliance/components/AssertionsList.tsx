@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useAssertions } from "@/hooks/useAssertions"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
-import { useComplianceStream } from "@/hooks/useComplianceStream"
+import { useComplianceStreams } from "@/hooks/useComplianceStream"
 import { useFrameworks } from "@/hooks/useFrameworks"
 import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 import { Loader2 } from "lucide-react"
@@ -19,11 +19,8 @@ interface AssertionListProps {
 
 const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
   const { assertions, isLoading, isError, error, isFetching } = useAssertions()
-  const activeCheckId = useComplianceCheckStore((s) => s.activeCheckId)
   const liveAssertions = useComplianceCheckStore((s) => s.liveAssertions)
-  const phase = useComplianceCheckStore((s) => s.phase)
 
-  // Used for differentiating between assertions.
   const { data: frameworks } = useFrameworks()
   const { data: clientDBs } = useAllClientDBs()
   const frameworkMap = frameworks?.results
@@ -33,7 +30,9 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
     ? Object.fromEntries(clientDBs.results.map((f) => [f.id, f.name]))
     : {}
 
-  useComplianceStream(activeCheckId) // opens SSE when a check is running
+  // Opens/closes SSE connections as activeCheckIds changes.
+  useComplianceStreams()
+  // opens SSE when a check is running
 
   if (isLoading) return <div className="animate-pulse p-4 text-xs">Scanning assertions...</div>
   if (isError)

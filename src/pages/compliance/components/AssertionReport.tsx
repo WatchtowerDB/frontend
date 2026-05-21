@@ -46,7 +46,12 @@ export default function AssertionReport({
 }: AssertionReportProps) {
   const { data: assertion } = useAssertionDetails(assertionId)
   const liveAssertions = useComplianceCheckStore((s) => s.liveAssertions)
-  const livePhase = useComplianceCheckStore((s) => s.phase)
+  const livePhase = useComplianceCheckStore((s) => {
+    if (!assertionId) return "idle"
+    const checkId = s.liveAssertions[assertionId]?.checkId
+    if (checkId === undefined) return "idle"
+    return s.checkStreams[checkId]?.phase ?? "idle"
+  })
   const live = assertionId ? liveAssertions[assertionId] : null
   const isStreaming = live && !live.streamingDone
 
