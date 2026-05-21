@@ -41,12 +41,12 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
 
   return (
     <div className="relative flex flex-col">
-      {isFetching && <div className="text-muted-foreground px-4 py-1 text-[10px]">Updating…</div>}
+      {/* {isFetching && <div className="text-muted-foreground px-4 py-1 text-[10px]">Updating…</div>}
       {phase !== "idle" && phase !== "complete" && (
         <div className="text-muted-foreground animate-pulse px-4 py-1 text-[10px] capitalize">
           {phase}…
         </div>
-      )}
+      )} */}
 
       <SidebarGroup>
         <SidebarGroupContent>
