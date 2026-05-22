@@ -40,14 +40,27 @@ export function useComplianceStreams() {
       fetchEventSource(
         `${import.meta.env.VITE_BACKEND_URL}/api/compliance/checks/${checkId}/stream/`,
         {
-          headers: {
-            Authorization: `Bearer ${useAuthStore.getState().accessToken}`,
+          get headers() {
+            // This getter ensures that if the library retries, it pulls the
+            // latest token from the store instead of using a stale one.
+            return {
+              Authorization: `Bearer ${useAuthStore.getState().accessToken}`,
+            }
           },
           signal: controller.signal,
+          openWhenHidden: true, // Found this! Prevents the browser from killing the stream when tab is inactive
 
           onmessage(e) {
-            const event = JSON.parse(e.data)
-            const type: string = e.event || event.type
+            let event
+            try {
+              event = JSON.parse(e.data)
+            } catch {
+              return
+            }
+
+            // Fallback: If e.event is generic "message" or empty, use the type from the JSON body
+            const type: string = e.event && e.event !== "message" ? e.event : event.type || ""
+
             const data = event.data
             const subject: string | undefined = event.subject
             const assertionId = subject ? Number(subject.split("/")[1]) : null
@@ -66,9 +79,8 @@ export function useComplianceStreams() {
                 setCheckPhase(checkId, "complete")
                 queryClient.invalidateQueries({ queryKey: ["assertions"] })
                 // Pull this check out of the active list so the effect
-                // re-runs and cleans up the controller.
+                // re-runs and naturally cleans up the controller via the logic above.
                 removeActiveCheck(checkId)
-                controller.abort()
               }
             }
 
@@ -96,13 +108,17 @@ export function useComplianceStreams() {
               setCheckPhase(checkId, "complete")
               queryClient.invalidateQueries({ queryKey: ["assertions"] })
               removeActiveCheck(checkId)
-              controller.abort()
             }
           },
 
           async onopen(response) {
             if (response.ok) return
             if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+              if (response.status === 401) {
+                // Handle token expiration: typically you'd trigger a logout
+                // or a token refresh here. ACCELERATOR, SAVE ME 🗣️
+                console.error("SSE Authentication failed.")
+              }
               throw new Error(`Fatal client streaming error for check ${checkId}.`)
             }
           },
