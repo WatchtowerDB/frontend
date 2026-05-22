@@ -101,7 +101,11 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
         <>
           <AlertCircleIcon className="text-destructive size-3 shrink-0" />
           <span className="text-destructive text-[10px]">
-            Error: {String(error) || "Something went wrong"}
+            {isError
+              ? `Error: ${error instanceof Error ? error.message : String(error)}`
+              : phase === "error"
+                ? "Streaming connection lost"
+                : "Something went wrong"}
           </span>
         </>
       )}
