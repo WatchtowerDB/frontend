@@ -222,34 +222,10 @@ export function useComplianceStreams() {
 
           async onopen(response) {
             if (response.ok) {
-              if (StreamCache.get(checkId)) {
-                // const freshAssertions = useComplianceCheckStore.getState().liveAssertions
-                // Object.entries(freshAssertions)
-                //   .filter(([id, a]) => {
-                //     if (a.checkId !== checkId || a.status !== "failed") {
-                //       console.log(
-                //         "This has failed, a.checkId is",
-                //         a.checkId,
-                //         "checkId is",
-                //         checkId,
-                //         "a status is",
-                //         a.status,
-                //       )
-                //       return false
-                //     }
-                //     const cached = queryClient.getQueryData<AssertionItem>([
-                //       "assertions",
-                //       "detail",
-                //       Number(id),
-                //       // The cheapest way to fix this little issue, is to get from the queryClient whether or not it's
-                //       // done streaming. how would it be done streaming? If the backend has it, therefore..
-                //     ])
-                //     return !cached?.recommendation // only resets if backend doesn't have it yet
-                //   })
-                //   .forEach(([id]) => {
-                //     upsertLiveAssertion(Number(id), checkId, { streamingDone: false })
-                //   })
+              if (!StreamCache.get(checkId)) {
+                setCheckPhase(checkId, "initiating")
               }
+
               console.log(`[SSE] Connection established for check ${checkId}`)
               return
             }

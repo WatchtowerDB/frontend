@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware"
 
 export type PipelinePhase =
   | "idle"
+  | "initiating"
   | "generating"
   | "executing"
   | "analyzing"
@@ -28,6 +29,7 @@ const PHASE_PRIORITY: PipelinePhase[] = [
   "analyzing",
   "executing",
   "generating",
+  "initiating",
   "reconnecting",
   "complete",
   "idle",
