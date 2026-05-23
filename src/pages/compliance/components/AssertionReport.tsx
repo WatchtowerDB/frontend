@@ -34,7 +34,7 @@ function deriveViewState(params: {
   if (!assertionId) return "empty" // Nothing selected.
   if (assertion?.result === true) return "passed" // a passed compliance, show the passed screen.
   if (livePhase === "error" && !assertion?.recommendation) return "error" // stream broke for whatever reason
-  if (isStreaming) return "streaming" // currently generating tokens
+  if (isStreaming && live?.recommendation) return "streaming" // currently generating tokens
   if (assertion?.result === false && (assertion?.recommendation || live?.recommendation))
     return "failed" // completed failure report, show the report
   return "loading" // is just loading. waiting for first token.
@@ -131,14 +131,19 @@ export default function AssertionReport({
         <h2 className="flex items-center gap-2 text-lg font-semibold">
           <Button
             onClick={() => {
-              console.log("live is", live)
+              console.log("live assertions are", liveAssertions)
             }}
           >
             Console all
           </Button>
           <Button
             onClick={() => {
-              console.log("live assertions are", liveAssertions)
+              console.log(
+                "le silly state of mind isStreaming is",
+                isStreaming,
+                "and the or condition is",
+                assertion?.recommendation || live?.recommendation,
+              )
             }}
           >
             Console log
