@@ -60,7 +60,7 @@ export default function AssertionReport({
   // These are used to clarify whether or not it should be rendering a report.
   // (In case it passes, it shouldn't. In case streaming fails, it shouldnt.)
   console.log("source:", live?.recommendation ? "live" : "assertion")
-  const recommendation = assertion?.recommendation ?? live?.recommendation ?? ""
+  const recommendation = live?.recommendation ?? assertion?.recommendation ?? ""
   const viewState = deriveViewState({ assertionId, assertion, livePhase, isStreaming, live })
   const prevRecommendation = useRef(recommendation)
   useEffect(() => {

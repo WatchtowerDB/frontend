@@ -1,6 +1,7 @@
 import api from "@/api/axiosInstance"
 import { toast } from "sonner"
 import { create } from "zustand"
+import { useComplianceCheckStore } from "./useComplianceCheckStore"
 
 interface AuthState {
   accessToken: string | null
@@ -36,6 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAccessToken: (token) => set({ accessToken: token }),
 
   logout: () => {
+    useComplianceCheckStore.getState().reset()
     set({ accessToken: null, userName: null, isAuthenticated: false })
     toast.info("You have been logged out.", {
       duration: 3000,
