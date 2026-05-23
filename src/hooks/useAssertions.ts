@@ -36,5 +36,6 @@ export const useAssertionDetails = (id: number | null) => {
 
     enabled: id !== null && id !== undefined && !isNaN(id),
     staleTime: 1000 * 60 * 5,
+    placeholderData: (prev) => prev,
   })
 }

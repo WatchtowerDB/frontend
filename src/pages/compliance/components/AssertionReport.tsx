@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useAssertionDetails } from "@/hooks/useAssertions"
 import { cn } from "@/lib/utils"
-import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
+import { useComplianceCheckStore, type LiveAssertion } from "@/stores/useComplianceCheckStore"
 import type { AssertionItem } from "@/types/compliance"
 import { AlertCircle, CheckCircle2, InfoIcon } from "lucide-react"
 import { useEffect, useRef } from "react"
@@ -27,14 +27,16 @@ function deriveViewState(params: {
   assertion: AssertionItem | undefined
   livePhase: string
   isStreaming: boolean | null
+  live: LiveAssertion | null
 }): ViewState {
-  const { assertionId, assertion, livePhase, isStreaming } = params
+  const { assertionId, assertion, livePhase, isStreaming, live } = params
 
   if (!assertionId) return "empty" // Nothing selected.
   if (assertion?.result === true) return "passed" // a passed compliance, show the passed screen.
   if (livePhase === "error" && !assertion?.recommendation) return "error" // stream broke for whatever reason
   if (isStreaming) return "streaming" // currently generating tokens
-  if (assertion?.result === false && assertion?.recommendation) return "failed" // completed failure report, show the report
+  if (assertion?.result === false && (assertion?.recommendation || live?.recommendation))
+    return "failed" // completed failure report, show the report
   return "loading" // is just loading. waiting for first token.
 
   // TODO: if it's empty, assume it's loading. confirm by refreshing mid stream.
@@ -57,8 +59,21 @@ export default function AssertionReport({
 
   // These are used to clarify whether or not it should be rendering a report.
   // (In case it passes, it shouldn't. In case streaming fails, it shouldnt.)
-  const recommendation = assertion?.recommendation ?? live?.recommendation ?? ""
-  const viewState = deriveViewState({ assertionId, assertion, livePhase, isStreaming })
+  console.log("source:", live?.recommendation ? "live" : "assertion")
+  const recommendation = live?.recommendation ?? assertion?.recommendation ?? ""
+  const viewState = deriveViewState({ assertionId, assertion, livePhase, isStreaming, live })
+  const prevRecommendation = useRef(recommendation)
+  useEffect(() => {
+    if (prevRecommendation.current !== recommendation) {
+      console.log(
+        "recommendation changed",
+        prevRecommendation.current?.length,
+        "->",
+        recommendation?.length,
+      )
+      prevRecommendation.current = recommendation
+    }
+  })
 
   // SO HERE IS THE THING. BOTH ACCEPT AND (while streaming) ASSERTION RETURN NULL.
 
@@ -105,6 +120,10 @@ export default function AssertionReport({
     viewport.scrollTo({ top: viewport.scrollHeight, behavior: "auto" })
   }, [recommendation, isStreaming])
 
+  useEffect(() => {
+    console.log("assertion data changed", assertion?.recommendation?.length)
+  }, [assertion])
+
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
@@ -135,7 +154,7 @@ export default function AssertionReport({
       </div>
 
       <div className="relative min-h-0 flex-1">
-        <ScrollArea className="h-full w-full">
+        <ScrollArea key={assertionId} className="h-full w-full">
           {(() => {
             switch (viewState) {
               case "empty":

@@ -200,6 +200,7 @@ export function useComplianceStreams() {
             }
 
             if (type.endsWith("system.status") && data.status === "completed") {
+              console.log("You took one hell of a turn to end up triggering this if condition.")
               setCheckPhase(checkId, "complete")
               queryClient.invalidateQueries({ queryKey: ["assertions"] })
               removeActiveCheck(checkId)
