@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/sidebar"
 import { useAssertions } from "@/hooks/useAssertions"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
-import { useComplianceStreams } from "@/hooks/useComplianceStream"
 import { useFrameworks } from "@/hooks/useFrameworks"
 import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 import { Loader2 } from "lucide-react"
@@ -31,7 +30,6 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
     : {}
 
   // Opens/closes SSE connections as activeCheckIds changes.
-  useComplianceStreams()
   // opens SSE when a check is running
 
   if (isLoading) return <div className="animate-pulse p-4 text-xs">Scanning assertions...</div>

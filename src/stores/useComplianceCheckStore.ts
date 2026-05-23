@@ -1,6 +1,14 @@
 import { create } from "zustand"
+import { createJSONStorage, persist } from "zustand/middleware"
 
-export type PipelinePhase = "idle" | "generating" | "executing" | "analyzing" | "complete" | "error"
+export type PipelinePhase =
+  | "idle"
+  | "generating"
+  | "executing"
+  | "analyzing"
+  | "complete"
+  | "reconnecting"
+  | "error"
 
 export interface CheckStream {
   phase: PipelinePhase
@@ -17,6 +25,7 @@ export interface LiveAssertion {
 // Used by AssertionsStatus and anywhere a global "are we busy?" signal is needed.
 const PHASE_PRIORITY: PipelinePhase[] = [
   "error",
+  "reconnecting",
   "analyzing",
   "executing",
   "generating",
@@ -50,71 +59,97 @@ interface ComplianceCheckState {
   reset: () => void
 }
 
-export const useComplianceCheckStore = create<ComplianceCheckState>((set) => ({
-  activeCheckIds: [],
-  checkStreams: {},
-  liveAssertions: {},
+export const useComplianceCheckStore = create<ComplianceCheckState>()(
+  persist(
+    (set) => ({
+      activeCheckIds: [],
+      checkStreams: {},
+      liveAssertions: {},
 
-  addActiveCheck: (id) =>
-    set((s) => ({
-      activeCheckIds: s.activeCheckIds.includes(id) ? s.activeCheckIds : [...s.activeCheckIds, id],
-      checkStreams: {
-        ...s.checkStreams,
-        [id]: { phase: "idle" },
-      },
-    })),
+      addActiveCheck: (id) =>
+        set((s) => ({
+          activeCheckIds: s.activeCheckIds.includes(id)
+            ? s.activeCheckIds
+            : [...s.activeCheckIds, id],
+          checkStreams: {
+            ...s.checkStreams,
+            [id]: { phase: "idle" },
+          },
+        })),
 
-  removeActiveCheck: (id) =>
-    set((s) => ({
-      activeCheckIds: s.activeCheckIds.filter((x) => x !== id),
-    })),
+      removeActiveCheck: (id) =>
+        set((s) => ({
+          activeCheckIds: s.activeCheckIds.filter((x) => x !== id),
+        })),
 
-  setCheckPhase: (checkId, phase) =>
-    set((s) => ({
-      checkStreams: {
-        ...s.checkStreams,
-        [checkId]: { ...s.checkStreams[checkId], phase },
-      },
-    })),
+      setCheckPhase: (checkId, phase) =>
+        set((s) => ({
+          checkStreams: {
+            ...s.checkStreams,
+            [checkId]: { ...s.checkStreams[checkId], phase },
+          },
+        })),
 
-  upsertLiveAssertion: (assertionId, checkId, patch) =>
-    set((s) => {
-      const existing = s.liveAssertions[assertionId] ?? {
-        checkId,
-        status: "pending" as const,
-        recommendation: "",
-        streamingDone: false,
-      }
-      return {
-        liveAssertions: {
-          ...s.liveAssertions,
-          [assertionId]: { ...existing, ...patch },
-        },
-      }
+      upsertLiveAssertion: (assertionId, checkId, patch) =>
+        set((s) => {
+          const existing = s.liveAssertions[assertionId] ?? {
+            checkId,
+            status: "pending" as const,
+            recommendation: "",
+            streamingDone: false,
+          }
+          console.log(
+            `[upsert] ${assertionId} existing.streamingDone:`,
+            existing.streamingDone,
+            "patch.streamingDone:",
+            patch.streamingDone,
+          )
+          return {
+            liveAssertions: {
+              ...s.liveAssertions,
+              [assertionId]: {
+                ...existing,
+                ...patch,
+                // streamingDone: existing.streamingDone
+                //   ? true
+                //   : (patch.streamingDone ?? existing.streamingDone),
+              },
+            },
+          }
+        }),
+
+      appendToken: (assertionId, token) =>
+        set((s) => ({
+          liveAssertions: {
+            ...s.liveAssertions,
+            [assertionId]: {
+              ...s.liveAssertions[assertionId],
+              recommendation: (s.liveAssertions[assertionId]?.recommendation ?? "") + token,
+            },
+          },
+        })),
+
+      // Removes check streams that are complete or errored;
+      // leaves liveAssertions intact (they're still displayed).
+      clearCompletedChecks: () =>
+        set((s) => {
+          const remaining = Object.fromEntries(
+            Object.entries(s.checkStreams).filter(
+              ([, v]) => v.phase !== "complete" && v.phase !== "error",
+            ),
+          ) as Record<number, CheckStream>
+          return { checkStreams: remaining }
+        }),
+
+      reset: () => set({ activeCheckIds: [], checkStreams: {}, liveAssertions: {} }),
     }),
-
-  appendToken: (assertionId, token) =>
-    set((s) => ({
-      liveAssertions: {
-        ...s.liveAssertions,
-        [assertionId]: {
-          ...s.liveAssertions[assertionId],
-          recommendation: (s.liveAssertions[assertionId]?.recommendation ?? "") + token,
-        },
-      },
-    })),
-
-  // Removes check streams that are complete or errored;
-  // leaves liveAssertions intact (they're still displayed).
-  clearCompletedChecks: () =>
-    set((s) => {
-      const remaining = Object.fromEntries(
-        Object.entries(s.checkStreams).filter(
-          ([, v]) => v.phase !== "complete" && v.phase !== "error",
-        ),
-      ) as Record<number, CheckStream>
-      return { checkStreams: remaining }
-    }),
-
-  reset: () => set({ activeCheckIds: [], checkStreams: {}, liveAssertions: {} }),
-}))
+    {
+      name: "watchtower-compliance-storage", // Unique key in storage
+      storage: createJSONStorage(() => sessionStorage), // sessionStorage clears when tab closes, perfect for live runs
+      partialize: (state) => ({
+        activeCheckIds: state.activeCheckIds,
+        liveAssertions: state.liveAssertions,
+      }), // ⚡️ ONLY persist active IDs, not the massive assertion dumps
+    },
+  ),
+)

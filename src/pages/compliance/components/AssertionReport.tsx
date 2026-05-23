@@ -112,7 +112,14 @@ export default function AssertionReport({
         <h2 className="flex items-center gap-2 text-lg font-semibold">
           <Button
             onClick={() => {
-              console.log("phase is", viewState)
+              console.log("live is", live)
+            }}
+          >
+            Console all
+          </Button>
+          <Button
+            onClick={() => {
+              console.log("live assertions are", liveAssertions)
             }}
           >
             Console log
