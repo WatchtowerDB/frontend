@@ -1,14 +1,7 @@
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 
-export type PipelinePhase =
-  | "idle"
-  | "generating"
-  | "executing"
-  | "analyzing"
-  | "complete"
-  | "reconnecting"
-  | "error"
+export type PipelinePhase = "idle" | "generating" | "executing" | "analyzing" | "complete" | "error"
 
 export interface CheckStream {
   phase: PipelinePhase
@@ -25,7 +18,6 @@ export interface LiveAssertion {
 // Used by AssertionsStatus and anywhere a global "are we busy?" signal is needed.
 const PHASE_PRIORITY: PipelinePhase[] = [
   "error",
-  "reconnecting",
   "analyzing",
   "executing",
   "generating",
@@ -149,6 +141,7 @@ export const useComplianceCheckStore = create<ComplianceCheckState>()(
       partialize: (state) => ({
         activeCheckIds: state.activeCheckIds,
         liveAssertions: state.liveAssertions,
+        checkStreams: state.checkStreams,
       }), // ⚡️ ONLY persist active IDs, not the massive assertion dumps
     },
   ),

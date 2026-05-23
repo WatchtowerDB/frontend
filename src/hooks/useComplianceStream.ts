@@ -209,10 +209,10 @@ export function useComplianceStreams() {
           async onopen(response) {
             if (response.ok) {
               if (StreamCache.get(checkId)) {
-                setCheckPhase(checkId, "reconnecting")
+                setCheckPhase(checkId, "analyzing")
                 const freshAssertions = useComplianceCheckStore.getState().liveAssertions
                 Object.entries(freshAssertions)
-                  .filter(([, a]) => a.checkId === checkId)
+                  .filter(([, a]) => a.checkId === checkId && a.status === "failed")
                   .forEach(([id]) => {
                     upsertLiveAssertion(Number(id), checkId, { streamingDone: false })
                   })
