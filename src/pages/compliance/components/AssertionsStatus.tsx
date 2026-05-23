@@ -22,7 +22,7 @@ interface AssertionsStatusProps {
 }
 
 export function AssertionsStatus({ className }: AssertionsStatusProps) {
-  const { isLoading, isError, error, isFetching } = useAssertions()
+  const { isError, error, isFetching } = useAssertions()
   const checkStreams = useComplianceCheckStore((s) => s.checkStreams)
   const clearCompletedChecks = useComplianceCheckStore((s) => s.clearCompletedChecks)
   const { data: latestCheck } = useLatestCheck()
