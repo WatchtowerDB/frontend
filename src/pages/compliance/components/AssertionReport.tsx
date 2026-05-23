@@ -1,7 +1,6 @@
 import SqlBlock from "@/components/SqlBlock"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import Loader from "@/components/ui/loader"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -38,8 +37,6 @@ function deriveViewState(params: {
   if (assertion?.result === false && (assertion?.recommendation || live?.recommendation))
     return "failed" // completed failure report, show the report
   return "loading" // is just loading. waiting for first token.
-
-  // TODO: if it's empty, assume it's loading. confirm by refreshing mid stream.
 }
 
 export default function AssertionReport({
@@ -62,18 +59,18 @@ export default function AssertionReport({
   console.log("source:", live?.recommendation ? "live" : "assertion")
   const recommendation = live?.recommendation ?? assertion?.recommendation ?? ""
   const viewState = deriveViewState({ assertionId, assertion, livePhase, isStreaming, live })
-  const prevRecommendation = useRef(recommendation)
-  useEffect(() => {
-    if (prevRecommendation.current !== recommendation) {
-      console.log(
-        "recommendation changed",
-        prevRecommendation.current?.length,
-        "->",
-        recommendation?.length,
-      )
-      prevRecommendation.current = recommendation
-    }
-  })
+  // const prevRecommendation = useRef(recommendation)
+  // useEffect(() => {
+  //   if (prevRecommendation.current !== recommendation) {
+  //     console.log(
+  //       "recommendation changed",
+  //       prevRecommendation.current?.length,
+  //       "->",
+  //       recommendation?.length,
+  //     )
+  //     prevRecommendation.current = recommendation
+  //   }
+  // })
 
   // SO HERE IS THE THING. BOTH ACCEPT AND (while streaming) ASSERTION RETURN NULL.
 
@@ -129,7 +126,7 @@ export default function AssertionReport({
       {/* Header */}
       <div className="flex-none border-b px-6 py-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
-          <Button
+          {/* <Button
             onClick={() => {
               console.log("live assertions are", liveAssertions)
             }}
@@ -147,7 +144,7 @@ export default function AssertionReport({
             }}
           >
             Console log
-          </Button>
+          </Button> */}
           <SidebarTrigger />
           {title}
           {assertion ? (

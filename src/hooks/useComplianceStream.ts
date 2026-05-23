@@ -25,7 +25,7 @@ const StreamCache = {
   },
 
   clear: (checkId: number) => {
-    // This isnt used at all either.
+    // This isnt used at all either. Will leave incase needed later.
     try {
       localStorage.removeItem(StreamCache.getKey(checkId))
     } catch {
@@ -33,7 +33,7 @@ const StreamCache = {
     }
   },
   clearAll: () => {
-    // This is not used at all rn.
+    // This is being used in the clean up process post reconnecting or lack thereof.
     try {
       const prefix = "watchtower_last_event_"
       Object.keys(localStorage)
@@ -49,7 +49,6 @@ export function useComplianceStreams() {
   const queryClient = useQueryClient()
   const { logout } = useAuthStore()
   const activeCheckIds = useComplianceCheckStore(useShallow((s) => s.activeCheckIds))
-  const storeReset = useComplianceCheckStore((s) => s.reset)
 
   // Stable action references — Zustand actions never change identity.
   const setCheckPhase = useComplianceCheckStore((s) => s.setCheckPhase)
@@ -155,12 +154,9 @@ export function useComplianceStreams() {
               if (step === "analysis" && status === "completed") {
                 setCheckPhase(checkId, "complete")
                 queryClient.invalidateQueries({ queryKey: ["assertions"] })
-                // Pull this check out of the active list so the effect
-                // re-runs and naturally cleans up the controller via the logic above.
-                StreamCache.clear(checkId)
+                // Clean up.
                 removeActiveCheck(checkId)
                 StreamCache.clearAll()
-                // storeReset()
               }
             }
 
@@ -245,8 +241,10 @@ export function useComplianceStreams() {
             if (controller.signal.aborted) throw err
             // StreamCache.clear(checkId)
             setCheckPhase(checkId, "error")
-            // Mark every assertion belonging to this check as done so the
-            // UI doesn't spin forever.
+            // In case, I'm leaving these here, for the implementation is likely to change.
+            // Right now, error just leaves things as they are, and reconnect handles either reconnecting,
+            // or cleaning up if there's nothing left streaming.
+            //
             // const freshAssertions = useComplianceCheckStore.getState().liveAssertions
             // Object.entries(freshAssertions)
             //   .filter(([, a]) => a.checkId === checkId && !a.streamingDone)
@@ -267,41 +265,4 @@ export function useComplianceStreams() {
       )
     }
   }, [activeCheckIds])
-
-  // Full cleanup on unmount (e.g. user navigates away).
-  // useEffect(() => {
-  //   return () => {
-  //     Object.values(controllersRef.current).forEach((c) => c.abort())
-  //     console.log("potential abort")
-  //   }
-  // }, [])
-
-  //   const abortStreamManual = (checkId: number): string | null => {
-  //   // 1. Check if the stream is actually running
-  //   const controller = controllersRef.current[checkId]
-
-  //   if (controller) {
-  //     console.log(`[SAIYAN STRIKE] Manually aborting stream for checkId: ${checkId}`)
-  //     // 2. Terminate the connection immediately
-  //     controller.abort()
-  //     // 3. Clean up the tracking reference
-  //     delete controllersRef.current[checkId]
-  //   } else {
-  //     console.log(`No active stream found to abort for checkId: ${checkId}`)
-  //   }
-
-  //   // 4. Retrieve the last event ID processed by onmessage
-  //   const lastEventId = StreamCache.get(checkId)
-
-  //   // 5. Update the Zustand store phase so the UI updates
-  //   setCheckPhase(checkId, "error") // or custom state like "paused" if you implement one
-  //   removeActiveCheck(checkId)
-
-  //   return lastEventId
-  // }
-
-  // // EXPOSE IT TO THE WORLD!
-  // return {
-  //   abortStreamManual
-  // }
 }
