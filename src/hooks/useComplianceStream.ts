@@ -128,8 +128,19 @@ export function useComplianceStreams() {
             const data = event.data
             const subject: string | undefined = event.subject
             const assertionId = subject ? Number(subject.split("/")[1]) : null
-            //           if (type.endsWith("recommendation.stream") && assertionId) {
-            // console.log("recommendation.stream event:", data.event, "assertionId:", assertionId) }
+
+            // Handle Reconnection/Resuming state from backend
+            if (type.endsWith("system.resuming")) {
+              setCheckPhase(checkId, "reconnecting")
+              const { last_known_step } = data
+              if (last_known_step === "assertion_generation") setCheckPhase(checkId, "generating")
+              if (last_known_step === "execution") setCheckPhase(checkId, "executing")
+              if (last_known_step === "analysis") {
+                setCheckPhase(checkId, "analyzing")
+                // Re-invalidate to ensure we have the latest results after gap
+                queryClient.invalidateQueries({ queryKey: ["assertions"] })
+              }
+            }
 
             if (type.endsWith("phase.update")) {
               const { step, status } = data
@@ -199,7 +210,7 @@ export function useComplianceStreams() {
               }
             }
 
-            if (type.endsWith("system.status") && data.status === "completed") {
+            if (type.endsWith("system.completed")) {
               console.log("You took one hell of a turn to end up triggering this if condition.")
               setCheckPhase(checkId, "complete")
               queryClient.invalidateQueries({ queryKey: ["assertions"] })
@@ -210,7 +221,6 @@ export function useComplianceStreams() {
           async onopen(response) {
             if (response.ok) {
               if (StreamCache.get(checkId)) {
-                setCheckPhase(checkId, "analyzing")
                 const freshAssertions = useComplianceCheckStore.getState().liveAssertions
                 Object.entries(freshAssertions)
                   .filter(([, a]) => a.checkId === checkId && a.status === "failed")
@@ -218,6 +228,7 @@ export function useComplianceStreams() {
                     upsertLiveAssertion(Number(id), checkId, { streamingDone: false })
                   })
               }
+              console.log(`[SSE] Connection established for check ${checkId}`)
               return
             }
             if (response.status >= 400 && response.status < 500 && response.status !== 429) {

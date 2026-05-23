@@ -1,7 +1,14 @@
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 
-export type PipelinePhase = "idle" | "generating" | "executing" | "analyzing" | "complete" | "error"
+export type PipelinePhase =
+  | "idle"
+  | "generating"
+  | "executing"
+  | "analyzing"
+  | "complete"
+  | "error"
+  | "reconnecting"
 
 export interface CheckStream {
   phase: PipelinePhase
@@ -21,6 +28,7 @@ const PHASE_PRIORITY: PipelinePhase[] = [
   "analyzing",
   "executing",
   "generating",
+  "reconnecting",
   "complete",
   "idle",
 ]
