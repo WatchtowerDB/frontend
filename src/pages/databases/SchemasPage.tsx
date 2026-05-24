@@ -1,52 +1,27 @@
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 import Loader from "@/components/ui/loader"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useClientDBSchemas } from "@/hooks/useClientDBSchemas"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Controller, useForm } from "react-hook-form"
-import * as z from "zod"
-
-const formSchema = z.object({
-  client_db: z.string().min(1, "Please select a database"),
-  sql_file: z
-    .instanceof(FileList)
-    .refine((files) => files?.length === 1, "SQL schema file is required."),
-})
+import { useState } from "react"
+import { SchemaList } from "./components/SchemaList"
+import { SchemaPreview } from "./components/SchemaPreview"
+import { SchemaUploadForm } from "./components/SchemaUploadForm"
 
 export default function SchemasPage() {
-  const { databases, isLoading, isUploading, uploadSchema } = useClientDBSchemas() // NOT IMPLEMENTED PROPERLY I THINK
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      client_db: "",
-    },
+  const { databases, schemas, isLoading, isUploading, uploadSchema } = useClientDBSchemas({
+    page: 1,
   })
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const file = values.sql_file[0]
-    await uploadSchema({
-      client_db: parseInt(values.client_db),
-      sql_file: file,
-    })
-    form.reset()
-  }
+  const [activeTab, setActiveTab] = useState("upload")
+  const [selectedSchemaId, setSelectedSchemaId] = useState<number | null>(null)
+  const [fileContent, setFileContent] = useState<string | null>(null)
+
+  const selectedSchema = schemas?.find((s) => s.id === selectedSchemaId)
+  const previewContent = activeTab === "upload" ? fileContent : selectedSchema?.sql_definition
+
+  const selectedInfo = selectedSchema
+    ? `${databases.find((db) => db.id === selectedSchema.client_db)?.name} (v${selectedSchema.id})`
+    : ""
 
   if (isLoading) {
     return (
@@ -57,86 +32,49 @@ export default function SchemasPage() {
   }
 
   return (
-    <div className="flex h-full w-full flex-col p-8">
-      <header>
-        <h1 className="text-2xl font-bold">Database Schemas</h1>
-        <p className="text-foreground">Upload a new schema for a selected database</p>
-      </header>
-      <main className="flex h-full min-h-0 w-full flex-col pt-4">
-        <Card className="w-full max-w-2xl">
-          <CardHeader>
-            <CardTitle>Upload Schema</CardTitle>
-            <CardDescription>Select a database and upload its SQL schema file.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form id="schema-upload-form" onSubmit={form.handleSubmit(onSubmit)}>
-              <FieldGroup>
-                <Controller
-                  name="client_db"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="client-db-select">Client Database</FieldLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger id="client-db-select" aria-invalid={fieldState.invalid}>
-                          <SelectValue placeholder="Select a database" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {databases.map((db) => (
-                            <SelectItem key={db.id} value={db.id.toString()}>
-                              {db.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FieldDescription>
-                        Select the database you want to upload the schema for.
-                      </FieldDescription>
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="sql_file"
-                  control={form.control}
-                  render={({ field: { value: _value, onChange, ...fieldProps }, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="sql-file-input">SQL Schema File</FieldLabel>
-                      <Input
-                        {...fieldProps}
-                        id="sql-file-input"
-                        type="file"
-                        accept=".sql"
-                        aria-invalid={fieldState.invalid}
-                        onChange={(event) => onChange(event.target.files)}
-                      />
-                      <FieldDescription>
-                        Upload a .sql file containing the database schema definition.
-                      </FieldDescription>
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-              </FieldGroup>
-            </form>
-          </CardContent>
-          <CardFooter>
-            <Field orientation="horizontal">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => form.reset()}
-                disabled={isUploading}
-              >
-                Reset
-              </Button>
-              <Button type="submit" form="schema-upload-form" disabled={isUploading}>
-                {isUploading ? "Uploading..." : "Upload Schema"}
-              </Button>
-            </Field>
-          </CardFooter>
-        </Card>
-      </main>
+    <div className="flex h-full w-full flex-row overflow-hidden">
+      {/* Left Column */}
+      <div className="bg-background flex h-full w-1/3 min-w-100 flex-col border-r">
+        <header className="p-8 pb-4">
+          <h1 className="text-2xl font-bold">Database Schemas</h1>
+          <p className="text-muted-foreground text-sm">Manage your SQL schema definitions.</p>
+        </header>
+
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="flex flex-1 flex-col overflow-hidden"
+        >
+          <div className="px-8">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="upload">Upload a Schema</TabsTrigger>
+              <TabsTrigger value="schemas">Schemas</TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="upload" className="flex-1 overflow-auto p-8 pt-4">
+            <SchemaUploadForm
+              databases={databases}
+              isUploading={isUploading}
+              onUpload={uploadSchema}
+              onPreviewChange={setFileContent}
+            />
+          </TabsContent>
+
+          <TabsContent value="schemas" className="flex-1 overflow-hidden pt-4">
+            <ScrollArea className="h-full">
+              <SchemaList
+                schemas={schemas || []}
+                databases={databases}
+                selectedSchemaId={selectedSchemaId}
+                onSelect={setSelectedSchemaId}
+              />
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <SchemaPreview content={previewContent} activeTab={activeTab} selectedInfo={selectedInfo} />
     </div>
   )
 }
