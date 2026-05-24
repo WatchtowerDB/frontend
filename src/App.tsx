@@ -6,6 +6,7 @@ import ComplianceLayout from "@/pages/compliance/ComplianceLayout"
 import Dashboard from "@/pages/dashboard/Dashboard"
 import ClientDBsPage from "@/pages/databases/ClientDBsPage"
 import DatabasesLayout from "@/pages/databases/DatabasesLayout"
+import SchemasPage from "@/pages/databases/SchemasPage"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Toaster } from "./components/ui/sonner"
 import { AuthProvider } from "./context/AuthProvider"
@@ -54,7 +55,7 @@ export default function App() {
 
                     <Route path="clientdbs" element={<ClientDBsPage />} />
 
-                    <Route path="schemas" element={<h2>Schemas</h2>} />
+                    <Route path="schemas" element={<SchemasPage />} />
                   </Route>
                   <Route path="/standards" element={<h2>Standards</h2>} />
                   <Route path="/settings" element={<h2>Settings</h2>} />
