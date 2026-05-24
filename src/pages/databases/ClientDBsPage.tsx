@@ -25,7 +25,7 @@ import {
   X,
 } from "lucide-react"
 
-export default function ClientDBPage() {
+export default function ClientDBsPage() {
   const {
     rows,
     isLoading,
