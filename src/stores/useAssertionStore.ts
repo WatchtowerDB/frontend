@@ -9,6 +9,7 @@ interface AssertionFilterState {
   clientDb: number | null
   schema: number | null
   complianceFramework: number | null
+  complianceCheckId: number | null
   result: boolean | null
 
   // --- Search ---
@@ -23,6 +24,7 @@ interface AssertionFilterActions {
   setClientDb: (id: number | null) => void
   setSchema: (id: number | null) => void
   setComplianceFramework: (id: number | null) => void
+  setComplianceCheckId: (id: number | null) => void
   setResult: (result: boolean | null) => void
   setFilterSearch: (query: string) => void
   setAssertionSearch: (query: string) => void
@@ -39,6 +41,7 @@ const initialFilterState: AssertionFilterState = {
   clientDb: null,
   schema: null,
   complianceFramework: null,
+  complianceCheckId: null,
   result: null,
   filterSearch: "",
   assertionSearch: "",
@@ -53,6 +56,7 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
     setClientDb: (id) => set({ clientDb: id, page: 1 }),
     setSchema: (id) => set({ schema: id, page: 1 }),
     setComplianceFramework: (id) => set({ complianceFramework: id, page: 1 }),
+    setComplianceCheckId: (id) => set({ complianceFramework: id, page: 1 }),
     setResult: (result) => set({ result, page: 1 }),
 
     // Search state does NOT reset page however, if needed, I will change that.
@@ -62,13 +66,14 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
     setPage: (page) => set({ page }),
 
     getApiFilters: () => {
-      const { clientDb, schema, complianceFramework, result, page } = get()
+      const { clientDb, schema, complianceFramework, complianceCheckId, result, page } = get()
       return {
         // Only include a param if it has a value — the API treats
         // missing params as "no filter", which is what we want.
         ...(clientDb !== null && { client_db: clientDb }),
         ...(schema !== null && { schema }),
         ...(complianceFramework !== null && { compliance_framework: complianceFramework }),
+        ...(complianceCheckId !== null && { compliance_check: complianceCheckId }),
         ...(result !== null && { result }),
         page,
       }

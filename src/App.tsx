@@ -6,7 +6,6 @@ import Dashboard from "@/pages/dashboard/Dashboard"
 import ClientDBPage from "@/pages/databases/ClientDBPage"
 import DatabasesLayout from "@/pages/databases/DatabasesLayout"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Toaster } from "./components/ui/sonner"
 import { AuthProvider } from "./context/AuthProvider"
 import { ProtectedRoute } from "./context/ProtectedRoute"
@@ -71,7 +70,7 @@ export default function App() {
           <Toaster richColors closeButton position="top-right" />
         </AuthProvider>
       </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   )
 }
