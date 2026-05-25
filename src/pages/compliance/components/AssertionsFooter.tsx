@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { useAssertions } from "@/hooks/useAssertions"
 import { useAssertionStore } from "@/stores/useAssertionStore"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-react"
 
 export default function AssertionsFooter() {
   const { totalPages, totalCount, isFetching } = useAssertions()
@@ -24,6 +24,16 @@ export default function AssertionsFooter() {
               size="icon"
               className="h-6 w-6"
               disabled={page <= 1 || isFetching}
+              onClick={() => setPage(1)}
+              aria-label="First page"
+            >
+              <ChevronFirst className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              disabled={page <= 1 || isFetching}
               onClick={() => setPage(page - 1)}
               aria-label="Previous page"
             >
@@ -38,6 +48,16 @@ export default function AssertionsFooter() {
               aria-label="Next page"
             >
               <ChevronRight className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              disabled={page >= totalPages || isFetching}
+              onClick={() => setPage(totalPages)}
+              aria-label="Last page"
+            >
+              <ChevronLast className="h-3 w-3" />
             </Button>
           </div>
         </div>

@@ -20,27 +20,26 @@ const StreamCache = {
     try {
       if (id) localStorage.setItem(StreamCache.getKey(checkId), id)
     } catch (e) {
-      console.log("Failed to save stream position to localStorage", e)
+      console.log("[SSE LocalStorage]: Failed to save stream position to localStorage", e)
     }
   },
 
   clear: (checkId: number) => {
-    // This isnt used at all either. Will leave incase needed later.
+    // RESERVED FOR FUTURE IMPLEMENTATION: It is not currently used.
     try {
       localStorage.removeItem(StreamCache.getKey(checkId))
     } catch {
-      console.log("Failed to clear for whatever reason.")
+      console.log("[SSE localStorage]: Failed to clear checkId: ", checkId)
     }
   },
   clearAll: () => {
-    // This is being used in the clean up process post reconnecting or lack thereof.
     try {
       const prefix = "watchtower_last_event_"
       Object.keys(localStorage)
         .filter((key) => key.startsWith(prefix))
         .forEach((key) => localStorage.removeItem(key))
     } catch (e) {
-      console.log("Failed to clear all stream positions from localStorage", e)
+      console.log("[SSE localStorage]: Failed to clear all stream positions from localStorage", e)
     }
   },
 }
@@ -63,17 +62,12 @@ export function useComplianceStreams() {
   // Cache specifically to support last-event-ID on refresh.
 
   useEffect(() => {
-    // StreamCache.clearAll()
-    // storeReset()
-    console.log("IT IS USED")
     const currentIds = new Set(activeCheckIds)
     const runningIds = new Set(Object.keys(controllersRef.current).map(Number))
-    console.log("current and running id", currentIds, runningIds)
 
     // Abort any streams whose checkId is no longer in the active list.
     for (const id of runningIds) {
       if (!currentIds.has(id)) {
-        console.log("For whatever reason, this has been triggered")
         controllersRef.current[id].abort()
         delete controllersRef.current[id]
       }
@@ -85,7 +79,6 @@ export function useComplianceStreams() {
 
       const controller = new AbortController()
       controllersRef.current[checkId] = controller
-      console.log("signal aborted? maybe")
       fetchEventSource(
         `${import.meta.env.VITE_BACKEND_URL}/api/compliance/checks/${checkId}/stream/`,
         {
@@ -109,7 +102,6 @@ export function useComplianceStreams() {
           openWhenHidden: true, // Found this! Prevents the browser from killing the stream when tab is inactive
 
           onmessage(e) {
-            console.log("Haha", e.data)
             if (e.id) {
               StreamCache.set(checkId, e.id)
             }
@@ -162,14 +154,6 @@ export function useComplianceStreams() {
 
             if (type.endsWith("assertion.result") && assertionId) {
               const passed = data.status === "passed"
-              console.log(
-                "151 has changed aID ",
-                assertionId,
-                "and check id",
-                checkId,
-                "streamingDone to",
-                String(passed),
-              )
               upsertLiveAssertion(assertionId, checkId, {
                 status: passed ? "passed" : "failed",
                 streamingDone: passed,
@@ -184,35 +168,13 @@ export function useComplianceStreams() {
 
               if (data.event === "complete") {
                 upsertLiveAssertion(assertionId, checkId, { streamingDone: true })
-                console.log(
-                  "162 has changed aID ",
-                  assertionId,
-                  "and check id",
-                  checkId,
-                  "streamingDone to true",
-                )
                 queryClient.invalidateQueries({
                   queryKey: ["assertions", "detail", assertionId],
                 })
               }
               if (data.event === "error") {
-                console.log("For some reason", data.event, "is an error?")
                 upsertLiveAssertion(assertionId, checkId, { streamingDone: true })
-                console.log(
-                  "169 has changed aID ",
-                  assertionId,
-                  "and check id",
-                  checkId,
-                  "streamingDone to true",
-                )
               }
-            }
-
-            if (type.endsWith("system.completed")) {
-              console.log("You took one hell of a turn to end up triggering this if condition.")
-              setCheckPhase(checkId, "complete")
-              queryClient.invalidateQueries({ queryKey: ["assertions"] })
-              removeActiveCheck(checkId)
             }
           },
 
@@ -230,14 +192,19 @@ export function useComplianceStreams() {
                 // Handle token expiration: typically you'd trigger a logout
                 // or a token refresh here. ACCELERATOR, SAVE ME 🗣️ - I  gotchu bro.
                 logout()
-                console.error("SSE Authentication failed.")
+                console.error("[SSE]: Authentication failed. Logging out.")
               }
-              throw new Error(`Fatal client streaming error for check ${checkId}.`)
+              throw new Error(`[SSE]: Fatal client streaming error for check ${checkId}.`)
             }
           },
 
           onerror(err) {
-            console.log("onerror fired", err, "aborted?", controller.signal.aborted)
+            console.log(
+              "[SSE] OnError occured: ",
+              err,
+              ", abort status: ",
+              controller.signal.aborted,
+            )
             if (controller.signal.aborted) throw err
             // StreamCache.clear(checkId)
             setCheckPhase(checkId, "error")

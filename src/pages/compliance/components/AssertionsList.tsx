@@ -46,15 +46,6 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
               const result =
                 live?.status === "passed" ? true : live?.status === "failed" ? false : item.result
 
-              {
-                /* <button
-                  onClick={() => {
-                    console.log("live is", live)
-                  }}
-                >
-                  Console log
-                </button> */
-              }
               return (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
