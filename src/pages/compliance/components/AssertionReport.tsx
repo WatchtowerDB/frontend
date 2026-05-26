@@ -1,17 +1,20 @@
+import { AlertCircle, CheckCircle2, InfoIcon } from "lucide-react"
+import { useEffect, useRef } from "react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+
 import SqlBlock from "@/components/SqlBlock"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import Loader from "@/components/ui/loader"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+
 import { useAssertionDetails } from "@/hooks/useAssertions"
 import { cn } from "@/lib/utils"
 import { useComplianceCheckStore, type LiveAssertion } from "@/stores/useComplianceCheckStore"
+
 import type { AssertionItem } from "@/types/compliance"
-import { AlertCircle, CheckCircle2, InfoIcon } from "lucide-react"
-import { useEffect, useRef } from "react"
-import ReactMarkdown from "react-markdown"
-import remarkGfm from "remark-gfm"
 
 interface AssertionReportProps {
   assertionId: number | null
@@ -53,32 +56,15 @@ export default function AssertionReport({
   })
   const live = assertionId ? liveAssertions[assertionId] : null
   const isStreaming = live && !live.streamingDone
-
-  // These are used to clarify whether or not it should be rendering a report.
-  // (In case it passes, it shouldn't. In case streaming fails, it shouldnt.)
-  console.log("source:", live?.recommendation ? "live" : "assertion")
   const recommendation = live?.recommendation ?? assertion?.recommendation ?? ""
-  const viewState = deriveViewState({ assertionId, assertion, livePhase, isStreaming, live })
-  // const prevRecommendation = useRef(recommendation)
-  // useEffect(() => {
-  //   if (prevRecommendation.current !== recommendation) {
-  //     console.log(
-  //       "recommendation changed",
-  //       prevRecommendation.current?.length,
-  //       "->",
-  //       recommendation?.length,
-  //     )
-  //     prevRecommendation.current = recommendation
-  //   }
-  // })
 
-  // SO HERE IS THE THING. BOTH ACCEPT AND (while streaming) ASSERTION RETURN NULL.
+  const viewState = deriveViewState({ assertionId, assertion, livePhase, isStreaming, live })
 
   const result =
     live?.status === "passed" ? true : live?.status === "failed" ? false : assertion?.result
 
+  // Viewport & Scroll
   const bottomRef = useRef<HTMLDivElement>(null)
-
   const userHasScrolledUp = useRef(false)
   const scrollViewportRef = useRef<Element | null>(null)
 
@@ -117,34 +103,11 @@ export default function AssertionReport({
     viewport.scrollTo({ top: viewport.scrollHeight, behavior: "auto" })
   }, [recommendation, isStreaming])
 
-  useEffect(() => {
-    console.log("assertion data changed", assertion?.recommendation?.length)
-  }, [assertion])
-
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="flex-none border-b px-6 py-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
-          {/* <Button
-            onClick={() => {
-              console.log("live assertions are", liveAssertions)
-            }}
-          >
-            Console all
-          </Button>
-          <Button
-            onClick={() => {
-              console.log(
-                "le silly state of mind isStreaming is",
-                isStreaming,
-                "and the or condition is",
-                assertion?.recommendation || live?.recommendation,
-              )
-            }}
-          >
-            Console log
-          </Button> */}
           <SidebarTrigger />
           {title}
           {assertion ? (

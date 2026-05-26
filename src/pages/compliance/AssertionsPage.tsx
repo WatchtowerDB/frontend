@@ -7,7 +7,6 @@ import AssertionsHeader from "./components/AssertionsHeader"
 import AssertionsList from "./components/AssertionsList"
 
 function AssertionsPage() {
-  // TODO: Change headerChildren and footerChildren components to be same name yknow.
   const [selectedId, setSelectedId] = useState<number | null>(null)
   return (
     <div className="flex h-full w-full">

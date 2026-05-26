@@ -22,7 +22,7 @@ import { useFrameworks } from "@/hooks/useFrameworks"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
-import { Controller, FormProvider, useForm } from "react-hook-form" // Using FormProvider to avoid DOM element generation collisions
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import * as z from "zod"
 
@@ -93,8 +93,6 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
               duration: 3000,
             })
             onOpenChange(false)
-            // form.reset()
-            // Makes no sense to reset the dialog when it closed.
           },
         },
       )
@@ -132,7 +130,10 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                   <FieldLabel>Framework</FieldLabel>
                   <Select
                     value={field.value ? String(field.value) : ""}
-                    onValueChange={(v) => field.onChange(Number(v))}
+                    onValueChange={(v) => {
+                      field.onChange(Number(v))
+                      if (resolutionError) setResolutionError(null)
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a framework" />
@@ -159,7 +160,10 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                   <FieldLabel>Client Database</FieldLabel>
                   <Select
                     value={field.value ? String(field.value) : ""}
-                    onValueChange={(v) => field.onChange(Number(v))}
+                    onValueChange={(v) => {
+                      field.onChange(Number(v))
+                      if (resolutionError) setResolutionError(null)
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a database" />

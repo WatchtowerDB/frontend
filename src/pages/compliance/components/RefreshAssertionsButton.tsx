@@ -11,12 +11,12 @@ export function RefreshAssertionsButton() {
     setIsRefreshing(true)
 
     await Promise.all([
-      new Promise((resolve) => setTimeout(resolve, 600)),
+      new Promise((resolve) => setTimeout(resolve, 200)),
 
       queryClient.invalidateQueries({
         queryKey: ["assertions"],
       }),
-      // Injecting a 600ms artificial delay. Truthfully this is purely visual and only on the button lmao
+      // Injecting a 200ms artificial delay. Truthfully this is purely visual and only on the button lmao
     ])
     setIsRefreshing(false)
   }
