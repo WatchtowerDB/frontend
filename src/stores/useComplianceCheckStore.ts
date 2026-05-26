@@ -132,7 +132,7 @@ export const useComplianceCheckStore = create<ComplianceCheckState>()(
         })),
 
       // Removes check streams that are complete or errored;
-      // leaves liveAssertions intact.
+      // leaves liveAssertions intact (they're still displayed).
       clearCompletedChecks: () =>
         set((s) => {
           const remaining = Object.fromEntries(
@@ -143,16 +143,16 @@ export const useComplianceCheckStore = create<ComplianceCheckState>()(
           return { checkStreams: remaining }
         }),
 
-      reset: () => set({ activeCheckIds: [], checkStreams: {}, liveAssertions: {} }), // Only this clears liveAssertions.
+      reset: () => set({ activeCheckIds: [], checkStreams: {}, liveAssertions: {} }),
     }),
     {
-      name: "watchtower-compliance-storage",
-      storage: createJSONStorage(() => sessionStorage),
+      name: "watchtower-compliance-storage", // Unique key in storage
+      storage: createJSONStorage(() => sessionStorage), // sessionStorage clears when tab closes, perfect for live runs
       partialize: (state) => ({
         activeCheckIds: state.activeCheckIds,
         liveAssertions: state.liveAssertions,
         checkStreams: state.checkStreams,
-      }),
+      }), // ⚡️ ONLY persist active IDs, not the massive assertion dumps
     },
   ),
 )
