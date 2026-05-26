@@ -120,6 +120,20 @@ export function useComplianceStreams() {
             const subject: string | undefined = event.subject
             const assertionId = subject ? Number(subject.split("/")[1]) : null
 
+            console.groupCollapsed(
+              `%c🔄 Stream Event%c [%s] %c(ID: %s)`,
+              "background: #4f46e5; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;", // Badge style
+              "color: #38bdf8; font-weight: bold;", // Type style
+              type || "UNKNOWN",
+              "color: #9ca3af;", // Metadata style
+              assertionId ? `Assertion #${assertionId}` : "No Assertion",
+            )
+
+            console.log("📦 Raw Event Data:", data)
+            if (subject) console.log("🔍 Subject Path:", subject)
+            console.log("📜 Full Event Body:", event)
+            console.groupEnd()
+
             // Handle Reconnection/Resuming state from backend
             if (type.endsWith("system.resuming")) {
               setCheckPhase(checkId, "reconnecting")
@@ -148,7 +162,7 @@ export function useComplianceStreams() {
                 queryClient.invalidateQueries({ queryKey: ["assertions"] })
                 // Clean up.
                 removeActiveCheck(checkId)
-                StreamCache.clearAll()
+                StreamCache.clear(checkId)
               }
             }
 
@@ -217,7 +231,8 @@ export function useComplianceStreams() {
             }
 
             // StreamCache.clear(checkId)
-            setCheckPhase(checkId, "error")
+            // setCheckPhase(checkId, "error")
+            console.log("Clearly, the onError has set the checkPhase for", checkId, "to error")
             // In case, I'm leaving these here, for the implementation is likely to change.
             // Right now, error just leaves things as they are, and reconnect handles either reconnecting,
             // or cleaning up if there's nothing left streaming.

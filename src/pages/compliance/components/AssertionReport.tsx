@@ -14,6 +14,7 @@ import { useAssertionDetails } from "@/hooks/useAssertions"
 import { cn } from "@/lib/utils"
 import { useComplianceCheckStore, type LiveAssertion } from "@/stores/useComplianceCheckStore"
 
+import { Button } from "@/components/ui/button"
 import type { AssertionItem } from "@/types/compliance"
 
 interface AssertionReportProps {
@@ -47,6 +48,7 @@ export default function AssertionReport({
   title = "Assertion Details",
 }: AssertionReportProps) {
   const { data: assertion } = useAssertionDetails(assertionId)
+  const checkStreams = useComplianceCheckStore((s) => s.checkStreams)
   const liveAssertions = useComplianceCheckStore((s) => s.liveAssertions)
   const livePhase = useComplianceCheckStore((s) => {
     if (!assertionId) return "idle"
@@ -108,6 +110,27 @@ export default function AssertionReport({
       {/* Header */}
       <div className="flex-none border-b px-6 py-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <Button
+            onClick={() => {
+              console.log("live assertions are", liveAssertions)
+            }}
+          >
+            Console all
+          </Button>
+          <Button
+            onClick={() => {
+              console.log(
+                "le silly state of mind isStreaming is",
+                isStreaming,
+                "and the or condition is",
+                assertion?.recommendation || live?.recommendation,
+                "and checkStrems are",
+                checkStreams,
+              )
+            }}
+          >
+            Console log
+          </Button>
           <SidebarTrigger />
           {title}
           {assertion ? (

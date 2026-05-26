@@ -151,7 +151,6 @@ export const useComplianceCheckStore = create<ComplianceCheckState>()(
       partialize: (state) => ({
         activeCheckIds: state.activeCheckIds,
         liveAssertions: state.liveAssertions,
-        checkStreams: state.checkStreams,
       }),
     },
   ),
