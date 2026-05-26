@@ -96,7 +96,7 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
             className="text-primary animate-pulse text-[10px] capitalize"
             style={{ animationDuration: "0.8s" }}
           >
-            {activeCount > 1 ? `${activeCount} checks` : ""} {phase}…
+            {activeCount > 1 ? `${activeCount} checks queued — ` : ""} {phase}…
           </span>
         </>
       )}
