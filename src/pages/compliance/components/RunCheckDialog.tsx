@@ -108,7 +108,13 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
   const isWorking = isMutationPending || resolvingSchema
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        if (!val) setResolutionError(null)
+        onOpenChange(val)
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Run Compliance Check</DialogTitle>

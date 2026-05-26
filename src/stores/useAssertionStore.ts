@@ -56,7 +56,7 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
     setClientDb: (id) => set({ clientDb: id, page: 1 }),
     setSchema: (id) => set({ schema: id, page: 1 }),
     setComplianceFramework: (id) => set({ complianceFramework: id, page: 1 }),
-    setComplianceCheckId: (id) => set({ complianceFramework: id, page: 1 }),
+    setComplianceCheckId: (id) => set({ complianceCheckId: id, page: 1 }),
     setResult: (result) => set({ result, page: 1 }),
 
     // Search state does NOT reset page however, if needed, I will change that.
@@ -73,7 +73,7 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
         ...(clientDb !== null && { client_db: clientDb }),
         ...(schema !== null && { schema }),
         ...(complianceFramework !== null && { compliance_framework: complianceFramework }),
-        ...(complianceCheckId !== null && { compliance_check: complianceCheckId }),
+        ...(complianceCheckId !== null && { check: complianceCheckId }),
         ...(result !== null && { result }),
         page,
       }
@@ -84,6 +84,7 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
         clientDb: null,
         schema: null,
         complianceFramework: null,
+        complianceCheckId: null,
         result: null,
         page: 1,
       }),

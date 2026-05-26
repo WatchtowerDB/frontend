@@ -61,10 +61,21 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
     <div className={cn("flex items-center gap-2 px-4 py-1", className)}>
       {displayState === "idle" && (
         <>
-          <span className="bg-muted-foreground/40 size-1.5 shrink-0 rounded-full" />
-          <span className="text-muted-foreground text-[10px]">
-            {latestCheck?.date ? `Last ran: ${timeAgo(new Date(latestCheck.date))}` : ""}
-          </span>
+          {latestCheck?.date ? (
+            <>
+              <span className="bg-muted-foreground/40 size-1.5 shrink-0 rounded-full" />
+              <span className="text-muted-foreground text-[10px]">
+                Last ran: {timeAgo(new Date(latestCheck.date))}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="size-1.5 shrink-0 rounded-full bg-amber-500/50" />
+              <span className="text-muted-foreground/70 text-[10px]">
+                No compliance checks recorded
+              </span>
+            </>
+          )}
         </>
       )}
 

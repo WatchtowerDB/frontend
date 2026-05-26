@@ -1,4 +1,5 @@
 import { MainLayout } from "@/layout/MainLayout"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom"
 // import Home from './pages/Home';
 import ComplianceLayout from "@/pages/compliance/ComplianceLayout"
@@ -70,7 +71,7 @@ export default function App() {
           <Toaster richColors closeButton position="top-right" />
         </AuthProvider>
       </ThemeProvider>
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
 }

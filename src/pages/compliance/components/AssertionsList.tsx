@@ -1,3 +1,4 @@
+import { Alert, AlertTitle } from "@/components/ui/alert"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -32,6 +33,21 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
   if (isLoading) return <div className="animate-pulse p-4 text-xs">Scanning assertions...</div>
   if (isError)
     return <div className="text-destructive p-4 text-xs">Failed to load: {error.message}</div>
+
+  if (assertions.length === 0) {
+    return (
+      <div className="flex min-h-[150px] w-full flex-1 items-center justify-center p-4">
+        <Alert
+          variant="default"
+          className="border-muted flex w-full max-w-[240px] flex-row items-center justify-center gap-2 bg-neutral-500/5 py-3 text-center backdrop-blur-xs"
+        >
+          <AlertTitle className="text-muted-foreground mb-0 pb-0 font-mono text-xs leading-none font-semibold tracking-wider uppercase">
+            No Assertions Found
+          </AlertTitle>
+        </Alert>
+      </div>
+    )
+  }
 
   return (
     <div className="relative flex flex-col">
