@@ -206,6 +206,16 @@ export function useComplianceStreams() {
               controller.signal.aborted,
             )
             if (controller.signal.aborted) throw err
+
+            // Swallow the transient "Error in input stream" that fires on page load
+            // before the connection is fully established. The library retries automatically.
+            const isInputStreamError =
+              err instanceof TypeError && err.message === "Error in input stream"
+            if (isInputStreamError) {
+              console.log("[SSE] Transient input stream error — letting library retry silently.")
+              return // Don't throw; library will retry
+            }
+
             // StreamCache.clear(checkId)
             setCheckPhase(checkId, "error")
             // In case, I'm leaving these here, for the implementation is likely to change.
