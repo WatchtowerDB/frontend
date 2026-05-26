@@ -21,6 +21,7 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
   const { assertions, isLoading, isError, error, isFetching } = useAssertions()
   const liveAssertions = useComplianceCheckStore((s) => s.liveAssertions)
 
+  // For assertion details
   const { data: frameworks } = useFrameworks()
   const { data: clientDBs } = useAllClientDBs()
   const frameworkMap = frameworks?.results
