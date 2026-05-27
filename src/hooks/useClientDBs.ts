@@ -274,7 +274,7 @@ export const useClientDBs = (): UseClientDBsResult => {
   }
 }
 
-// Lightweight fetch all for the meantime. I do not like it either but it doesn't make sense
+// Lightweight "fetch all" with quotation marks (it's still paginated) for the meantime. I do not like it either but it doesn't make sense
 // to have the assertions list unclear. It'll be used for the filters too.
 export function useAllClientDBs() {
   return useQuery({

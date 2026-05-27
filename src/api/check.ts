@@ -4,7 +4,6 @@ import { type PaginatedResponse } from "@/types/api"
 import { type Check } from "@/types/compliance"
 
 export interface CheckFilters {
-  check?: number // TODO: Clear this up. This filter is useless for just CheckFilters because by ID is a different endpoint.
   page?: number
 }
 

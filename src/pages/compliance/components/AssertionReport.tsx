@@ -14,7 +14,6 @@ import { useAssertionDetails } from "@/hooks/useAssertions"
 import { cn } from "@/lib/utils"
 import { useComplianceCheckStore, type LiveAssertion } from "@/stores/useComplianceCheckStore"
 
-import { Button } from "@/components/ui/button"
 import type { AssertionItem } from "@/types/compliance"
 
 interface AssertionReportProps {
@@ -110,27 +109,6 @@ export default function AssertionReport({
       {/* Header */}
       <div className="flex-none border-b px-6 py-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
-          <Button
-            onClick={() => {
-              console.log("live assertions are", liveAssertions)
-            }}
-          >
-            Console all
-          </Button>
-          <Button
-            onClick={() => {
-              console.log(
-                "le silly state of mind isStreaming is",
-                isStreaming,
-                "and the or condition is",
-                assertion?.recommendation || live?.recommendation,
-                "and checkStrems are",
-                checkStreams,
-              )
-            }}
-          >
-            Console log
-          </Button>
           <SidebarTrigger />
           {title}
           {assertion ? (
@@ -159,7 +137,7 @@ export default function AssertionReport({
                     <Loader className="h-8 w-8 animate-spin text-indigo-500" />
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <AlertCircle className="h-4 w-4 text-amber-500" />
-                      <span>Stream disconnected. Hoping we support last-event-id now...</span>
+                      <span>Stream disconnected. Please refresh the page.</span>
                     </div>
                   </div>
                 )

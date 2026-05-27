@@ -120,20 +120,6 @@ export function useComplianceStreams() {
             const subject: string | undefined = event.subject
             const assertionId = subject ? Number(subject.split("/")[1]) : null
 
-            console.groupCollapsed(
-              `%c🔄 Stream Event%c [%s] %c(ID: %s)`,
-              "background: #4f46e5; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;", // Badge style
-              "color: #38bdf8; font-weight: bold;", // Type style
-              type || "UNKNOWN",
-              "color: #9ca3af;", // Metadata style
-              assertionId ? `Assertion #${assertionId}` : "No Assertion",
-            )
-
-            console.log("📦 Raw Event Data:", data)
-            if (subject) console.log("🔍 Subject Path:", subject)
-            console.log("📜 Full Event Body:", event)
-            console.groupEnd()
-
             // Handle Reconnection/Resuming state from backend
             if (type.endsWith("system.resuming")) {
               setCheckPhase(checkId, "reconnecting")
