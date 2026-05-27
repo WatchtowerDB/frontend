@@ -29,7 +29,7 @@ export default function AssertionsHeader({
             Run Compliance Check
           </Button>
           <RefreshAssertionsButton />
-          <Tooltip>
+          <Tooltip delayDuration={500}>
             <TooltipTrigger asChild>
               <Button
                 onClick={onJumpToStreaming}
@@ -41,7 +41,7 @@ export default function AssertionsHeader({
                 <FastForward />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Jump to streaming asssertion</TooltipContent>
+            <TooltipContent>Jump to Streaming Asssertion</TooltipContent>
           </Tooltip>
         </div>
         <AssertionsStatus />

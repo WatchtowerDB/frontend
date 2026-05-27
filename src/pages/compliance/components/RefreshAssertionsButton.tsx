@@ -23,7 +23,7 @@ export function RefreshAssertionsButton() {
   }
 
   return (
-    <Tooltip>
+    <Tooltip delayDuration={500}>
       <TooltipTrigger asChild>
         <Button
           onClick={handleRefresh}
@@ -35,7 +35,7 @@ export function RefreshAssertionsButton() {
           <RotateCw className={`h-4 w-4 ${isRefreshing ? "animate-spin text-indigo-500" : ""}`} />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>Refresh assertions</TooltipContent>
+      <TooltipContent>Refresh Assertions</TooltipContent>
     </Tooltip>
   )
 }
