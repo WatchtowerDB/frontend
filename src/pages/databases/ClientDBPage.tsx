@@ -254,7 +254,7 @@ export default function ClientDBPage() {
                 Page {page} of {totalPages}
               </span>
               <div className="flex gap-2">
-                <Tooltip>
+                <Tooltip delayDuration={500}>
                   <TooltipTrigger asChild>
                     <Button
                       variant="outline"
@@ -269,7 +269,7 @@ export default function ClientDBPage() {
                     <p>Previous page</p>
                   </TooltipContent>
                 </Tooltip>
-                <Tooltip>
+                <Tooltip delayDuration={500}>
                   <TooltipTrigger asChild>
                     <Button
                       variant="outline"

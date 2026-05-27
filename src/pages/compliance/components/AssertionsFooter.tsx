@@ -20,7 +20,7 @@ export default function AssertionsFooter() {
             Page {page} of {totalPages} · {totalCount} total
           </span>
           <div className="flex items-center gap-1">
-            <Tooltip>
+            <Tooltip delayDuration={500}>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
@@ -35,7 +35,7 @@ export default function AssertionsFooter() {
               </TooltipTrigger>
               <TooltipContent>First page</TooltipContent>
             </Tooltip>
-            <Tooltip>
+            <Tooltip delayDuration={500}>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
@@ -50,7 +50,7 @@ export default function AssertionsFooter() {
               </TooltipTrigger>
               <TooltipContent>Previous page</TooltipContent>
             </Tooltip>
-            <Tooltip>
+            <Tooltip delayDuration={500}>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
@@ -65,7 +65,7 @@ export default function AssertionsFooter() {
               </TooltipTrigger>
               <TooltipContent>Next page</TooltipContent>
             </Tooltip>
-            <Tooltip>
+            <Tooltip delayDuration={500}>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
