@@ -274,12 +274,30 @@ export const useClientDBs = (): UseClientDBsResult => {
   }
 }
 
-// Lightweight "fetch all" with quotation marks (it's still paginated) for the meantime. I do not like it either but it doesn't make sense
-// to have the assertions list unclear. It'll be used for the filters too.
 export function useAllClientDBs() {
+  const PAGE_SIZE = Number(import.meta.env.VITE_DEFAULT_PAGE_SIZE) || 20
   return useQuery({
     queryKey: ["clientdbs", "all"],
-    queryFn: () => getClientDBs(),
+    queryFn: async () => {
+      const firstPage = await getClientDBs({ page: 1 })
+      const totalCount = firstPage.count
+      const allResults = [...firstPage.results]
+      const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+
+      if (totalPages > 1) {
+        const remainingPages = await Promise.all(
+          Array.from({ length: totalPages - 1 }, (_, i) => getClientDBs({ page: i + 2 })),
+        )
+        remainingPages.forEach((pageData) => {
+          allResults.push(...pageData.results)
+        })
+      }
+
+      return {
+        ...firstPage,
+        results: allResults,
+      }
+    },
     staleTime: 1000 * 60 * 30,
   })
 }
