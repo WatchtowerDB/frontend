@@ -37,10 +37,10 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
 
   if (assertions.length === 0) {
     return (
-      <div className="flex min-h-[150px] w-full flex-1 items-center justify-center p-4">
+      <div className="flex min-h-37.5 w-full flex-1 items-center justify-center p-4">
         <Alert
           variant="default"
-          className="border-muted flex w-full max-w-[240px] flex-row items-center justify-center gap-2 bg-neutral-500/5 py-3 text-center backdrop-blur-xs"
+          className="border-muted flex w-full max-w-60 flex-row items-center justify-center gap-2 bg-neutral-500/5 py-3 text-center backdrop-blur-xs"
         >
           <AlertTitle className="text-muted-foreground mb-0 pb-0 font-mono text-xs leading-none font-semibold tracking-wider uppercase">
             No Assertions Found
