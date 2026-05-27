@@ -90,12 +90,11 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                           {frameworkMap[item.compliance_framework] ?? "—"}
                         </span>
                       </div>
-                      {isCurrentlyStreaming && (
+                      {isCurrentlyStreaming ? (
                         <Disc3 className="h-6! w-6! shrink-0 animate-spin self-center text-red-500" />
-                      )}
-                      {isAssertionLoading && !isCurrentlyStreaming && (
+                      ) : isAssertionLoading ? (
                         <Loader2 className="text-primary h-6! w-6! shrink-0 animate-spin self-center" />
-                      )}
+                      ) : null}
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

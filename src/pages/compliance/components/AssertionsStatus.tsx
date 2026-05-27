@@ -82,7 +82,7 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
       {displayState === "fetching" && (
         <>
           <span className="bg-primary size-1.5 shrink-0 animate-pulse rounded-full" />
-          <span className="text-primary animate-pulse text-[10px]">Fetching…</span>
+          <span className="text-primary animate-pulse text-[10px] dark:text-white">Fetching…</span>
         </>
       )}
 
@@ -93,7 +93,7 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
             style={{ animationDuration: "0.8s" }}
           />
           <span
-            className="text-primary animate-pulse text-[10px] capitalize"
+            className="text-primary animate-pulse text-[10px] capitalize dark:text-white"
             style={{ animationDuration: "0.8s" }}
           >
             {activeCount > 1 ? `${activeCount} checks queued — ` : ""} {phase}…
