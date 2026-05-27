@@ -10,7 +10,7 @@ import { useAssertions } from "@/hooks/useAssertions"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useFrameworks } from "@/hooks/useFrameworks"
 import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
-import { Loader2 } from "lucide-react"
+import { Disc3, Loader2 } from "lucide-react"
 
 interface AssertionListProps {
   onSelect?: (item: number) => void
@@ -60,6 +60,8 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
             {assertions.map((item) => {
               const live = liveAssertions[item.id]
               const isAssertionLoading = live && !live.streamingDone
+              const isCurrentlyStreaming =
+                live && !live.streamingDone && live.recommendation.length > 0
               const result =
                 live?.status === "passed" ? true : live?.status === "failed" ? false : item.result
 
@@ -88,7 +90,10 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                           {frameworkMap[item.compliance_framework] ?? "—"}
                         </span>
                       </div>
-                      {isAssertionLoading && (
+                      {isCurrentlyStreaming && (
+                        <Disc3 className="h-6! w-6! shrink-0 animate-spin self-center text-red-500" />
+                      )}
+                      {isAssertionLoading && !isCurrentlyStreaming && (
                         <Loader2 className="text-primary h-6! w-6! shrink-0 animate-spin self-center" />
                       )}
                     </button>
