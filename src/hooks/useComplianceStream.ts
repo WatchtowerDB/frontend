@@ -154,6 +154,7 @@ export function useComplianceStreams() {
               if (step === "assertion_generation" && status === "completed") {
                 setCheckPhase(checkId, "executing")
                 queryClient.invalidateQueries({ queryKey: ["assertions"] })
+                queryClient.invalidateQueries({ queryKey: ["checks", "latest"] })
               }
               if (step === "execution" && status === "started") setCheckPhase(checkId, "executing")
               if (step === "analysis" && status === "started") setCheckPhase(checkId, "analyzing")
