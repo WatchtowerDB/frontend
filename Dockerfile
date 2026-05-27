@@ -1,7 +1,9 @@
 FROM node:26-alpine AS dependencies
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm \
+    npm install -g npm@11.14 && \
+    npm ci
 
 FROM node:26-alpine AS builder
 WORKDIR /app
