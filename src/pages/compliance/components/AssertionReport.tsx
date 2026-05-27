@@ -112,7 +112,7 @@ export default function AssertionReport({
         {/* Header */}
         <div className="flex-none border-b px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Tooltip>
+            <Tooltip delayDuration={500}>
               <TooltipTrigger asChild>
                 <SidebarTrigger />
               </TooltipTrigger>

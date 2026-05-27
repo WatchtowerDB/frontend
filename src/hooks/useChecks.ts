@@ -3,6 +3,7 @@ import { getChecks, getLatestCheck } from "@/api/check"
 import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
+// ! NOTE: does NOT retrieve all checks currently
 export function useChecks() {
   return useQuery({
     queryKey: ["checks", "list"],

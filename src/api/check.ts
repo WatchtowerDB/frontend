@@ -7,7 +7,7 @@ export interface CheckFilters {
   page?: number
 }
 
-// To retrieve ALL compliance checks
+// TODO: make it retrieve ALL compliance checks
 export const getChecks = async (filters: CheckFilters = {}): Promise<PaginatedResponse<Check>> => {
   const response = await api.get<PaginatedResponse<Check>>("/api/compliance/checks/", {
     params: filters,
