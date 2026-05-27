@@ -1,0 +1,17 @@
+version: 2
+updates:
+  # Keep GitHub Actions pinned SHAs up to date
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+  # Keep npm deps up to date
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Group all non-breaking updates into one PR instead of one per package
+    groups:
+      dependencies:
+        update-types: ["minor", "patch"]

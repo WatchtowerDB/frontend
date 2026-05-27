@@ -1,119 +1,220 @@
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { useAssertions } from "@/hooks/useAssertions"
-import { InfoIcon } from "lucide-react"
+import { AlertCircle, CheckCircle2, InfoIcon } from "lucide-react"
+import { useEffect, useRef } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+
+import SqlBlock from "@/components/SqlBlock"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
+import Loader from "@/components/ui/loader"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
+
+import { useAssertionDetails } from "@/hooks/useAssertions"
+import { cn } from "@/lib/utils"
+import { useComplianceCheckStore, type LiveAssertion } from "@/stores/useComplianceCheckStore"
+
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import type { AssertionItem } from "@/types/compliance"
 
 interface AssertionReportProps {
   assertionId: number | null
   title?: string
 }
 
+type ViewState = "empty" | "error" | "passed" | "streaming" | "failed" | "loading"
+
+// This is a function that helps organize what shows in the report, to help clear up the confusion with the stream.
+function deriveViewState(params: {
+  assertionId: number | null
+  assertion: AssertionItem | undefined
+  livePhase: string
+  isStreaming: boolean | null
+  live: LiveAssertion | null
+}): ViewState {
+  const { assertionId, assertion, livePhase, isStreaming, live } = params
+
+  if (!assertionId) return "empty" // Nothing selected.
+  if (assertion?.result === true) return "passed" // a passed compliance, show the passed screen.
+  if (livePhase === "error" && !assertion?.recommendation) return "error" // stream broke for whatever reason
+  if (isStreaming && live?.recommendation) return "streaming" // currently generating tokens
+  if (assertion?.result === false && (assertion?.recommendation || live?.recommendation))
+    return "failed" // completed failure report, show the report
+  return "loading" // is just loading. waiting for first token.
+}
+
 export default function AssertionReport({
   assertionId,
   title = "Assertion Details",
 }: AssertionReportProps) {
-  const fake: string = `
-### VIOLATION SUMMARY
-The compliance assertion has failed, indicating a **PCI-DSS v4.0.1** violation. Specifically, the assertion:
-\`SELECT card_number FROM operations.cardholder_data WHERE card_number IS NOT NULL AND card_number_masked IS NOT NULL AND card_number != card_number_masked;\` 
-returns rows where the card number is not the same as its masked version, which suggests that the card numbers are not properly masked.
+  const { data: assertion } = useAssertionDetails(assertionId)
+  const liveAssertions = useComplianceCheckStore((s) => s.liveAssertions)
+  const livePhase = useComplianceCheckStore((s) => {
+    if (!assertionId) return "idle"
+    const checkId = s.liveAssertions[assertionId]?.checkId
+    if (checkId === undefined) return "idle"
+    return s.checkStreams[checkId]?.phase ?? "idle"
+  })
+  const live = assertionId ? liveAssertions[assertionId] : null
+  const isStreaming = live && !live.streamingDone
+  const recommendation = live?.recommendation ?? assertion?.recommendation ?? ""
 
-### STANDARD REFERENCE
-The violation pertains to PCI-DSS v4.0.1 clauses:
-- **4.1 Data Security:** The card numbers are being stored in a non-masked format.
-- **4.2 Access Control:** The access to sensitive data is not appropriately controlled.
+  const viewState = deriveViewState({ assertionId, assertion, livePhase, isStreaming, live })
 
-### SECURITY IMPACT
-This violation poses a significant risk. If card numbers are not properly masked, they could be exposed to unauthorized individuals, leading to potential data breaches and identity theft.
+  const result =
+    live?.status === "passed" ? true : live?.status === "failed" ? false : assertion?.result
 
-### REMEDIATION STEPS
+  // Viewport, scroll & sidebar status
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const userHasScrolledUp = useRef(false)
+  const scrollViewportRef = useRef<Element | null>(null)
 
-1. **Identify and Mask Card Numbers**
-Ensure all card numbers in \`operations.cardholder_data\` are properly masked.
+  const { open } = useSidebar()
 
-\`\`\`sql
-UPDATE operations.cardholder_data
-SET card_number_masked = CONCAT('XXXX-XXXX-XXXX-', SUBSTRING(card_number, -4))
-WHERE card_number IS NOT NULL;
-\`\`\`
+  // Effect 1: Attach/detach the scroll listener once per stream session
+  useEffect(() => {
+    if (!bottomRef.current) return
+    const viewport = bottomRef.current.closest("[data-radix-scroll-area-viewport]")
+    if (!viewport) return
 
-2. **Remove Unmasked Data**
-\`\`\`sql
-DELETE FROM operations.cardholder_data
-WHERE card_number IS NOT NULL AND card_number_masked IS NULL;
-\`\`\`
+    scrollViewportRef.current = viewport
 
-3. **Implement Encryption**
-If card numbers must be stored in a non-masked format, encrypt them at rest (e.g., AES-256).
+    const handleScroll = () => {
+      const el = viewport as HTMLDivElement
+      const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+      // Any upward movement at all (> 2px tolerance) breaks the lock
+      userHasScrolledUp.current = distanceFromBottom > 2
+    }
 
-\`\`\`python
-from cryptography.fernet import Fernet
+    viewport.addEventListener("scroll", handleScroll, { passive: true })
+    return () => viewport.removeEventListener("scroll", handleScroll)
+  }, [assertionId]) // Re-attach only when the assertion changes, not every token
 
-# Encrypt card numbers example
-key = Fernet.generate_key()
-cipher_suite = Fernet(key)
-# ... logic to encrypt ...
-\`\`\`
-`
-  const { data } = useAssertions()
-  const assertion = data?.results.find((a) => a.id === assertionId)
+  // Effect 2: Reset lock and auto-scroll on new stream
+  useEffect(() => {
+    if (!isStreaming) return
+    // Only reset at stream start (when recommendation is empty/short)
+    if (!recommendation) {
+      userHasScrolledUp.current = false
+    }
+
+    if (userHasScrolledUp.current) return
+
+    const viewport = scrollViewportRef.current as HTMLDivElement | null
+    if (!viewport) return
+
+    viewport.scrollTo({ top: viewport.scrollHeight, behavior: "auto" })
+  }, [recommendation, isStreaming])
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="flex-none border-b px-6 py-4">
-        <h2 className="flex items-center gap-2 text-lg font-semibold">
-          <SidebarTrigger />
-          {title}
-          {assertion ? (
-            <Badge variant={assertion.result ? "outline" : "destructive"} className="ml-2">
-              {assertion.result ? "Pass" : "Fail"}
-            </Badge>
-          ) : null}
-        </h2>
-      </div>
+    <TooltipProvider>
+      <div className="flex h-full flex-col">
+        {/* Header */}
+        <div className="flex-none border-b px-6 py-4">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <Tooltip delayDuration={500}>
+              <TooltipTrigger asChild>
+                <SidebarTrigger />
+              </TooltipTrigger>
+              <TooltipContent>{open ? "Hide assertions" : "Show assertions"}</TooltipContent>
+            </Tooltip>
+            {title}
+            {assertion ? (
+              <Badge variant={result ? "outline" : "destructive"} className="ml-2">
+                {result ? "Pass" : "Fail"}
+              </Badge>
+            ) : null}
+          </h2>
+        </div>
 
-      <div className="relative min-h-0 flex-1">
-        <ScrollArea className="h-full w-full">
-          {assertion ? (
-            <div className="p-6">
-              {/* The SQL Query */}
-              <div className="relative mb-6">
-                <span className="absolute inset-s-3 top-2 font-mono text-[10px] tracking-widest text-slate-500 uppercase">
-                  SQL
-                </span>
-                <pre className="overflow-x-auto rounded-md border-2 bg-slate-950 p-4 pt-7 text-sm break-all whitespace-pre-wrap text-slate-50 shadow-lg">
-                  <code>{assertion.sql_query}</code>
-                </pre>
-              </div>
-              {/* The Assertion Report */}
-              <article className="prose prose-slate dark:prose-invert prose-headings:font-bold prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-pre:bg-slate-950 prose-pre:text-slate-50 prose-pre:shadow-lg prose-pre:border-2 max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {assertion.recommendation}
-                </ReactMarkdown>
-              </article>
-            </div>
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center py-20 text-slate-400 italic">
-              <InfoIcon className="mb-2 h-8 w-8 opacity-20" />
-              <p>Select an assertion to view its audit intelligence.</p>
-            </div>
-          )}
-        </ScrollArea>
+        <div className="relative min-h-0 flex-1">
+          <ScrollArea key={assertionId} className="h-full w-full">
+            {(() => {
+              switch (viewState) {
+                case "empty":
+                  return (
+                    <div className="flex h-full flex-col items-center justify-center py-20 text-slate-400 italic">
+                      <InfoIcon className="mb-2 h-8 w-8 opacity-20" />
+                      <p>Select an assertion to view its audit intelligence.</p>
+                    </div>
+                  )
+
+                case "error":
+                  return (
+                    <div className="flex h-full flex-col items-center justify-center gap-3 py-20 text-slate-500">
+                      <Loader className="h-8 w-8 animate-spin text-indigo-500" />
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <AlertCircle className="h-4 w-4 text-amber-500" />
+                        <span>Stream disconnected. Please refresh the page.</span>
+                      </div>
+                    </div>
+                  )
+
+                case "passed":
+                  return (
+                    <div className="p-6">
+                      {assertion?.sql_query && (
+                        <SqlBlock query={assertion.sql_query} label="SQL Audited" />
+                      )}
+                      <div className="flex flex-col items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-12 text-center shadow-sm">
+                        <CheckCircle2 className="mb-4 h-16 w-16 text-emerald-500" />
+                        <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-400">
+                          Compliance Verified
+                        </h3>
+                        <p className="mt-2 max-w-md text-sm text-emerald-600/80 dark:text-emerald-400/70">
+                          This target database constraint successfully passed all automated
+                          compliance checks. No structural anomalies detected.
+                        </p>
+                      </div>
+                    </div>
+                  )
+
+                case "streaming":
+                case "failed":
+                  return (
+                    <div className="p-6">
+                      {assertion?.sql_query && (
+                        <SqlBlock query={assertion.sql_query} label="SQL Target" />
+                      )}
+                      <article
+                        className={cn(
+                          "prose prose-slate dark:prose-invert max-w-none",
+                          viewState === "streaming" && [
+                            "[&_p:last-child]:after:content-['▍']",
+                            "[&_p:last-child]:after:inline-block",
+                            "[&_p:last-child]:after:ml-1",
+                            "[&_p:last-child]:after:text-indigo-500",
+                            "[&_p:last-child]:after:animate-pulse",
+                          ],
+                        )}
+                      >
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{recommendation}</ReactMarkdown>
+                      </article>
+                      <div ref={bottomRef} className="h-2" />
+                    </div>
+                  )
+
+                case "loading":
+                  return (
+                    <div className="flex h-full flex-col items-center justify-center gap-2 py-20 text-slate-400">
+                      <Loader className="h-6 w-6 animate-spin text-indigo-500" />
+                      <p className="text-sm italic">Generating audit intelligence...</p>
+                    </div>
+                  )
+              }
+            })()}
+          </ScrollArea>
+        </div>
+        <div className="border-t bg-white px-6 transition-colors duration-200 dark:bg-slate-950">
+          <Alert className="rounded-none border-none bg-transparent p-0 py-3">
+            <AlertDescription className="text-muted-foreground text-center text-[10px] leading-relaxed tracking-widest uppercase">
+              All responses are AI-generated and may not always be accurate or complete. They should
+              be independently reviewed and verified by a domain expert. WatchtowerDB is NOT
+              responsible for any actions taken based on these responses.
+            </AlertDescription>
+          </Alert>
+        </div>
       </div>
-      <div className="border-t bg-white px-6 transition-colors duration-200 dark:bg-slate-950">
-        <Alert className="rounded-none border-none bg-transparent p-0 py-3">
-          <AlertDescription className="text-muted-foreground text-center text-[10px] leading-relaxed tracking-widest uppercase">
-            All responses are AI-generated and may not always be accurate or complete. They should
-            be independently reviewed and verified by a domain expert. WatchtowerDB is NOT
-            responsible for any actions taken based on these responses.
-          </AlertDescription>
-        </Alert>
-      </div>
-    </div>
+    </TooltipProvider>
   )
 }

@@ -1,4 +1,5 @@
 import { MainLayout } from "@/layout/MainLayout"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom"
 // import Home from './pages/Home';
 import ComplianceLayout from "@/pages/compliance/ComplianceLayout"
@@ -6,7 +7,6 @@ import Dashboard from "@/pages/dashboard/Dashboard"
 import ClientDBPage from "@/pages/databases/ClientDBPage"
 import DatabasesLayout from "@/pages/databases/DatabasesLayout"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Toaster } from "./components/ui/sonner"
 import { AuthProvider } from "./context/AuthProvider"
 import { ProtectedRoute } from "./context/ProtectedRoute"

@@ -54,3 +54,13 @@ export interface Framework {
   description: string
   version: string
 }
+
+// Check object
+export interface Check {
+  id: number
+  framework: number
+  schema: number
+  client_db: number
+  user: number
+  date: string
+}

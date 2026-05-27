@@ -39,9 +39,9 @@ export function GenericSidebar({
             </div>
           </SidebarHeader>
         )}
-        {/* Header children, also optional. Likely will have search, filter, etc. */}
+        {/* Header children, optional. Likely will have search, filter, etc. */}
         {headerChildren && (
-          <SidebarHeader className="mt-1 flex h-13 overflow-hidden px-4 transition-all duration-200 group-data-[state=collapsed]:h-0 group-data-[state=collapsed]:border-none group-data-[state=collapsed]:p-0">
+          <SidebarHeader className="mx-1 mt-1 flex min-h-16 min-w-0 overflow-hidden border-b px-4 transition-all duration-200 group-data-[state=collapsed]:h-0 group-data-[state=collapsed]:border-none group-data-[state=collapsed]:p-0">
             {headerChildren}
           </SidebarHeader>
         )}
@@ -51,6 +51,7 @@ export function GenericSidebar({
             <div className="flex w-full min-w-0 flex-col">{children}</div>
           </ScrollArea>
         </SidebarContent>
+        {/* Footer children, optional. Likely will have pagination. */}
         {footerChildren && (
           <SidebarFooter className="mx-1 border-t p-0"> {footerChildren}</SidebarFooter>
         )}

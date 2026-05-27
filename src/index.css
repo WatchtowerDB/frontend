@@ -56,7 +56,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.35 0.072 220); /* Main color of our brand */
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -91,9 +91,9 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --primary: oklch(0.35 0.072 220); /* — teal */
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.35 0.072 220); /* #194D65 — deep blue */
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
@@ -130,5 +130,19 @@
   }
   html {
     @apply font-sans;
+  }
+
+  /* The following is primarily for the SQL Querys in assertions list. */
+  .prose code:not(pre code) {
+    @apply bg-primary/10 text-foreground rounded px-1.5 py-0.5 font-mono text-sm;
+  }
+
+  .dark .prose code:not(pre code) {
+    @apply bg-primary/60;
+  }
+
+  .prose :where(code):not(pre code)::before,
+  .prose :where(code):not(pre code)::after {
+    content: none !important;
   }
 }
