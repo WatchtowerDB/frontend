@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  NODE_VERSION: "26"
+  IMAGE_NAME: watchtower-frontend
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit -p tsconfig.app.json
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Prettier formatting check
+        run: |
+          npx prettier --check \
+            "src/**/*.{ts,tsx,js,jsx}" \
+            "*.{json,md,css}"
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Vite build
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  sca:
+    name: NodeSecure
+    runs-on: ubuntu-latest
+    needs: quality
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - uses: NodeSecure/ci-action@177c57fe32c75cafabe87f6e4515d277cc37ae6c # 1.4.1
+        with:
+          strategy: npm
+          vulnerabilities: medium
+          # warnings: error would fail on suspicious patterns too. "off" to start without noise. Later we could change this.
+          warnings: off
+          reporters: console
+
+  docker:
+    name: Docker
+    runs-on: ubuntu-latest
+    needs: [build, sca]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Resolve image tags
+        id: tags
+        # Tagging strategy:
+        #   - Push to main:       main-<short-sha> + latest   e.g. main-a1b2c3d, latest
+        #   - Git tags (v*.*.*):  semver + latest             e.g. v1.2.3, latest
+        #   - PR into main:       main-<short-sha>            e.g. main-a1b2c3d
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "tags=${{ env.IMAGE_NAME }}:${GITHUB_REF_NAME},${{ env.IMAGE_NAME }}:latest" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            echo "tags=${{ env.IMAGE_NAME }}:main-${SHORT_SHA},${{ env.IMAGE_NAME }}:latest" >> "$GITHUB_OUTPUT"
+          else
+            echo "tags=${{ env.IMAGE_NAME }}:main-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false # TODO: publish the images on GHCR
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
