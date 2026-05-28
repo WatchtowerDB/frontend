@@ -1,6 +1,6 @@
 import { AlertCircle, CheckCircle2, InfoIcon } from "lucide-react"
 import { useEffect, useRef } from "react"
-import ReactMarkdown from "react-markdown"
+import ReactMarkdown, { type Components } from "react-markdown"
 import remarkGfm from "remark-gfm"
 
 import SqlBlock from "@/components/SqlBlock"
@@ -41,6 +41,20 @@ function deriveViewState(params: {
   if (assertion?.result === false && (assertion?.recommendation || live?.recommendation))
     return "failed" // completed failure report, show the report
   return "loading" // is just loading. waiting for first token.
+}
+
+// This is for handling markdown in-report, to color the code.
+const markdownComponents: Components = {
+  pre({ children }) {
+    return <>{children}</>
+  },
+  code({ className, children }) {
+    const match = /language-(\w+)/.exec(className || "")
+    if (match) {
+      return <SqlBlock query={String(children).trim()} label={match[1].toUpperCase()} />
+    }
+    return <code className={className}>{children}</code>
+  },
 }
 
 export default function AssertionReport({
@@ -153,9 +167,7 @@ export default function AssertionReport({
                 case "passed":
                   return (
                     <div className="p-6">
-                      {assertion?.sql_query && (
-                        <SqlBlock query={assertion.sql_query} label="SQL Audited" />
-                      )}
+                      {assertion?.sql_query && <SqlBlock query={assertion.sql_query} label="SQL" />}
                       <div className="flex flex-col items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-12 text-center shadow-sm">
                         <CheckCircle2 className="mb-4 h-16 w-16 text-emerald-500" />
                         <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-400">
@@ -173,9 +185,7 @@ export default function AssertionReport({
                 case "failed":
                   return (
                     <div className="p-6">
-                      {assertion?.sql_query && (
-                        <SqlBlock query={assertion.sql_query} label="SQL Target" />
-                      )}
+                      {assertion?.sql_query && <SqlBlock query={assertion.sql_query} label="SQL" />}
                       <article
                         className={cn(
                           "prose prose-slate dark:prose-invert max-w-none",
@@ -188,7 +198,9 @@ export default function AssertionReport({
                           ],
                         )}
                       >
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{recommendation}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                          {recommendation}
+                        </ReactMarkdown>
                       </article>
                       <div ref={bottomRef} className="h-2" />
                     </div>
