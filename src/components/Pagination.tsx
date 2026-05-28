@@ -85,17 +85,22 @@ export default function Pagination({
           </Tooltip>
           <span className={`text-muted-foreground ${textSize}`}>
             Page{" "}
-            <input
-              className={`${inputWidth} rounded border bg-transparent text-center ${textSize} align-middle`}
-              value={isEditing ? inputVal : String(page)}
-              onChange={(e) => {
-                setIsEditing(true)
-                setInputVal(e.target.value)
-              }}
-              onBlur={handleJump}
-              onKeyDown={(e) => e.key === "Enter" && handleJump()}
-              disabled={isFetching}
-            />{" "}
+            <Tooltip delayDuration={500}>
+              <TooltipTrigger asChild>
+                <input
+                  className={`${inputWidth} rounded border bg-transparent text-center ${textSize} align-middle`}
+                  value={isEditing ? inputVal : String(page)}
+                  onChange={(e) => {
+                    setIsEditing(true)
+                    setInputVal(e.target.value)
+                  }}
+                  onBlur={handleJump}
+                  onKeyDown={(e) => e.key === "Enter" && handleJump()}
+                  disabled={isFetching}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Press Enter to jump to page</TooltipContent>
+            </Tooltip>{" "}
             of {totalPages}
           </span>
           <Tooltip delayDuration={500}>
