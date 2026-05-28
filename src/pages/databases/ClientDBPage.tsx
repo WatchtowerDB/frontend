@@ -1,3 +1,4 @@
+import Pagination from "@/components/Pagination"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Loader from "@/components/ui/loader"
@@ -13,17 +14,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useClientDBs } from "@/hooks/useClientDBs"
 import { cn } from "@/lib/utils"
-import {
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Edit,
-  History,
-  Plus,
-  Trash2,
-  Undo2,
-  X,
-} from "lucide-react"
+import { Check, Edit, History, Plus, Trash2, Undo2, X } from "lucide-react"
 
 export default function ClientDBPage() {
   const {
@@ -245,48 +236,15 @@ export default function ClientDBPage() {
           </ScrollArea>
 
           {/* Pagination Controls */}
-          <div className="mt-4 flex items-center justify-between px-2">
-            <p className="text-muted-foreground text-sm">
-              Showing {rows.length} records (Total {totalCount})
-            </p>
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium">
-                Page {page} of {totalPages}
-              </span>
-              <div className="flex gap-2">
-                <Tooltip delayDuration={500}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(page - 1)}
-                      disabled={!hasPrevious || isPending}
-                    >
-                      <ChevronLeft className="h-3 w-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Previous page</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip delayDuration={500}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(page + 1)}
-                      disabled={!hasNext || isPending}
-                    >
-                      <ChevronRight className="h-3 w-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Next page</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
+          <Pagination
+            className="mt-2"
+            page={page}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            isFetching={isPending}
+            onPageChange={setPage}
+            size="sm"
+          />
 
           <div className={cn("mt-4 flex justify-end gap-2", hasChanges ? "" : "invisible")}>
             <Button
