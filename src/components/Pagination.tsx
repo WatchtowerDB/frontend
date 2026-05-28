@@ -28,13 +28,6 @@ export default function Pagination({
   const [isEditing, setIsEditing] = useState(false)
   const [inputVal, setInputVal] = useState(String(page))
 
-  //   const prevPage = useRef(page)
-
-  //   if (prevPage.current !== page) {
-  //     prevPage.current = page
-  //     setInputVal(String(page))
-  //   }
-
   const handleJump = () => {
     setIsEditing(false)
     const parsed = parseInt(inputVal)
