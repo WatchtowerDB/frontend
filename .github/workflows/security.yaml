@@ -28,7 +28,6 @@ jobs:
           reporters: console
           vulnerabilities: medium
           warnings: off # everything causes a warning I hate the js ecosystem
-          reporters: console
 
   npm-audit:
     name: npm audit
