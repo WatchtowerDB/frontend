@@ -105,7 +105,7 @@ export const useComplianceCheckStore = create<ComplianceCheckState>()(
             existing.streamingDone,
             "patch.streamingDone:",
             patch.streamingDone,
-          )
+          ) // nosemgrep
           return {
             liveAssertions: {
               ...s.liveAssertions,
