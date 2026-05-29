@@ -30,7 +30,7 @@ jobs:
           warnings: off # everything causes a warning I hate the js ecosystem
       
       - name: npm audit
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level moderate
 
   sast:
     name: Semgrep SAST
