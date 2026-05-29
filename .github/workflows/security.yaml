@@ -25,19 +25,6 @@ jobs:
         uses: NodeSecure/ci-action@177c57fe32c75cafabe87f6e4515d277cc37ae6c # 1.4.1
         with:
           strategy: npm
-          vulnerabilities: medium
-          # warnings: error would fail on suspicious patterns too. It is REALLY noisy...
-          warnings: |
-            '{
-              "obfuscated-code": "error",
-              "encoded-literal": "off",
-              "ast-error": "off",
-              "unsafe-regex": "off",
-              "suspicious-literal": "off",
-              "unsafe-import": "off",
-              "unsafe-assign": "off",
-              "unsafe-stmt": "off"
-            }'
           reporters: console
 
   npm-audit:

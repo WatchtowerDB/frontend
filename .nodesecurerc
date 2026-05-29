@@ -1,0 +1,18 @@
+{
+  "reporters": [
+    "console"
+  ],
+  "vulnerabilities": {
+    "severity": "medium"
+  },
+  "warnings": {
+    "obfuscated-code": "error",
+    "encoded-literal": "off",
+    "ast-error": "off",
+    "unsafe-regex": "off",
+    "suspicious-literal": "off",
+    "unsafe-import": "off",
+    "unsafe-assign": "off",
+    "unsafe-stmt": "off"
+  }
+}
