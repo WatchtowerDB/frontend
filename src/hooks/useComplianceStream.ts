@@ -92,10 +92,11 @@ export function useComplianceStreams() {
             if (lastEventId) {
               headers["Last-Event-Id"] = lastEventId
             }
+            // nosemgrep
             console.log(`[SSE HEADERS] Request headers constructed for checkId: ${checkId}`, {
               lastEventId,
               Authorization: "Bearer [REDACTED]",
-            }) // nosemgrep
+            })
             return headers
           },
           signal: controller.signal,

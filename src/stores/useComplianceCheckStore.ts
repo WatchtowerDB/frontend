@@ -101,11 +101,11 @@ export const useComplianceCheckStore = create<ComplianceCheckState>()(
             streamingDone: false,
           }
           console.log(
-            `[upsert] ${assertionId} existing.streamingDone:`,
+            `[upsert] ${assertionId} existing.streamingDone:`, // nosemgrep
             existing.streamingDone,
             "patch.streamingDone:",
             patch.streamingDone,
-          ) // nosemgrep
+          )
           return {
             liveAssertions: {
               ...s.liveAssertions,
