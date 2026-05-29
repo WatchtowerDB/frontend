@@ -57,7 +57,7 @@ jobs:
     name: Semgrep SAST
     runs-on: ubuntu-latest
     container:
-      image: semgrep/semgrep:1.164.0-nonroot
+      image: semgrep/semgrep:1.164.0
 
     # Skip any PR created by dependabot to avoid permission issues
     if: (github.actor != 'dependabot[bot]')
