@@ -1,11 +1,13 @@
 name: Security
 
 on:
-  push: # every branch, every push
+  push:
+    branches-ignore: ["main"]
   pull_request:
     branches: ["main"]
   schedule:
     - cron: "0 6 * * 1" # Monday 06:00 UTC
+  workflow_dispatch:
 
 env:
   NODE_VERSION: "26"
