@@ -24,8 +24,16 @@ jobs:
         with:
           strategy: npm
           vulnerabilities: medium
-          # warnings: error would fail on suspicious patterns too. "warning" to start without noise. Later we could change this.
-          warnings: warning
+          # warnings: error would fail on suspicious patterns too. It is REALLY noisy...
+          warnings: |
+            {
+              "obfuscated-code": "error",
+              "unsafe-regex": "off",
+              "suspicious-literal": "off",
+              "unsafe-import": "off",
+              "unsafe-assign": "off",
+              "unsafe-stmt": "off"
+            }
           reporters: console
 
   npm-audit:
@@ -49,6 +57,7 @@ jobs:
     container:
       image: semgrep/semgrep
     permissions:
+      actions: read
       contents: read
       security-events: write
 
