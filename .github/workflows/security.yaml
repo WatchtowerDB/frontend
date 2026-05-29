@@ -15,19 +15,22 @@ permissions:
 
 jobs:
   sca:
-    name: NodeSecure SCA
+    name: SCA
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: SCA
+      - name: NodeSecure SCA
         uses: NodeSecure/ci-action@177c57fe32c75cafabe87f6e4515d277cc37ae6c # 1.4.1
         with:
           strategy: npm
           reporters: console
           vulnerabilities: medium
           warnings: off # everything causes a warning I hate the js ecosystem
+      
+      - name: npm audit
+        run: npm audit --audit-level=moderate
 
   sast:
     name: Semgrep SAST
