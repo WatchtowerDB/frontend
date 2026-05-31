@@ -35,8 +35,6 @@ export default function ClientDBPage() {
     totalPages,
     page,
     totalCount,
-    hasNext,
-    hasPrevious,
     setPage,
   } = useClientDBs()
 
