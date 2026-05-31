@@ -13,7 +13,9 @@ RUN npm run build
 
 FROM node:26-alpine AS final
 WORKDIR /app
+RUN addgroup -S nodeapp && adduser -S -G nodeapp nodeapp
 RUN npm install -g serve
-COPY --from=builder /app/dist ./dist
+COPY --chown=nodeapp:nodeapp --from=builder /app/dist ./dist
 EXPOSE 3000
+USER nodeapp
 CMD ["serve", "-s", "dist", "-l", "3000"]
