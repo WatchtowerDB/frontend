@@ -111,7 +111,9 @@ export default function ClientDBPage() {
                               required
                             />
                           ) : (
-                            <span className={textClassName}>{db.connection_string}</span>
+                            <span className={cn(textClassName, "font-mono tracking-widest")}>
+                              {"•".repeat(32)}
+                            </span>
                           )}
                         </TableCell>
                         <TableCell className="flex justify-end pr-3">
