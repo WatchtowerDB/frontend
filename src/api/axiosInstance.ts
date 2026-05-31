@@ -24,16 +24,17 @@ api.interceptors.response.use(
       prevRequest.sent = true
 
       try {
+        console.log("attempting to refresh token")
         const response = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/auth/refresh/`,
           {},
           { withCredentials: true },
         )
 
-        const { accessToken } = response.data
-        useAuthStore.getState().setAccessToken(accessToken)
+        const { access } = response.data
+        useAuthStore.getState().setAccessToken(access)
 
-        prevRequest.headers.Authorization = `Bearer ${accessToken}`
+        prevRequest.headers.Authorization = `Bearer ${access}`
         return api(prevRequest)
       } catch (err) {
         console.log("axiosinstance reports here", err)

@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await api.post("/auth/refresh/", {})
+        const response = await api.post("/auth/refresh/", {}, { withCredentials: true })
         const { access } = response.data
 
         setAccessToken(access)

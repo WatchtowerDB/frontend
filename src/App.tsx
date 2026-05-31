@@ -16,16 +16,15 @@ import SummaryPage from "./pages/compliance/SummaryPage"
 import Login from "./pages/login/Login"
 import NotFound from "./pages/not-found/NotFound"
 
-export default function App() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 1000 * 60 * 5, // 5 minutes and TODO: Make sure i dont have staleTime otherwhere.
-        retry: 1,
-      },
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes and TODO: Make sure i dont have staleTime otherwhere.
+      retry: 1,
     },
-  })
-
+  },
+})
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="theme">
