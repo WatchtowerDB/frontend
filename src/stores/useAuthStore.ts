@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: true,
       })
     } catch (error) {
-      console.error("useAuthStore.ts: Login failed, the error is:", error)
+      console.log("[AUTH] Failed to log in: ", error)
       throw error
     }
   },

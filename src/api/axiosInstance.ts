@@ -1,3 +1,4 @@
+import { toAPIError } from "@/lib/utils"
 import axios from "axios"
 import { useAuthStore } from "../stores/useAuthStore"
 const api = axios.create({
@@ -42,7 +43,8 @@ api.interceptors.response.use(
         return Promise.reject(err)
       }
     }
-    return Promise.reject(error)
+    return Promise.reject(toAPIError(error))
+    // Whenever any component is handling an api fetch error, add const apiError = error as APIError for graceful handling.
   },
 )
 
