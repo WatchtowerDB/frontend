@@ -12,7 +12,7 @@ interface AuthState {
   setAccessToken: (token: string | null) => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   userName: null,
   isAuthenticated: false,
@@ -37,6 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAccessToken: (token) => set({ accessToken: token }),
 
   logout: () => {
+    if (!get().isAuthenticated) return
     useComplianceCheckStore.getState().reset()
     set({ accessToken: null, userName: null, isAuthenticated: false })
     toast.info("You have been logged out.", {
