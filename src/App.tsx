@@ -24,6 +24,7 @@ const queryClient = new QueryClient({
       staleTime: 1000 * 60 * 5, // 5 minutes and TODO: Make sure i dont have staleTime otherwhere.
       retry: 1,
       throwOnError: (error) => {
+        console.log("App queries tsx says", error)
         const apiError = error as APIError
         const message = apiError.detail ?? "An unexpected error occurred."
         toast.error(message, { id: message })
@@ -32,6 +33,7 @@ const queryClient = new QueryClient({
     },
     mutations: {
       onError: (error) => {
+        console.log("App tsx mutations says", error)
         const apiError = error as APIError
         const message = apiError.detail ?? "An unexpected error occurred."
         toast.error(message, { id: message })
