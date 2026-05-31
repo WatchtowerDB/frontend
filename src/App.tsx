@@ -25,14 +25,16 @@ const queryClient = new QueryClient({
       retry: 1,
       throwOnError: (error) => {
         const apiError = error as APIError
-        toast.error(apiError.detail)
+        const message = apiError.detail ?? "An unexpected error occurred."
+        toast.error(message, { id: message })
         return false
       },
     },
     mutations: {
       onError: (error) => {
         const apiError = error as APIError
-        toast.error(apiError.detail)
+        const message = apiError.detail ?? "An unexpected error occurred."
+        toast.error(message, { id: message })
       },
     },
   },
