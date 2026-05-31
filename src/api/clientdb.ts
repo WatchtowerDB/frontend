@@ -7,7 +7,7 @@ export interface ClientDBFilters {
   page?: number
 }
 
-// To retrieve ALL client databases
+// To retrieve client databases per page
 export const getClientDBs = async (
   filters: ClientDBFilters = {},
 ): Promise<PaginatedResponse<ClientDB>> => {

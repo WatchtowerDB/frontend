@@ -12,7 +12,7 @@ export interface ClientDBSchemaFilters {
   page?: number
 }
 
-// To retrieve ALL client database schemas
+// To retrieve client database schemas per page
 export const getClientDBSchemas = async (
   filters: ClientDBSchemaFilters = {},
 ): Promise<PaginatedResponse<ClientDBSchema>> => {

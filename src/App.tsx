@@ -21,7 +21,7 @@ import type { APIError } from "./types/api"
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes and TODO: Make sure i dont have staleTime otherwhere.
+      staleTime: 1000 * 60 * 5, // 5 minutes
       retry: 1,
       throwOnError: (error) => {
         console.log("App queries tsx says", error)

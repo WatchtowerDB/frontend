@@ -13,7 +13,7 @@ export interface AssertionFilters {
   page?: number
 }
 
-// To retrieve ALL assertions
+// To retrieve assertions per page
 export const getAssertions = async (
   filters: AssertionFilters = {},
 ): Promise<PaginatedResponse<AssertionItem>> => {

@@ -8,7 +8,7 @@ export interface FrameworkFilters {
   page?: number
 }
 
-// To retrieve ALL frameworks
+// To retrieve frameworks per page
 export const getFrameworks = async (
   filters: FrameworkFilters = {},
 ): Promise<PaginatedResponse<Framework>> => {

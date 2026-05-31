@@ -13,7 +13,6 @@ export interface PaginatedResponse<T> {
 }
 
 // Every error we get is in this form, needed so we can give the errors returned a type.
-// TODO: Make sure this works across all error handling ESPECIALLY AUTHENTICATION.
 
 export class APIError extends Error {
   status: number
