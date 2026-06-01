@@ -9,7 +9,9 @@ import {
 
 export interface ClientDBSchemaFilters {
   client_db?: number
+  // Pagination & Sorting
   page?: number
+  ordering?: string
 }
 
 // To retrieve client database schemas per page

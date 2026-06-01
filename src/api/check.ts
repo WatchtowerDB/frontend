@@ -4,7 +4,11 @@ import { type PaginatedResponse } from "@/types/api"
 import { type Check } from "@/types/compliance"
 
 export interface CheckFilters {
+  client_db?: number
+  framework?: number
+  // Pagination & Sorting
   page?: number
+  ordering?: string
 }
 
 // to retrieve compliance checks per page

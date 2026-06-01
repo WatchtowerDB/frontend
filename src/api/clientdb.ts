@@ -4,7 +4,10 @@ import { type PaginatedResponse } from "@/types/api"
 import { type ClientDB, type ClientDBCreate, type ClientDBPatch } from "@/types/compliance"
 
 export interface ClientDBFilters {
+  name?: string
+  // Pagination & Sorting
   page?: number
+  ordering?: string
 }
 
 // To retrieve client databases per page
