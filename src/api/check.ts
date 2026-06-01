@@ -4,10 +4,14 @@ import { type PaginatedResponse } from "@/types/api"
 import { type Check } from "@/types/compliance"
 
 export interface CheckFilters {
+  client_db?: number
+  framework?: number
+  // Pagination & Sorting
   page?: number
+  ordering?: string
 }
 
-// TODO: make it retrieve ALL compliance checks
+// to retrieve compliance checks per page
 export const getChecks = async (filters: CheckFilters = {}): Promise<PaginatedResponse<Check>> => {
   const response = await api.get<PaginatedResponse<Check>>("/api/compliance/checks/", {
     params: filters,

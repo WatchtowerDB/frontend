@@ -9,10 +9,12 @@ import {
 
 export interface ClientDBSchemaFilters {
   client_db?: number
+  // Pagination & Sorting
   page?: number
+  ordering?: string
 }
 
-// To retrieve ALL client database schemas
+// To retrieve client database schemas per page
 export const getClientDBSchemas = async (
   filters: ClientDBSchemaFilters = {},
 ): Promise<PaginatedResponse<ClientDBSchema>> => {

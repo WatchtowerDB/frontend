@@ -16,8 +16,9 @@ interface AssertionFilterState {
   filterSearch: string
   assertionSearch: string
 
-  // --- Pagination ---
+  // --- Pagination & Sorting ---
   page: number
+  ordering: string | null
 }
 
 interface AssertionFilterActions {
@@ -29,6 +30,7 @@ interface AssertionFilterActions {
   setFilterSearch: (query: string) => void
   setAssertionSearch: (query: string) => void
   setPage: (page: number) => void
+  setOrdering: (ordering: string | null) => void
 
   // Derives the AssertionFilters object the hook expects.
   getApiFilters: () => AssertionFilters & { page: number }
@@ -46,6 +48,7 @@ const initialFilterState: AssertionFilterState = {
   filterSearch: "",
   assertionSearch: "",
   page: 1,
+  ordering: null,
 }
 
 export const useAssertionStore = create<AssertionFilterState & AssertionFilterActions>(
@@ -64,9 +67,11 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
     setAssertionSearch: (query) => set({ assertionSearch: query }),
 
     setPage: (page) => set({ page }),
+    setOrdering: (ordering) => set({ ordering }),
 
     getApiFilters: () => {
-      const { clientDb, schema, complianceFramework, complianceCheckId, result, page } = get()
+      const { clientDb, schema, complianceFramework, complianceCheckId, result, page, ordering } =
+        get()
       return {
         // Only include a param if it has a value — the API treats
         // missing params as "no filter", which is what we want.
@@ -75,6 +80,7 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
         ...(complianceFramework !== null && { compliance_framework: complianceFramework }),
         ...(complianceCheckId !== null && { check: complianceCheckId }),
         ...(result !== null && { result }),
+        ...(ordering !== null && { ordering }),
         page,
       }
     },

@@ -7,6 +7,7 @@ import Dashboard from "@/pages/dashboard/Dashboard"
 import ClientDBPage from "@/pages/databases/ClientDBPage"
 import DatabasesLayout from "@/pages/databases/DatabasesLayout"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { Toaster } from "./components/ui/sonner"
 import { AuthProvider } from "./context/AuthProvider"
 import { ProtectedRoute } from "./context/ProtectedRoute"
@@ -15,17 +16,32 @@ import AssertionsPage from "./pages/compliance/AssertionsPage"
 import SummaryPage from "./pages/compliance/SummaryPage"
 import Login from "./pages/login/Login"
 import NotFound from "./pages/not-found/NotFound"
+import type { APIError } from "./types/api"
 
-export default function App() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 1000 * 60 * 5, // 5 minutes and TODO: Make sure i dont have staleTime otherwhere.
-        retry: 1,
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+      throwOnError: (error) => {
+        console.log("App queries tsx says", error)
+        const apiError = error as APIError
+        const message = apiError.detail ?? "An unexpected error occurred."
+        toast.error(message, { id: message })
+        return false
       },
     },
-  })
-
+    mutations: {
+      onError: (error) => {
+        console.log("App tsx mutations says", error)
+        const apiError = error as APIError
+        const message = apiError.detail ?? "An unexpected error occurred."
+        toast.error(message, { id: message })
+      },
+    },
+  },
+})
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="theme">

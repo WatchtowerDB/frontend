@@ -9,12 +9,11 @@ import {
 } from "@/components/ui/navigation-menu"
 import { APP_NAV } from "@/config/app-nav"
 import { User } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { Logout } from "./Logout"
 
 export function Navbar() {
-  // const { accessToken, setAccessToken } = useAuthStore()
-  // const refreshToken = localStorage.getItem("refresh_token")
+  const location = useLocation()
 
   return (
     <NavigationMenu className="flex w-full max-w-none justify-between ps-2">
@@ -26,16 +25,31 @@ export function Navbar() {
       {/* Navigation Options */}
       <div className="flex flex-1">
         <NavigationMenuList>
-          {APP_NAV.map((item) => (
-            <NavigationMenuItem key={item.title}>
-              <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                <Link to={item.url} className="flex items-center gap-2">
-                  {/* {item.icon && <item.icon className="size-4" />} */}
-                  {item.title}
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          ))}
+          {APP_NAV.map((item) => {
+            const isDashboard = item.url === "/"
+            const isActive = isDashboard
+              ? location.pathname === "/"
+              : location.pathname.startsWith(item.url)
+
+            return (
+              <NavigationMenuItem key={item.title}>
+                <NavigationMenuLink
+                  asChild
+                  active={isActive}
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link
+                    to={item.url}
+                    className={`flex items-center gap-2 ${
+                      isActive ? "text-foreground font-medium" : "text-muted-foreground"
+                    }`}
+                  >
+                    {item.title}
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            )
+          })}
         </NavigationMenuList>
       </div>
 
