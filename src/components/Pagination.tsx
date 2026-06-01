@@ -44,7 +44,14 @@ export default function Pagination({
   const textSize = isXs ? "text-[10px]" : "text-sm"
   const inputWidth = isXs ? "w-6" : "w-8"
 
-  if (totalPages <= 1) return null
+  if (totalPages <= 1)
+    return (
+      <div className={cn("flex items-center justify-between", className)}>
+        {showTotal && totalCount !== undefined && (
+          <span className={cn("text-muted-foreground", textSize)}>{totalCount} total</span>
+        )}
+      </div>
+    )
 
   return (
     <div className={cn("flex items-center justify-between", className)}>
