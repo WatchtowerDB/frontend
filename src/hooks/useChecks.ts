@@ -1,5 +1,5 @@
 import { runComplianceCheck } from "@/api/assertions"
-import { getChecks, getLatestCheck } from "@/api/check"
+import { getChecks, getLatestCheck, type CheckFilters } from "@/api/check"
 import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
@@ -34,10 +34,10 @@ export function useAllChecks() {
 }
 
 // Retrieves it per page, I am keeping it incase this ends up being used in the implmenetation for the checks list.
-export function useChecks() {
+export function useChecks(filters?: CheckFilters) {
   return useQuery({
-    queryKey: ["checks", "list"],
-    queryFn: () => getChecks(),
+    queryKey: ["checks", "list", filters ?? {}],
+    queryFn: () => getChecks(filters ?? {}),
     staleTime: 0,
     placeholderData: (prev) => prev,
   })
