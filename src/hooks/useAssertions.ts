@@ -1,12 +1,13 @@
-import { getAssertionById, getAssertions } from "@/api/assertions"
+import { getAssertionById, getAssertions, type AssertionFilters } from "@/api/assertions"
 import { PAGE_SIZE, useAssertionStore } from "@/stores/useAssertionStore"
 import type { AssertionItem } from "@/types/compliance"
-import { useQuery } from "@tanstack/react-query"
+import { useQueries, useQuery } from "@tanstack/react-query"
 import { useShallow } from "zustand/shallow"
 
-export const useAssertions = () => {
-  // Pulls the derived API filters.
-  const filters = useAssertionStore(useShallow((s) => s.getApiFilters()))
+export const useAssertions = (overrideFilters?: Partial<AssertionFilters>) => {
+  // It will use the store's filters (so for assertions list) if not explicitly given filters (so for summary page).
+  const storeFilters = useAssertionStore(useShallow((s) => s.getApiFilters()))
+  const filters = overrideFilters ?? storeFilters
 
   const query = useQuery({
     queryKey: ["assertions", "list", filters],
@@ -26,6 +27,37 @@ export const useAssertions = () => {
   }
 }
 
+export function useAllAssertions(filters: AssertionFilters = {}) {
+  const PAGE_SIZE = Number(import.meta.env.VITE_DEFAULT_PAGE_SIZE) || 20
+  return useQuery({
+    queryKey: ["assertions", "all", filters],
+    queryFn: async () => {
+      const firstPage = await getAssertions({ ...filters, page: 1 })
+      const totalCount = firstPage.count
+      const allResults = [...firstPage.results]
+      const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+
+      if (totalPages > 1) {
+        const remainingPages = await Promise.all(
+          Array.from({ length: totalPages - 1 }, (_, i) =>
+            getAssertions({ ...filters, page: i + 2 }),
+          ),
+        )
+        remainingPages.forEach((pageData) => {
+          allResults.push(...pageData.results)
+        })
+      }
+
+      return {
+        ...firstPage,
+        results: allResults,
+      }
+    },
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+  })
+}
+
 export const useAssertionDetails = (id: number | null) => {
   return useQuery({
     queryKey: ["assertions", "detail", id],
@@ -37,5 +69,40 @@ export const useAssertionDetails = (id: number | null) => {
     enabled: id !== null && id !== undefined && !isNaN(id),
     staleTime: 1000 * 60 * 5,
     placeholderData: (prev) => prev,
+  })
+}
+
+// Using this feels extremely suboptimal. For now, since data aggregation is required on the front end.
+export function useAssertionsByCheckIds(checkIds: number[]) {
+  const PAGE_SIZE = Number(import.meta.env.VITE_DEFAULT_PAGE_SIZE) || 20
+
+  return useQueries({
+    queries: checkIds.map((id) => ({
+      queryKey: ["assertions", "all", { check: id }],
+      queryFn: async () => {
+        const firstPage = await getAssertions({ check: id, page: 1 })
+        const totalCount = firstPage.count
+        const allResults = [...firstPage.results]
+        const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+
+        if (totalPages > 1) {
+          const remainingPages = await Promise.all(
+            Array.from({ length: totalPages - 1 }, (_, i) =>
+              getAssertions({ check: id, page: i + 2 }),
+            ),
+          )
+          remainingPages.forEach((pageData) => {
+            allResults.push(...pageData.results)
+          })
+        }
+
+        return {
+          ...firstPage,
+          results: allResults,
+        }
+      },
+      enabled: checkIds.length > 0,
+      staleTime: 1000 * 60 * 5,
+    })),
   })
 }
