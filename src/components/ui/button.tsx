@@ -42,6 +42,13 @@ const buttonVariants = cva(
   },
 )
 
+export type ButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+  }
+
+// I added the ButtonProps.
+
 function Button({
   className,
   variant = "default",

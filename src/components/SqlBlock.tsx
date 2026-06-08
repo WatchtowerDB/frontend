@@ -5,6 +5,7 @@ import {
   stackoverflowDark as dark,
   colorBrewer as light,
 } from "react-syntax-highlighter/dist/esm/styles/hljs"
+import CopyButton from "./CopyButton"
 // DARK MODE CANDIDATES:
 // - nord
 // - hybrid
@@ -24,6 +25,7 @@ export default function SqlBlock({ query, label }: { query: string; label: strin
       <span className="absolute top-2 left-3 z-10 font-mono text-[10px] tracking-widest text-slate-500 uppercase">
         {label}
       </span>
+      <CopyButton textToCopy={query} variant={"ghost"} className="absolute top-2 right-3" />
       <SyntaxHighlighter
         language="sql"
         style={isDark ? dark : light}
