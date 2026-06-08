@@ -3,6 +3,11 @@ import type { PaginatedResponse } from "@/types/api"
 import type { AssertionItem } from "@/types/compliance"
 import type { UseQueryResult } from "@tanstack/react-query"
 
+// Please, ignore this file if you're reviewing it, robin.
+// It is messy, it can not be cleared up for the mean time.
+// It will properly be cleaned up down the branches, but its existence does not harm anything else.
+// And I need it for the data aggregation used in the checks page.
+
 // export interface CheckFilters {
 //   client_db?: number
 //   framework?: number
@@ -177,7 +182,6 @@ export function useAssertionsByChecks(checkIds: number[]) {
     return { summary: null, isLoading, isError }
   }
 
-  // Calculate the raw numbers without wasting energy on useMemo
   const summaryMap: Record<number, { passed: number; failed: number; total: number }> = {}
 
   assertionResults.forEach((query, index) => {

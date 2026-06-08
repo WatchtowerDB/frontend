@@ -7,6 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
+import Loader from "@/components/ui/loader"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -71,142 +72,165 @@ export default function ChecksPage() {
   const totalPages = Math.ceil(totalCount / (Number(import.meta.env.VITE_DEFAULT_PAGE_SIZE) || 20))
   return (
     <TooltipProvider>
-      <div className="flex h-full w-full flex-col p-8">
-        <header>
+      <div className="flex h-full w-full flex-col">
+        <header className="p-6">
           <h1 className="text-2xl font-bold">Compliance Checks</h1>
           <p className="text-foreground">View the history of all performed checks.</p>
         </header>
         <main className="flex min-h-0 w-full flex-1 flex-col gap-2">
           <ScrollArea className="max-h-full min-h-0 flex-1">
-            <div className="flex flex-col gap-3 pr-4">
-              {/* {checkData?.results?.map((check) => { */}
-              {MOCK_CHECKS_RESPONSE.results.map((check) => {
-                // const stats = summaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
-                const stats = MOCK_SUMMARY_MAP?.[check.id]
-                const status =
-                  stats.failed === 0 ? "success" : stats.passed === 0 ? "failed" : "partial"
-                const statusBadge = {
-                  success: {
-                    label: "All passed",
-                    className: "bg-green-300 text-green-800",
-                    icon: CheckCircle,
-                  },
-                  failed: {
-                    label: "All failed",
-                    className: "bg-red-300 text-red-800",
-                    icon: XCircle,
-                  },
-                  partial: {
-                    label: "Partial",
-                    className: "bg-amber-100 text-amber-800",
-                    icon: AlertTriangle,
-                  },
-                }[status]
-                return (
-                  <Accordion className="w-full" key={check.id} type="single" collapsible>
-                    <AccordionItem
-                      className="bg-accent w-full rounded-lg border px-4 font-mono text-xs backdrop-blur-sm"
-                      value={String(check.id)}
-                    >
-                      <AccordionTrigger className="py-4 hover:no-underline">
-                        <div className="flex flex-1 items-center justify-between pr-4">
-                          {/* Context/Left Block */}
-                          <div className="text-left font-sans">
-                            <p className="text-foreground text-sm font-semibold">
-                              {dbMap[check.client_db]} · {frameworkMap[check.framework]}
-                            </p>
-                            <div className="flex flex-row items-center gap-1">
-                              <Badge className={`${statusBadge.className} gap-1`}>
-                                <statusBadge.icon className="h-3 w-3" />
-                                {statusBadge.label}
-                              </Badge>
-                              <Badge className="gap-1 bg-green-100 text-green-800">
-                                <CheckCircle className="h-3 w-3" />
-                                {stats.passed} passed
-                              </Badge>
-                              <Badge className="gap-1 bg-red-100 text-red-800">
-                                <XCircle className="h-3 w-3" />
-                                {stats.failed} failed
-                              </Badge>
-                              <Badge className="bg-secondary text-secondary-foreground gap-1">
-                                <List className="h-3 w-3" />
-                                {stats.total} total
-                              </Badge>
+            <div className="flex flex-col gap-3 px-4">
+              {checkLoading || isAssertionsLoading ? (
+                <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-16 text-sm">
+                  <Loader className="h-8 w-8 animate-spin items-center text-indigo-500" />
+                </div>
+              ) : checkError ? (
+                // TODO: Maybe have a refresh button on the error.
+                <div className="text-muted-foreground flex items-center justify-center gap-2 py-16 text-sm">
+                  <XCircle className="h-8 w-8 text-red-500" />
+                  Failed to load checks.
+                </div>
+              ) : checkData?.results?.length === 0 ? (
+                <div className="text-muted-foreground flex items-center justify-center gap-2 py-16 text-sm">
+                  <List className="h-8 w-8" />
+                  No checks found.
+                </div>
+              ) : (
+                MOCK_CHECKS_RESPONSE.results.map((check) => {
+                  // const stats = summaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
+                  const stats = MOCK_SUMMARY_MAP?.[check.id]
+                  const status =
+                    stats.failed === 0 ? "success" : stats.passed === 0 ? "failed" : "partial"
+                  const statusBadge = {
+                    success: {
+                      label: "All passed",
+                      className: "bg-green-300 text-green-800",
+                      icon: CheckCircle,
+                    },
+                    failed: {
+                      label: "All failed",
+                      className: "bg-red-300 text-red-800",
+                      icon: XCircle,
+                    },
+                    partial: {
+                      label: "Partial",
+                      className: "bg-amber-100 text-amber-800",
+                      icon: AlertTriangle,
+                    },
+                  }[status]
+                  return (
+                    <Accordion className="w-full" key={check.id} type="single" collapsible>
+                      <AccordionItem
+                        className="bg-accent w-full rounded-lg border px-4 font-mono text-xs backdrop-blur-sm"
+                        value={String(check.id)}
+                      >
+                        <AccordionTrigger className="py-4 hover:no-underline">
+                          <div className="flex flex-1 items-center justify-between pr-4">
+                            {/* Context/Left Block */}
+                            <div className="text-left font-sans">
+                              <p className="text-foreground text-sm font-semibold">
+                                {dbMap[check.client_db]} · {frameworkMap[check.framework]}
+                              </p>
+                              <div className="flex flex-row items-center gap-1">
+                                <Badge className={`${statusBadge.className} gap-1`}>
+                                  <statusBadge.icon className="h-3 w-3" />
+                                  {statusBadge.label}
+                                </Badge>
+                                {stats.passed > 0 && (
+                                  <Badge className="gap-1 bg-green-100 text-green-800">
+                                    <CheckCircle className="h-3 w-3" />
+                                    {stats.passed} passed
+                                  </Badge>
+                                )}
+                                {stats.failed > 0 && (
+                                  <Badge className="gap-1 bg-red-100 text-red-800">
+                                    <XCircle className="h-3 w-3" />
+                                    {stats.failed} failed
+                                  </Badge>
+                                )}
+                                <Badge className="bg-secondary text-secondary-foreground gap-1">
+                                  <List className="h-3 w-3" />
+                                  {stats.total} total
+                                </Badge>
+                              </div>
                             </div>
-                            {/* <p className="text-muted-foreground text-xs">{dbName}</p> */}
+                            {/* On the far right end of a check, it shows check ID*/}
+                            <span className="text-muted-foreground self-start pt-[1.1px] font-mono text-xs">
+                              #{check.id}
+                            </span>
                           </div>
+                        </AccordionTrigger>
 
-                          {/* <div className="flex items-center gap-3 text-xs"></div> */}
-                          <span className="text-muted-foreground self-start pt-[1.1px] font-mono text-xs">
-                            #{check.id}
-                          </span>
-                        </div>
-                      </AccordionTrigger>
-
-                      <AccordionContent className="px-4 pb-4">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(check.date).toLocaleString()}
-                        </div>
-                        <Separator className="my-1" />
-                        <div className="grid grid-cols-4 gap-3">
-                          {[
-                            {
-                              label: "framework",
-                              name: frameworkMap[check.framework],
-                            },
-                            {
-                              label: "schema",
-                              name: check.schema,
-                            },
-                            {
-                              label: "client database",
-                              name: dbMap[check.client_db],
-                            },
-                            {
-                              label: "user",
-                              name: check.user,
-                            },
-                          ].map(({ label, name }) => (
-                            <div key={label} className="bg-card flex flex-col gap-1 rounded-lg p-3">
-                              <span className="text-muted-foreground text-xs">{label}</span>
-                              <span className={`text-sm font-medium`}>{name}</span>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="text-muted-foreground flex flex-col items-center justify-between text-xs">
+                        <AccordionContent className="px-4 pb-4">
+                          {/* Date */}
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(check.date).toLocaleString()}
+                          </div>
                           <Separator className="my-1" />
-                          <div className="w-full">
-                            <div className="mt-1 mb-1 flex justify-between">
-                              <span>Pass rate</span>
-                              <span>{Math.round((stats.passed / stats.total) * 100)}%</span>
-                            </div>
-                            <div className="bg-card h-1.5 rounded-full">
+                          {/* General Info */}
+                          <div className="grid grid-cols-4 gap-3">
+                            {[
+                              {
+                                label: "framework",
+                                name: frameworkMap[check.framework],
+                              },
+                              {
+                                label: "schema",
+                                name: check.schema,
+                              },
+                              {
+                                label: "client database",
+                                name: dbMap[check.client_db],
+                              },
+                              {
+                                label: "user",
+                                name: check.user,
+                              },
+                            ].map(({ label, name }) => (
                               <div
-                                className={`h-1.5 rounded-full ${status === "success" ? "bg-green-500" : status === "failed" ? "bg-red-500" : "bg-amber-500"}`}
-                                style={{
-                                  width: `${Math.round((stats.passed / stats.total) * 100)}%`,
-                                }}
-                              />
+                                key={label}
+                                className="bg-card flex flex-col gap-1 rounded-lg p-3"
+                              >
+                                <span className="text-muted-foreground text-xs">{label}</span>
+                                <span className={`text-sm font-medium`}>{name}</span>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="text-muted-foreground flex flex-col items-center justify-between text-xs">
+                            <Separator className="my-1" />
+                            <div className="w-full">
+                              {/* Pass rate bar (passed/failed on assertions) */}
+                              <div className="mt-1 mb-1 flex justify-between">
+                                <span>Pass rate</span>
+                                <span>{Math.round((stats.passed / stats.total) * 100)}%</span>
+                              </div>
+                              <div className="h-1.5 rounded-full bg-red-800">
+                                <div
+                                  className={`h-1.5 rounded-full ${status === "success" ? "bg-green-500" : status === "failed" ? "bg-red-500" : "bg-amber-500"}`}
+                                  style={{
+                                    width: `${Math.round((stats.passed / stats.total) * 100)}%`,
+                                  }}
+                                />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                )
-              })}
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  )
+                })
+              )}
             </div>
           </ScrollArea>
         </main>
         <div className="bg-card border-t p-4">
-          <h2>Kill</h2>
           <Pagination
             page={filters.page || 1}
             totalPages={totalPages}
             totalCount={totalCount}
-            isFetching={isPlaceholderData} // Use this to show a loading state on the buttons
+            isFetching={isPlaceholderData}
             onPageChange={handlePageChange}
             size="sm"
           />
