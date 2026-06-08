@@ -1,11 +1,14 @@
 import { toAPIError } from "@/lib/utils"
 import axios from "axios"
 import createAuthRefreshInterceptor from "axios-auth-refresh"
+import qs from "qs"
 import { useAuthStore } from "../stores/useAuthStore"
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
   withCredentials: true,
+  paramsSerializer: (params) => qs.stringify(params, { arrayFormat: "repeat" }),
+  // This paramsSerializer allows for using arrays when fetching!
 })
 
 api.interceptors.request.use((config) => {

@@ -1,5 +1,6 @@
 import type { CheckFilters } from "@/api/check"
 import Pagination from "@/components/Pagination"
+import SortsControls from "@/components/SortsControls"
 import {
   Accordion,
   AccordionContent,
@@ -15,7 +16,7 @@ import { useChecks } from "@/hooks/useChecks"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAssertionsByChecks } from "@/hooks/useDataAggregation"
 import { useFrameworks } from "@/hooks/useFrameworks"
-import { AlertTriangle, Calendar, CheckCircle, List, XCircle } from "lucide-react"
+import { AlertTriangle, Box, Calendar, CheckCircle, Database, List, XCircle } from "lucide-react"
 import { useState } from "react"
 
 export const MOCK_CHECKS_RESPONSE = {
@@ -38,11 +39,12 @@ export const MOCK_SUMMARY_MAP: Record<number, { passed: number; failed: number; 
 export default function ChecksPage() {
   const [filters, setFilters] = useState<CheckFilters>({
     page: 1,
-    ordering: "-date",
+    ordering: ["-date"],
     client_db: undefined,
     framework: undefined,
   })
   const handlePageChange = (newPage: number) => {
+    console.log("Kill a man, save a horse")
     setFilters((prev) => ({ ...prev, page: newPage }))
   }
   const {
@@ -51,7 +53,6 @@ export default function ChecksPage() {
     isError: checkError,
     isPlaceholderData,
   } = useChecks(filters)
-  const { data: dbs, isLoading: dbsLoading, isError: dbsError } = useAllClientDBs()
   const currentCheckIds = checkData?.results?.map((check) => check.id) ?? []
 
   // For data aggregation
@@ -73,10 +74,25 @@ export default function ChecksPage() {
   return (
     <TooltipProvider>
       <div className="flex h-full w-full flex-col">
-        <header className="p-6">
-          <h1 className="text-2xl font-bold">Compliance Checks</h1>
-          <p className="text-foreground">View the history of all performed checks.</p>
-        </header>
+        <div className="flex items-center justify-between">
+          <header className="p-6">
+            <h1 className="text-2xl font-bold">Compliance Checks</h1>
+            <p className="text-foreground">View the history of all performed checks.</p>
+          </header>
+
+          <div className="flex items-center gap-2 px-6 pb-2">
+            <SortsControls
+              value={filters.ordering ?? ["-date"]}
+              onChange={(ordering) => setFilters((prev) => ({ ...prev, ordering, page: 1 }))}
+              options={[
+                { label: "Date", value: "date", icon: Calendar, alwaysActive: true },
+                { label: "Client DB", value: "client_db", icon: Database },
+                { label: "Framework", value: "framework", icon: Box },
+              ]}
+            />
+          </div>
+        </div>
+
         <main className="flex min-h-0 w-full flex-1 flex-col gap-2">
           <ScrollArea className="max-h-full min-h-0 flex-1">
             <div className="flex flex-col gap-3 px-4">
@@ -96,9 +112,9 @@ export default function ChecksPage() {
                   No checks found.
                 </div>
               ) : (
-                MOCK_CHECKS_RESPONSE.results.map((check) => {
-                  // const stats = summaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
-                  const stats = MOCK_SUMMARY_MAP?.[check.id]
+                checkData?.results.map((check) => {
+                  const stats = summaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
+                  // const stats = MOCK_SUMMARY_MAP?.[check.id]
                   const status =
                     stats.failed === 0 ? "success" : stats.passed === 0 ? "failed" : "partial"
                   const statusBadge = {
