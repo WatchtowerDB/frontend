@@ -186,16 +186,16 @@ export default function ChecksPage() {
                         <div className="grid grid-cols-4 gap-3">
                           {[
                             {
+                              label: "client database",
+                              name: dbMap[check.client_db],
+                            },
+                            {
                               label: "framework",
                               name: frameworkMap[check.framework],
                             },
                             {
                               label: "schema",
                               name: check.schema,
-                            },
-                            {
-                              label: "client database",
-                              name: dbMap[check.client_db],
                             },
                             {
                               label: "user",
