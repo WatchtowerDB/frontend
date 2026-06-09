@@ -29,7 +29,7 @@ export default function SortsControls({ options, value, onChange }: SortControls
       // ascending to descending
       onChange(value.map((v) => (v === option.value ? `-${option.value}` : v)))
     } else if (isDesc) {
-      // descending to inactive (but only if not alwaysActive)
+      // descending to inactive (but only if there's at least a single selected sort)
       if (value.length === 1) {
         onChange(value.map((v) => (v === `-${option.value}` ? option.value : v)))
       } else {
