@@ -83,7 +83,7 @@ export default function ChecksPage() {
             value={filters.ordering ?? ["-date"]}
             onChange={(ordering) => setFilters((prev) => ({ ...prev, ordering, page: 1 }))}
             options={[
-              { label: "Date", value: "date", icon: Calendar, alwaysActive: true },
+              { label: "Date", value: "date", icon: Calendar },
               { label: "Client DB", value: "client_db", icon: Database },
               { label: "Framework", value: "framework", icon: Box },
             ]}

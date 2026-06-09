@@ -215,7 +215,7 @@ export default function AssertionReport({
           })()}
         </ScrollArea>
       </div>
-      <div className="border-t bg-white px-6 transition-colors duration-200 dark:bg-slate-950">
+      <div className="border-t px-6 transition-colors duration-200">
         <Alert className="rounded-none border-none bg-transparent p-0 py-3">
           <AlertDescription className="text-muted-foreground text-center text-[10px] leading-relaxed tracking-widest uppercase">
             All responses are AI-generated and may not always be accurate or complete. They should
