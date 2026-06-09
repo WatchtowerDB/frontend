@@ -25,7 +25,12 @@ export default function SqlBlock({ query, label }: { query: string; label: strin
       <span className="absolute top-2 left-3 z-10 font-mono text-[10px] tracking-widest text-slate-500 uppercase">
         {label}
       </span>
-      <CopyButton textToCopy={query} variant={"ghost"} className="absolute top-1 right-1" />
+      <CopyButton
+        textToCopy={query}
+        variant={"ghost"}
+        className="absolute top-1 right-1"
+        size={"xs"}
+      />
       <SyntaxHighlighter
         language="sql"
         style={isDark ? dark : light}
