@@ -33,7 +33,7 @@ export function useAllChecks() {
   })
 }
 
-// Retrieves it per page, I am keeping it incase this ends up being used in the implmenetation for the checks list.
+// Retrieves it per page with filter.
 export function useChecks(filters?: CheckFilters) {
   return useQuery({
     queryKey: ["checks", "list", filters ?? {}],
