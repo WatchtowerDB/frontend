@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import Loader from "@/components/ui/loader"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useChecks } from "@/hooks/useChecks"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAssertionsByChecks } from "@/hooks/useDataAggregation"
@@ -64,11 +65,14 @@ export default function ChecksPage() {
 
   // For jumping to an assertion
   const setComplianceCheckId = useAssertionStore((s) => s.setComplianceCheckId)
-  const Navigate = useNavigate()
+  const navigate = useNavigate()
 
   // For pagination
   const totalCount = checkData?.count || 0
   const totalPages = Math.ceil(totalCount / (Number(import.meta.env.VITE_DEFAULT_PAGE_SIZE) || 20))
+
+  // TODO: If it's generating, it would not show most of these elements.
+  // To be added when we get generating status on checks/assertions.
   return (
     <div className="flex h-full w-full flex-col">
       <div className="flex items-center justify-between">
@@ -91,57 +95,62 @@ export default function ChecksPage() {
       </div>
 
       <main className="flex min-h-0 w-full flex-1 flex-col gap-2">
-        <ScrollArea className="max-h-full min-h-0 flex-1">
-          <div className="flex flex-col gap-3 px-4">
-            {checkLoading || isAssertionsLoading ? (
-              <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-16 text-sm">
-                <Loader className="h-8 w-8 animate-spin items-center text-indigo-500" />
-              </div>
-            ) : checkError ? (
-              // TODO: Maybe have a refresh button on the error. Probably put it on all lists in one commit at some point.
-              <div className="text-muted-foreground flex items-center justify-center gap-2 py-16 text-sm">
-                <XCircle className="h-8 w-8 text-red-500" />
-                Failed to load checks.
-              </div>
-            ) : checkData?.results?.length === 0 ? (
-              <div className="text-muted-foreground flex items-center justify-center gap-2 py-16 text-sm">
-                <List className="h-8 w-8" />
-                No checks found.
-              </div>
-            ) : (
-              checkData?.results.map((check) => {
-                const stats = summaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
-                const status =
-                  stats.failed === 0 ? "success" : stats.passed === 0 ? "failed" : "partial"
-                const statusBadge = {
-                  success: {
-                    label: "All passed",
-                    className: "bg-green-300 text-green-800",
-                    icon: CheckCircle,
-                  },
-                  failed: {
-                    label: "All failed",
-                    className: "bg-red-300 text-red-800",
-                    icon: XCircle,
-                  },
-                  partial: {
-                    label: "Partial",
-                    className: "bg-amber-100 text-amber-800",
-                    icon: AlertTriangle,
-                  },
-                }[status]
-                return (
-                  <Accordion className="w-full" key={check.id} type="single" collapsible>
+        {checkLoading || isAssertionsLoading ? (
+          <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-2 text-sm">
+            <Loader className="h-8 w-8 animate-spin items-center text-indigo-500" />
+          </div>
+        ) : checkError ? (
+          // TODO: Maybe have a refresh button on the error. Probably put it on all lists in one commit at some point.
+          <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2 text-sm">
+            <XCircle className="h-8 w-8 text-red-500" />
+            Failed to load checks.
+          </div>
+        ) : checkData?.results?.length === 0 ? (
+          <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2 text-sm">
+            <List className="h-8 w-8" />
+            No checks found.
+          </div>
+        ) : (
+          <ScrollArea className="max-h-full min-h-0 flex-1">
+            <div className="px-4 pb-4">
+              <Accordion className="flex w-full flex-col gap-3" type="multiple">
+                {checkData?.results.map((check) => {
+                  const stats = summaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
+                  const status =
+                    stats.failed === 0 ? "success" : stats.passed === 0 ? "failed" : "partial"
+                  const statusBadge = {
+                    success: {
+                      label: "All passed",
+                      className: "bg-green-300 text-green-800",
+                      icon: CheckCircle,
+                    },
+                    failed: {
+                      label: "All failed",
+                      className: "bg-red-300 text-red-800",
+                      icon: XCircle,
+                    },
+                    partial: {
+                      label: "Partial",
+                      className: "bg-amber-100 text-amber-800",
+                      icon: AlertTriangle,
+                    },
+                  }[status]
+                  return (
                     <AccordionItem
+                      key={check.id}
                       className="bg-accent w-full rounded-lg border px-4 font-mono text-xs backdrop-blur-sm"
                       value={String(check.id)}
                     >
                       <AccordionTrigger className="py-4 hover:no-underline">
                         <div className="flex flex-1 items-center justify-between pr-4">
                           {/* Context/Left Block */}
-                          <div className="text-left font-sans">
-                            <p className="text-foreground text-sm font-semibold">
-                              {dbMap[check.client_db]} · {frameworkMap[check.framework]}
+                          <div className="flex flex-col gap-1 text-left font-sans">
+                            <p className="text-foreground ms-0.5 text-sm font-semibold">
+                              {dbMap[check.client_db] ? (
+                                `${dbMap[check.client_db]} · ${frameworkMap[check.framework]}`
+                              ) : (
+                                <Skeleton className="mb-2 h-4 w-32" />
+                              )}
                             </p>
                             <div className="flex flex-row items-center gap-1">
                               <Badge className={`${statusBadge.className} gap-1`}>
@@ -166,7 +175,7 @@ export default function ChecksPage() {
                               </Badge>
                             </div>
                           </div>
-                          {/* On the far right end of a check, it shows check ID*/}
+                          {/* On the far right end of a check, it shows check ID */}
                           <span className="text-muted-foreground self-start pt-[1.1px] font-mono text-xs">
                             #{check.id}
                           </span>
@@ -202,7 +211,7 @@ export default function ChecksPage() {
                           ].map(({ label, name }) => (
                             <div key={label} className="bg-card flex flex-col gap-1 rounded-lg p-3">
                               <span className="text-muted-foreground text-xs">{label}</span>
-                              <span className={`text-sm font-medium`}>{name}</span>
+                              <span className="text-sm font-medium">{name}</span>
                             </div>
                           ))}
                         </div>
@@ -234,7 +243,7 @@ export default function ChecksPage() {
                                 size="sm"
                                 onClick={() => {
                                   setComplianceCheckId(check.id)
-                                  Navigate("/compliance/assertions")
+                                  navigate("/compliance/assertions")
                                 }}
                               >
                                 Jump to assertions
@@ -245,13 +254,14 @@ export default function ChecksPage() {
                         </div>
                       </AccordionContent>
                     </AccordionItem>
-                  </Accordion>
-                )
-              })
-            )}
-          </div>
-        </ScrollArea>
+                  )
+                })}
+              </Accordion>
+            </div>
+          </ScrollArea>
+        )}
       </main>
+
       {/* Pagination */}
       <div className="bg-background border-t p-4">
         <Pagination
