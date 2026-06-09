@@ -9,8 +9,6 @@ export interface CheckFilters {
   // Pagination & Sorting
   page?: number
   ordering?: string[]
-  // TODO: Axios is a smart cookie that can take an array and automatically handle the params.
-  // Make all ordering an array.
 }
 
 // to retrieve compliance checks per page

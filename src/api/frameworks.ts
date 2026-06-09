@@ -9,7 +9,7 @@ export interface FrameworkFilters {
   search?: string
   // Pagination & Sorting
   page?: number
-  ordering?: string
+  ordering?: string[]
 }
 
 // To retrieve frameworks per page

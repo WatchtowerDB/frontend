@@ -18,7 +18,7 @@ interface AssertionFilterState {
 
   // --- Pagination & Sorting ---
   page: number
-  ordering: string | null
+  ordering: string[] | null
 }
 
 interface AssertionFilterActions {
@@ -30,7 +30,7 @@ interface AssertionFilterActions {
   setFilterSearch: (query: string) => void
   setAssertionSearch: (query: string) => void
   setPage: (page: number) => void
-  setOrdering: (ordering: string | null) => void
+  setOrdering: (ordering: string[] | null) => void
 
   // Derives the AssertionFilters object the hook expects.
   getApiFilters: () => AssertionFilters & { page: number }

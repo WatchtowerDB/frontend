@@ -13,7 +13,7 @@ import type { UseQueryResult } from "@tanstack/react-query"
 //   framework?: number
 //   // Pagination & Sorting
 //   page?: number
-//   ordering?: string
+//   ordering?: string[]
 // }
 
 // For the bar chart in the compliance/summary page.

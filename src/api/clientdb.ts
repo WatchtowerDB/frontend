@@ -7,7 +7,7 @@ export interface ClientDBFilters {
   name?: string
   // Pagination & Sorting
   page?: number
-  ordering?: string
+  ordering?: string[]
 }
 
 // To retrieve client databases per page

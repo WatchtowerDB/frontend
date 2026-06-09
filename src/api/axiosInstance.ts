@@ -8,7 +8,7 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
   withCredentials: true,
   paramsSerializer: (params) => qs.stringify(params, { arrayFormat: "repeat" }),
-  // This paramsSerializer allows for using arrays when fetching!
+  // Axios is now a smart cookie that can take an array and automatically handle the params thanks to this Serializer.
 })
 
 api.interceptors.request.use((config) => {

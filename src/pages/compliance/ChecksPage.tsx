@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import Loader from "@/components/ui/loader"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -15,27 +16,22 @@ import { useChecks } from "@/hooks/useChecks"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAssertionsByChecks } from "@/hooks/useDataAggregation"
 import { useFrameworks } from "@/hooks/useFrameworks"
-import { AlertTriangle, Box, Calendar, CheckCircle, Database, List, XCircle } from "lucide-react"
+import { useAssertionStore } from "@/stores/useAssertionStore"
+import {
+  AlertTriangle,
+  ArrowRight,
+  Box,
+  Calendar,
+  CheckCircle,
+  Database,
+  List,
+  XCircle,
+} from "lucide-react"
 import { useState } from "react"
-
-export const MOCK_CHECKS_RESPONSE = {
-  count: 4,
-  results: [
-    { id: 5001, client_db: 3, framework: 0, schema: 1, user: 42, date: "2026-06-05T14:30:00Z" },
-    { id: 5002, client_db: 4, framework: 1, schema: 2, user: 19, date: "2026-06-06T09:15:00Z" },
-    { id: 5003, client_db: 3, framework: 1, schema: 1, user: 42, date: "2026-06-06T11:00:00Z" },
-    { id: 5004, client_db: 4, framework: 0, schema: 2, user: 0, date: "2026-06-06T11:59:00Z" },
-  ],
-}
-
-export const MOCK_SUMMARY_MAP: Record<number, { passed: number; failed: number; total: number }> = {
-  5001: { passed: 45, failed: 0, total: 45 }, // Triggers: "success" (All passed)
-  5002: { passed: 0, failed: 12, total: 12 }, // Triggers: "failed"  (All failed)
-  5003: { passed: 35, failed: 15, total: 50 }, // Triggers: "partial" (70% Pass Rate)
-  5004: { passed: 1, failed: 1, total: 2 }, // Triggers: "partial" (50% Pass Rate Boundary)
-}
+import { useNavigate } from "react-router-dom"
 
 export default function ChecksPage() {
+  // For filtering & handling the pages
   const [filters, setFilters] = useState<CheckFilters>({
     page: 1,
     ordering: ["-date"],
@@ -43,7 +39,6 @@ export default function ChecksPage() {
     framework: undefined,
   })
   const handlePageChange = (newPage: number) => {
-    console.log("Kill a man, save a horse")
     setFilters((prev) => ({ ...prev, page: newPage }))
   }
   const {
@@ -66,6 +61,10 @@ export default function ChecksPage() {
   const dbMap = clientDBs?.results
     ? Object.fromEntries(clientDBs.results.map((f) => [f.id, f.name]))
     : {}
+
+  // For jumping to an assertion
+  const setComplianceCheckId = useAssertionStore((s) => s.setComplianceCheckId)
+  const Navigate = useNavigate()
 
   // For pagination
   const totalCount = checkData?.count || 0
@@ -99,7 +98,7 @@ export default function ChecksPage() {
                 <Loader className="h-8 w-8 animate-spin items-center text-indigo-500" />
               </div>
             ) : checkError ? (
-              // TODO: Maybe have a refresh button on the error.
+              // TODO: Maybe have a refresh button on the error. Probably put it on all lists in one commit at some point.
               <div className="text-muted-foreground flex items-center justify-center gap-2 py-16 text-sm">
                 <XCircle className="h-8 w-8 text-red-500" />
                 Failed to load checks.
@@ -112,7 +111,6 @@ export default function ChecksPage() {
             ) : (
               checkData?.results.map((check) => {
                 const stats = summaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
-                // const stats = MOCK_SUMMARY_MAP?.[check.id]
                 const status =
                   stats.failed === 0 ? "success" : stats.passed === 0 ? "failed" : "partial"
                 const statusBadge = {
@@ -212,18 +210,36 @@ export default function ChecksPage() {
                         <div className="text-muted-foreground flex flex-col items-center justify-between text-xs">
                           <Separator className="my-1" />
                           <div className="w-full">
-                            {/* Pass rate bar (passed/failed on assertions) */}
-                            <div className="mt-1 mb-1 flex justify-between">
-                              <span>Pass rate</span>
-                              <span>{Math.round((stats.passed / stats.total) * 100)}%</span>
-                            </div>
-                            <div className="h-1.5 rounded-full bg-red-800">
-                              <div
-                                className={`h-1.5 rounded-full ${status === "success" ? "bg-green-500" : status === "failed" ? "bg-red-500" : "bg-amber-500"}`}
-                                style={{
-                                  width: `${Math.round((stats.passed / stats.total) * 100)}%`,
+                            {/* Pass rate bar & jump to assertions button */}
+                            <div className="mt-2 flex items-center gap-4">
+                              {/* Pass rate bar (passed/failed on assertions) */}
+                              <div className="flex-1">
+                                <div className="flex justify-between">
+                                  <span>Pass rate</span>
+                                  <span>{Math.round((stats.passed / stats.total) * 100)}%</span>
+                                </div>
+                                <div className="h-1.5 rounded-full bg-red-800">
+                                  <div
+                                    className={`h-1.5 rounded-full ${status === "success" ? "bg-green-500" : status === "failed" ? "bg-red-500" : "bg-amber-500"}`}
+                                    style={{
+                                      width: `${Math.round((stats.passed / stats.total) * 100)}%`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                              {/* Jump to assertions button */}
+                              <Button
+                                className="self-center"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setComplianceCheckId(check.id)
+                                  Navigate("/compliance/assertions")
                                 }}
-                              />
+                              >
+                                Jump to assertions
+                                <ArrowRight className="h-3.5 w-3.5" />
+                              </Button>
                             </div>
                           </div>
                         </div>
@@ -236,6 +252,7 @@ export default function ChecksPage() {
           </div>
         </ScrollArea>
       </main>
+      {/* Pagination */}
       <div className="bg-background border-t p-4">
         <Pagination
           page={filters.page || 1}
