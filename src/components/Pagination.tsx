@@ -50,6 +50,15 @@ export default function Pagination({
         {showTotal && totalCount !== undefined && (
           <span className={cn("text-muted-foreground", textSize)}>{totalCount} total</span>
         )}
+        <Button
+          onClick={() => console.log("page, total count, totalpages", page, totalCount, totalPages)}
+        >
+          <img
+            src="/mambo.jpg"
+            alt="Print the stuff"
+            className="h-6 w-6 rounded-sm object-contain"
+          />
+        </Button>
       </div>
     )
 
@@ -60,6 +69,17 @@ export default function Pagination({
       )}
       <div className={cn("ml-auto flex items-center gap-2")}>
         <div className="flex flex-row items-center gap-1">
+          <Button
+            onClick={() =>
+              console.log("page, total count, totalpages", page, totalCount, totalPages)
+            }
+          >
+            <img
+              src="/mambo.jpg"
+              alt="Print the stuff"
+              className="h-6 w-6 rounded-sm object-contain"
+            />
+          </Button>
           <Tooltip delayDuration={500}>
             <TooltipTrigger asChild>
               <Button

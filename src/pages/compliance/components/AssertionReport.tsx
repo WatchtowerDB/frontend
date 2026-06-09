@@ -10,11 +10,10 @@ import Loader from "@/components/ui/loader"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAssertionDetails } from "@/hooks/useAssertions"
 import { cn } from "@/lib/utils"
 import { useComplianceCheckStore, type LiveAssertion } from "@/stores/useComplianceCheckStore"
-
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { AssertionItem } from "@/types/compliance"
 
 interface AssertionReportProps {

@@ -27,7 +27,7 @@ export function RefreshAssertionsButton() {
       <TooltipTrigger asChild>
         <Button
           onClick={handleRefresh}
-          variant={"outline"}
+          variant={"default"}
           disabled={isRefreshing}
           className="p-2 text-slate-500 transition-colors hover:text-slate-900 disabled:opacity-50 dark:hover:text-slate-100"
           aria-label="Refresh compilation audit data"

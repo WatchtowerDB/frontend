@@ -24,7 +24,7 @@ export default function AssertionsHeader({
   return (
     <div className={cn("w-full", className)}>
       <div className="flex w-full flex-row items-center justify-between gap-1">
-        <Button className="flex-1" variant="outline" onClick={() => setIsRunDialogOpen(true)}>
+        <Button className="flex-1" variant="default" onClick={() => setIsRunDialogOpen(true)}>
           Run Compliance Check
         </Button>
         <RefreshAssertionsButton />
@@ -32,7 +32,7 @@ export default function AssertionsHeader({
           <TooltipTrigger asChild>
             <Button
               onClick={onJumpToStreaming}
-              variant={"outline"}
+              variant={"default"}
               disabled={!hasStreaming}
               className="p-2 text-red-500 transition-colors hover:text-red-700 disabled:text-slate-500 disabled:opacity-50 dark:hover:text-slate-100"
               aria-label="Jump to running assertion"
