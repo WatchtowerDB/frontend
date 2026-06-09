@@ -236,7 +236,7 @@ export default function ChecksPage() {
           </div>
         </ScrollArea>
       </main>
-      <div className="bg-card border-t p-4">
+      <div className="bg-background border-t p-4">
         <Pagination
           page={filters.page || 1}
           totalPages={totalPages}

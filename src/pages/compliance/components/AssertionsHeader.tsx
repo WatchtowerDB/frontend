@@ -34,7 +34,7 @@ export default function AssertionsHeader({
               onClick={onJumpToStreaming}
               variant={"default"}
               disabled={!hasStreaming}
-              className="p-2 text-red-500 transition-colors hover:text-red-700 disabled:text-slate-500 disabled:opacity-50 dark:hover:text-slate-100"
+              className="disabled:text-foreground p-2 text-red-500 transition-colors hover:text-red-700 disabled:opacity-50 dark:hover:text-red-500"
               aria-label="Jump to running assertion"
             >
               <FastForward />
