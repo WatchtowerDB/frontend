@@ -50,15 +50,6 @@ export default function Pagination({
         {showTotal && totalCount !== undefined && (
           <span className={cn("text-muted-foreground", textSize)}>{totalCount} total</span>
         )}
-        <Button
-          onClick={() => console.log("page, total count, totalpages", page, totalCount, totalPages)}
-        >
-          <img
-            src="/mambo.jpg"
-            alt="Print the stuff"
-            className="h-6 w-6 rounded-sm object-contain"
-          />
-        </Button>
       </div>
     )
 
