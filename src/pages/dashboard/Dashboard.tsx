@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Loader from "@/components/ui/loader"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -9,14 +11,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useLatestCheck } from "@/hooks/useChecks"
+import { useChecks } from "@/hooks/useChecks"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
+import { useAssertionsByChecks } from "@/hooks/useDataAggregation"
 import { useFrameworks } from "@/hooks/useFrameworks"
-import { cn } from "@/lib/utils"
+import { cn, timeAgo } from "@/lib/utils"
 import { useAssertionStore } from "@/stores/useAssertionStore"
 import {
   ArrowRight,
-  ArrowUpDown,
   BrainCircuit,
   Cpu,
   Database,
@@ -31,69 +33,56 @@ import { useNavigate } from "react-router-dom"
 import { AssertionsStatus, type ViewState } from "../compliance/components/AssertionsStatus"
 import RunCheckDialog from "../compliance/components/RunCheckDialog"
 
-const DUMMY_CHECKS = [
-  {
-    id: 7,
-    framework: "HIPAA v2024",
-    database: "prod-us-east",
-    date: "2026-06-03",
-    passed: 26,
-    total: 30,
-  },
-  {
-    id: 6,
-    framework: "SOC 2 Type II",
-    database: "analytics-db",
-    date: "2026-06-02",
-    passed: 11,
-    total: 18,
-  },
-  {
-    id: 5,
-    framework: "GDPR 2018",
-    database: "eu-customers",
-    date: "2026-06-01",
-    passed: 17,
-    total: 18,
-  },
-  {
-    id: 4,
-    framework: "HIPAA v2024",
-    database: "prod-us-east",
-    date: "2026-05-28",
-    passed: 22,
-    total: 30,
-  },
-  {
-    id: 3,
-    framework: "SOC 2 Type II",
-    database: "analytics-db",
-    date: "2026-05-25",
-    passed: 15,
-    total: 18,
-  },
-]
-
 const passRate = (passed: number, total: number) => Math.round((passed / total) * 100)
 
 const ResultBadge = ({ passed, total }: { passed: number; total: number }) => {
   const rate = passRate(passed, total)
-  const variant = rate >= 80 ? "default" : rate >= 60 ? "outline" : "destructive"
-  return <Badge variant={variant}>{rate}% pass</Badge>
+  const variant = rate === 100 ? "success" : rate > 0 ? "warning" : "destructive"
+  return <Badge variant={variant}>{rate}% passed</Badge>
+}
+
+const dummyChecks = [
+  { id: 101, client_db: 4, framework: "soc2", date: "2026-06-10T10:00:00Z" },
+  { id: 102, client_db: 3, framework: "iso27001", date: "2026-06-05T14:30:00Z" },
+  { id: 103, client_db: 2, framework: "hipaa", date: "2026-05-20T09:15:00Z" },
+  { id: 104, client_db: 1, framework: "gdpr", date: "2026-01-01T12:00:00Z" },
+  { id: 105, client_db: 2, framework: "soc2", date: "2026-06-11T08:00:00Z" },
+]
+
+const dummySummaryMap: Record<number, { passed: number; failed: number; total: number }> = {
+  101: { passed: 10, failed: 0, total: 10 }, // 100% - Success!
+  102: { passed: 0, failed: 5, total: 5 }, // 0% - Total Failure!
+  103: { passed: 7, failed: 3, total: 10 }, // 70% - Partial
+  104: { passed: 2, failed: 8, total: 10 }, // 20% - Partial (Mostly failing)
+  105: { passed: 15, failed: 0, total: 15 }, // 100% - Success!
 }
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const [sortAsc, setSortAsc] = useState(false)
   const [runCheckOpen, setRunCheckOpen] = useState(false)
   const [complianceStatus, setComplianceStatus] = useState<ViewState>("idle")
 
-  const setClientDb = useAssertionStore((s) => s.setClientDb)
-  const { data: dbs } = useAllClientDBs()
-  const { data: frameworks } = useFrameworks()
-  const { data: latestCheck } = useLatestCheck()
+  const setCheckId = useAssertionStore((s) => s.setComplianceCheckId)
+  const {
+    data: checkData,
+    isLoading: checkLoading,
+    // isError: checkError,
+    // isPlaceholderData,
+  } = useChecks({ page: 1, ordering: ["-date"] })
+  const currentCheckIds = checkData?.results?.map((check) => check.id) ?? []
+  const { summaryMap } = useAssertionsByChecks(currentCheckIds)
 
-  const sorted = [...DUMMY_CHECKS].sort((a, b) => (sortAsc ? a.id - b.id : b.id - a.id))
+  // For check details
+  const { data: frameworks } = useFrameworks()
+  const { data: clientDBs } = useAllClientDBs()
+  const frameworkMap = frameworks?.results
+    ? Object.fromEntries(frameworks.results.map((f) => [f.id, f.name]))
+    : {}
+  const dbMap = clientDBs?.results
+    ? Object.fromEntries(clientDBs.results.map((f) => [f.id, f.name]))
+    : {}
+
+  // const sorted = [...DUMMY_CHECKS].sort((a, b) => (sortAsc ? a.id - b.id : b.id - a.id))
   const formattedDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -159,18 +148,8 @@ export default function Dashboard() {
     text: modelStatusText,
   } = modelConfig[modelStatus]
 
-  // const stats = [
-  //   { label: "Databases", value: dbs?.count, sub: "connected" },
-  //   { label: "Frameworks", value: frameworks?.count, sub: "available" },
-  //   {
-  //     label: "Last check",
-  //     value: latestCheck ? timeAgo(new Date(latestCheck.date)) : "—",
-  //     sub: "ago",
-  //   },
-  //   { label: "Pass rate", value: "—", sub: "last check" },
-  // ]
   return (
-    <div className="flex flex-col gap-3 p-6">
+    <div className="flex h-full min-h-0 flex-col gap-3 p-6">
       {/* Greeting & Time */}
       <div className="flex flex-row items-center">
         <div>
@@ -214,7 +193,9 @@ export default function Dashboard() {
             <Database className="text-muted-foreground/40 size-5 transition-colors group-hover:text-blue-500" />
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="text-3xl font-medium">{dbs?.count ?? "—"}</p>
+            <p className="text-3xl font-medium">
+              {clientDBs?.count ?? <Skeleton className="mb-2 h-4 w-20 bg-gray-300" />}
+            </p>
             <p className="text-muted-foreground mt-1 text-xs">registered databases</p>
           </CardContent>
         </Card>
@@ -227,7 +208,9 @@ export default function Dashboard() {
             <Database className="text-muted-foreground/40 size-5 transition-colors group-hover:text-red-500" />
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="text-3xl font-medium">{dbs?.count ?? "—"}</p>
+            <p className="text-3xl font-medium">
+              {clientDBs?.count ?? <Skeleton className="mb-2 h-4 w-20 bg-gray-300" />}
+            </p>
             <p className="text-muted-foreground mt-1 text-xs">registered databases</p>
           </CardContent>
         </Card>
@@ -241,7 +224,7 @@ export default function Dashboard() {
             <Button
               size="sm"
               variant="outline"
-              className="w-full text-xs"
+              className={`w-full text-xs`}
               onClick={() =>
                 setModelStatus((s) => (s === "initialized" ? "uninitialized" : "initialized"))
               }
@@ -255,7 +238,7 @@ export default function Dashboard() {
         <RunCheckDialog open={runCheckOpen} onOpenChange={setRunCheckOpen} />
       </div>
       {/* Latest Checks Table */}
-      <Card className="bg-muted/50">
+      <Card className="bg-muted/50 flex flex-1 flex-col">
         <CardHeader className="px- flex flex-row items-center justify-between border-b">
           <div className="space-y-0.5">
             <CardTitle className="text-foreground text-base font-semibold tracking-tight">
@@ -269,50 +252,74 @@ export default function Dashboard() {
             variant="ghost"
             size="sm"
             className="text-muted-foreground text-xs"
-            onClick={() => navigate("/compliance/assertions")}
+            onClick={() => navigate("/compliance/checks")}
           >
             View all <ArrowRight size={14} className="ml-1" />
           </Button>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>
-                  <button
-                    className="hover:text-foreground flex items-center gap-1 text-xs transition-colors"
-                    onClick={() => setSortAsc((p) => !p)}
-                  >
-                    ID <ArrowUpDown size={12} />
-                  </button>
-                </TableHead>
-                <TableHead>Framework</TableHead>
-                <TableHead>Database</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Result</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sorted.map((check) => (
-                <TableRow
-                  key={check.id}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setClientDb(check.id)
-                    navigate(`/compliance/assertions`)
-                  }}
-                >
-                  <TableCell className="text-muted-foreground">#{check.id}</TableCell>
-                  <TableCell className="font-medium">{check.framework}</TableCell>
-                  <TableCell className="text-muted-foreground">{check.database}</TableCell>
-                  <TableCell className="text-muted-foreground">{check.date}</TableCell>
-                  <TableCell className="text-right">
-                    <ResultBadge passed={check.passed} total={check.total} />
-                  </TableCell>
+          {checkLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader className="h-6 w-6 animate-spin text-indigo-500" />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Database</TableHead>
+                  <TableHead>Framework</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Result</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {dummyChecks?.slice(0, 5).map((check) => {
+                  const stats = dummySummaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
+                  const status =
+                    stats.failed === 0 ? "success" : stats.passed === 0 ? "failed" : "partial"
+                  return (
+                    <TableRow
+                      key={check.id}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setCheckId(check.id)
+                        navigate(`/compliance/assertions`)
+                      }}
+                    >
+                      <TableCell className="text-muted-foreground">#{check.id}</TableCell>
+                      {/* Database */}
+                      <TableCell className="text-muted-foreground">
+                        {" "}
+                        {dbMap[check.client_db] ? (
+                          `${dbMap[check.client_db]}`
+                        ) : (
+                          <Skeleton className="mb-2 h-4 w-32" />
+                        )}
+                      </TableCell>
+                      {/* Framework */}
+                      <TableCell className="font-medium">
+                        {" "}
+                        {frameworkMap[check.framework] ? (
+                          `${frameworkMap[check.framework]}`
+                        ) : (
+                          <Skeleton className="mb-2 h-4 w-32" />
+                        )}
+                      </TableCell>
+                      {/* Date */}
+                      <TableCell className="text-muted-foreground">
+                        {timeAgo(new Date(check.date))}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <ResultBadge passed={stats.passed} total={stats.total} />
+                        {/* TODO: Make this have a skeleton too, or something. */}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
