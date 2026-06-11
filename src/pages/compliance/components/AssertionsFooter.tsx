@@ -1,5 +1,4 @@
 import Pagination from "@/components/Pagination"
-import { TooltipProvider } from "@/components/ui/tooltip"
 import { useAssertions } from "@/hooks/useAssertions"
 import { useAssertionStore } from "@/stores/useAssertionStore"
 
@@ -11,7 +10,7 @@ export default function AssertionsFooter() {
   console.log(totalPages)
 
   return (
-    <TooltipProvider>
+    <>
       {/* Pagination used in the Assertions List */}
       <Pagination
         className="m-1 ml-2"
@@ -22,6 +21,6 @@ export default function AssertionsFooter() {
         onPageChange={setPage}
         size="xs"
       />
-    </TooltipProvider>
+    </>
   )
 }

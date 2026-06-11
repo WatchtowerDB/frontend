@@ -13,6 +13,7 @@ import { AuthProvider } from "./context/AuthProvider"
 import { ProtectedRoute } from "./context/ProtectedRoute"
 import { ThemeProvider } from "./context/ThemeProvider"
 import AssertionsPage from "./pages/compliance/AssertionsPage"
+import ChecksPage from "./pages/compliance/ChecksPage"
 import SummaryPage from "./pages/compliance/SummaryPage"
 import Login from "./pages/login/Login"
 import NotFound from "./pages/not-found/NotFound"
@@ -62,6 +63,9 @@ export default function App() {
 
                     {/* The Sub-Route: Renders at /compliance/queries */}
                     <Route path="assertions" element={<AssertionsPage />} />
+
+                    {/* The Sub-Route: Renders at /compliance/checks */}
+                    <Route path="checks" element={<ChecksPage />} />
                   </Route>
 
                   <Route path="databases" element={<DatabasesLayout />}>

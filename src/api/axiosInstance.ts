@@ -1,11 +1,14 @@
 import { toAPIError } from "@/lib/utils"
 import axios from "axios"
 import createAuthRefreshInterceptor from "axios-auth-refresh"
+import qs from "qs"
 import { useAuthStore } from "../stores/useAuthStore"
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
   withCredentials: true,
+  paramsSerializer: (params) => qs.stringify(params, { arrayFormat: "repeat" }),
+  // Axios is now a smart cookie that can take an array and automatically handle the params thanks to this Serializer.
 })
 
 api.interceptors.request.use((config) => {
