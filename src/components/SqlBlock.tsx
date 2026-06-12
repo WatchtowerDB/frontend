@@ -20,7 +20,7 @@ export default function SqlBlock({
 }: {
   query: string
   label: string
-  copyButton: boolean
+  copyButton?: boolean
 }) {
   const { theme } = useTheme()
 
