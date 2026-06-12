@@ -330,7 +330,6 @@ export default function Dashboard() {
                         ) : (
                           <Skeleton className="ml-auto h-5 w-20" />
                         )}
-                        {/* TODO: Make this have a skeleton too, or something. */}
                       </TableCell>
                     </TableRow>
                   )
