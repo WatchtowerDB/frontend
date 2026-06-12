@@ -36,7 +36,8 @@ import RunCheckDialog from "../compliance/components/RunCheckDialog"
 // Helpers
 type ModelStatus = "uninitialized" | "loading" | "initialized" | "error"
 
-const passRate = (passed: number, total: number) => Math.round((passed / total) * 100)
+const passRate = (passed: number, total: number) =>
+  total === 0 ? 0 : Math.round((passed / total) * 100)
 
 const getGreeting = () => {
   const hour = new Date().getHours()
@@ -207,20 +208,20 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* IDK Some Bullshit Card */}
+        {/* Frameworks Card */}
         <Card
           className="hover:bg-muted group bg-muted/50 flex cursor-pointer flex-col transition-colors"
-          onClick={() => navigate("/databases")}
+          onClick={() => navigate("/frameworks")}
         >
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-xl">Idk Some bullshit</CardTitle>
+            <CardTitle className="text-xl">Available frameworks</CardTitle>
             <Database className="text-muted-foreground/40 size-5 transition-colors group-hover:text-red-500" />
           </CardHeader>
           <CardContent className="flex flex-1 flex-col justify-between pt-0">
             <p className="text-3xl font-medium">
-              {clientDBs?.count ?? <Skeleton className="mb-2 h-4 w-20 bg-gray-300" />}
+              {frameworks?.count ?? <Skeleton className="mb-2 h-4 w-20 bg-gray-300" />}
             </p>
-            <p className="text-muted-foreground mt-1 text-xs">registered databases</p>
+            <p className="text-muted-foreground mt-1 text-xs">registered frameworks</p>
           </CardContent>
         </Card>
 
@@ -228,12 +229,14 @@ export default function Dashboard() {
         <Card
           className={cn("bg-muted/50 flex flex-col border-r-2 transition-colors", modelBorderColor)}
         >
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-xl">AI model</CardTitle>
-            <BrainCircuit className={cn("size-5", modelIconColor)} />
+          <CardHeader className="flex flex-col gap-1 pb-2">
+            <div className="flex w-full flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-xl">AI model</CardTitle>
+              <BrainCircuit className={cn("size-5", modelIconColor)} />
+            </div>
+            <p className={cn("text-xs", modelTextColor)}>{modelStatusText}</p>
           </CardHeader>
           <CardContent className="flex flex-1 flex-col justify-between pt-0">
-            <p className={cn("text-xs", modelTextColor)}>{modelStatusText}</p>
             <Button
               size="sm"
               variant="outline"
@@ -288,9 +291,7 @@ export default function Dashboard() {
               </TableHeader>
               <TableBody>
                 {checkData?.results?.slice(0, 5).map((check) => {
-                  const stats = summaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
-                  // const status =
-                  //   stats.failed === 0 ? "success" : stats.passed === 0 ? "failed" : "partial"
+                  const stats = summaryMap?.[check.id]
                   return (
                     <TableRow
                       key={check.id}

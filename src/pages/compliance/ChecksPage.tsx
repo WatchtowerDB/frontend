@@ -25,6 +25,7 @@ import {
   Calendar,
   CheckCircle,
   Database,
+  Ellipsis,
   List,
   XCircle,
 } from "lucide-react"
@@ -115,9 +116,14 @@ export default function ChecksPage() {
             <div className="px-4 pb-4">
               <Accordion className="flex w-full flex-col gap-3" type="multiple">
                 {checkData?.results.map((check) => {
-                  const stats = summaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
-                  const status =
-                    stats.failed === 0 ? "success" : stats.passed === 0 ? "failed" : "partial"
+                  const stats = summaryMap?.[check.id]
+                  const status = !stats
+                    ? "loading"
+                    : stats.failed === 0
+                      ? "success"
+                      : stats.passed === 0
+                        ? "failed"
+                        : "partial"
                   const statusBadge = {
                     success: {
                       label: "All passed",
@@ -133,6 +139,11 @@ export default function ChecksPage() {
                       label: "Partial",
                       className: "bg-amber-100 text-amber-800",
                       icon: AlertTriangle,
+                    },
+                    loading: {
+                      label: "Loading…",
+                      className: "bg-muted text-muted-foreground animate-pulse",
+                      icon: Ellipsis,
                     },
                   }[status]
                   return (
@@ -157,22 +168,28 @@ export default function ChecksPage() {
                                 <statusBadge.icon className="h-3 w-3" />
                                 {statusBadge.label}
                               </Badge>
-                              {stats.passed > 0 && (
-                                <Badge className="gap-1 bg-green-100 text-green-800">
-                                  <CheckCircle className="h-3 w-3" />
-                                  {stats.passed} passed
-                                </Badge>
+                              {stats ? (
+                                <>
+                                  {stats.passed > 0 && (
+                                    <Badge className="gap-1 bg-green-100 text-green-800">
+                                      <CheckCircle className="h-3 w-3" />
+                                      {stats.passed} passed
+                                    </Badge>
+                                  )}
+                                  {stats.failed > 0 && (
+                                    <Badge className="gap-1 bg-red-100 text-red-800">
+                                      <XCircle className="h-3 w-3" />
+                                      {stats.failed} failed
+                                    </Badge>
+                                  )}
+                                  <Badge className="bg-secondary text-secondary-foreground gap-1">
+                                    <List className="h-3 w-3" />
+                                    {stats.total} total
+                                  </Badge>
+                                </>
+                              ) : (
+                                <Skeleton className="h-5 w-24" />
                               )}
-                              {stats.failed > 0 && (
-                                <Badge className="gap-1 bg-red-100 text-red-800">
-                                  <XCircle className="h-3 w-3" />
-                                  {stats.failed} failed
-                                </Badge>
-                              )}
-                              <Badge className="bg-secondary text-secondary-foreground gap-1">
-                                <List className="h-3 w-3" />
-                                {stats.total} total
-                              </Badge>
                             </div>
                           </div>
                           {/* On the far right end of a check, it shows check ID */}
@@ -211,7 +228,11 @@ export default function ChecksPage() {
                           ].map(({ label, name }) => (
                             <div key={label} className="bg-card flex flex-col gap-1 rounded-lg p-3">
                               <span className="text-muted-foreground text-xs">{label}</span>
-                              <span className="text-sm font-medium">{name}</span>
+                              {name ? (
+                                <span className="text-sm font-medium">{name}</span>
+                              ) : (
+                                <Skeleton className="h-4 w-24" />
+                              )}
                             </div>
                           ))}
                         </div>
@@ -223,18 +244,24 @@ export default function ChecksPage() {
                             <div className="mt-2 flex items-center gap-4">
                               {/* Pass rate bar (passed/failed on assertions) */}
                               <div className="flex-1">
-                                <div className="flex justify-between">
-                                  <span>Pass rate</span>
-                                  <span>{Math.round((stats.passed / stats.total) * 100)}%</span>
-                                </div>
-                                <div className="h-1.5 rounded-full bg-red-800">
-                                  <div
-                                    className={`h-1.5 rounded-full ${status === "success" ? "bg-green-500" : status === "failed" ? "bg-red-500" : "bg-amber-500"}`}
-                                    style={{
-                                      width: `${Math.round((stats.passed / stats.total) * 100)}%`,
-                                    }}
-                                  />
-                                </div>
+                                {stats ? (
+                                  <>
+                                    <div className="flex justify-between">
+                                      <span>Pass rate</span>
+                                      <span>{Math.round((stats.passed / stats.total) * 100)}%</span>
+                                    </div>
+                                    <div className="h-1.5 rounded-full bg-red-800">
+                                      <div
+                                        className={`h-1.5 rounded-full ${status === "success" ? "bg-green-500" : status === "failed" ? "bg-red-500" : "bg-amber-500"}`}
+                                        style={{
+                                          width: `${Math.round((stats.passed / stats.total) * 100)}%`,
+                                        }}
+                                      />
+                                    </div>
+                                  </>
+                                ) : (
+                                  <Skeleton className="h-4 w-full" />
+                                )}
                               </div>
                               {/* Jump to assertions button */}
                               <Button
