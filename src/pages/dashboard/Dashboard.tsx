@@ -41,21 +41,21 @@ const ResultBadge = ({ passed, total }: { passed: number; total: number }) => {
   return <Badge variant={variant}>{rate}% passed</Badge>
 }
 
-const dummyChecks = [
-  { id: 101, client_db: 4, framework: "soc2", date: "2026-06-10T10:00:00Z" },
-  { id: 102, client_db: 3, framework: "iso27001", date: "2026-06-05T14:30:00Z" },
-  { id: 103, client_db: 2, framework: "hipaa", date: "2026-05-20T09:15:00Z" },
-  { id: 104, client_db: 1, framework: "gdpr", date: "2026-01-01T12:00:00Z" },
-  { id: 105, client_db: 2, framework: "soc2", date: "2026-06-11T08:00:00Z" },
-]
+// const dummyChecks = [
+//   { id: 101, client_db: 4, framework: "soc2", date: "2026-06-10T10:00:00Z" },
+//   { id: 102, client_db: 3, framework: "iso27001", date: "2026-06-05T14:30:00Z" },
+//   { id: 103, client_db: 2, framework: "hipaa", date: "2026-05-20T09:15:00Z" },
+//   { id: 104, client_db: 1, framework: "gdpr", date: "2026-01-01T12:00:00Z" },
+//   { id: 105, client_db: 2, framework: "soc2", date: "2026-06-11T08:00:00Z" },
+// ]
 
-const dummySummaryMap: Record<number, { passed: number; failed: number; total: number }> = {
-  101: { passed: 10, failed: 0, total: 10 }, // 100% - Success!
-  102: { passed: 0, failed: 5, total: 5 }, // 0% - Total Failure!
-  103: { passed: 7, failed: 3, total: 10 }, // 70% - Partial
-  104: { passed: 2, failed: 8, total: 10 }, // 20% - Partial (Mostly failing)
-  105: { passed: 15, failed: 0, total: 15 }, // 100% - Success!
-}
+// const dummySummaryMap: Record<number, { passed: number; failed: number; total: number }> = {
+//   101: { passed: 10, failed: 0, total: 10 }, // 100% - Success!
+//   102: { passed: 0, failed: 5, total: 5 }, // 0% - Total Failure!
+//   103: { passed: 7, failed: 3, total: 10 }, // 70% - Partial
+//   104: { passed: 2, failed: 8, total: 10 }, // 20% - Partial (Mostly failing)
+//   105: { passed: 15, failed: 0, total: 15 }, // 100% - Success!
+// }
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -163,68 +163,74 @@ export default function Dashboard() {
       </div>
       {/* Information Cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {/* Compliance Check Card */}
         <Card className={cn("bg-muted/50 border-l-2", borderColor)}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-xl">Compliance status</CardTitle>
-            <ShieldCheck className={cn("size-5", iconColor)} />
+          <CardHeader className="flex flex-col gap-1 pb-2">
+            <div className="flex w-full flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-xl">Compliance status</CardTitle>
+              <ShieldCheck className={cn("size-5", iconColor)} />
+            </div>
+            <AssertionsStatus textClassName="text-xs" onStatusChange={setComplianceStatus} />
           </CardHeader>
           <CardContent className="pt-0">
-            <AssertionsStatus
-              className="-mt-4 -ml-3"
-              textClassName="text-xs"
-              onStatusChange={setComplianceStatus}
-            />
             <Button
               size="sm"
               variant="outline"
-              className="mt-3 w-full text-xs"
+              className="w-full text-xs"
               onClick={() => setRunCheckOpen(true)}
             >
               <Play size={12} className="mr-1" /> Run check
             </Button>
           </CardContent>
         </Card>
+        {/* Databases Card */}
         <Card
-          className="hover:bg-muted group bg-muted/50 cursor-pointer transition-colors"
+          className="hover:bg-muted group bg-muted/50 flex cursor-pointer flex-col transition-colors"
           onClick={() => navigate("/databases")}
         >
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-xl">Databases connected</CardTitle>
             <Database className="text-muted-foreground/40 size-5 transition-colors group-hover:text-blue-500" />
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent className="flex flex-1 flex-col justify-between pt-0">
             <p className="text-3xl font-medium">
               {clientDBs?.count ?? <Skeleton className="mb-2 h-4 w-20 bg-gray-300" />}
             </p>
             <p className="text-muted-foreground mt-1 text-xs">registered databases</p>
           </CardContent>
         </Card>
+
+        {/* IDK Some Bullshit Card */}
         <Card
-          className="hover:bg-muted group bg-muted/50 cursor-pointer transition-colors"
+          className="hover:bg-muted group bg-muted/50 flex cursor-pointer flex-col transition-colors"
           onClick={() => navigate("/databases")}
         >
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-xl">Idk Some bullshit</CardTitle>
             <Database className="text-muted-foreground/40 size-5 transition-colors group-hover:text-red-500" />
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent className="flex flex-1 flex-col justify-between pt-0">
             <p className="text-3xl font-medium">
               {clientDBs?.count ?? <Skeleton className="mb-2 h-4 w-20 bg-gray-300" />}
             </p>
             <p className="text-muted-foreground mt-1 text-xs">registered databases</p>
           </CardContent>
         </Card>
-        <Card className={cn("bg-muted/50 border-r-2 transition-colors", modelBorderColor)}>
+
+        {/* Init Model Card */}
+        <Card
+          className={cn("bg-muted/50 flex flex-col border-r-2 transition-colors", modelBorderColor)}
+        >
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-xl">AI model</CardTitle>
             <BrainCircuit className={cn("size-5", modelIconColor)} />
           </CardHeader>
-          <CardContent className="pt-0">
-            <p className={cn("-mt-1 mb-3 text-xs", modelTextColor)}>{modelStatusText}</p>
+          <CardContent className="flex flex-1 flex-col justify-between pt-0">
+            <p className={cn("text-xs", modelTextColor)}>{modelStatusText}</p>
             <Button
               size="sm"
               variant="outline"
-              className={`w-full text-xs`}
+              className="w-full text-xs"
               onClick={() =>
                 setModelStatus((s) => (s === "initialized" ? "uninitialized" : "initialized"))
               }
@@ -274,20 +280,20 @@ export default function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {dummyChecks?.slice(0, 5).map((check) => {
-                  const stats = dummySummaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
-                  const status =
-                    stats.failed === 0 ? "success" : stats.passed === 0 ? "failed" : "partial"
+                {checkData?.results?.slice(0, 5).map((check) => {
+                  const stats = summaryMap?.[check.id] ?? { passed: 0, failed: 0, total: 0 }
+                  // const status =
+                  //   stats.failed === 0 ? "success" : stats.passed === 0 ? "failed" : "partial"
                   return (
                     <TableRow
                       key={check.id}
-                      className="cursor-pointer"
+                      className="h-5 cursor-pointer"
                       onClick={() => {
                         setCheckId(check.id)
                         navigate(`/compliance/assertions`)
                       }}
                     >
-                      <TableCell className="text-muted-foreground">#{check.id}</TableCell>
+                      <TableCell className="text-muted-foreground">{check.id}</TableCell>
                       {/* Database */}
                       <TableCell className="text-muted-foreground">
                         {" "}
@@ -298,7 +304,7 @@ export default function Dashboard() {
                         )}
                       </TableCell>
                       {/* Framework */}
-                      <TableCell className="font-medium">
+                      <TableCell className="text-muted-foreground">
                         {" "}
                         {frameworkMap[check.framework] ? (
                           `${frameworkMap[check.framework]}`
@@ -311,7 +317,11 @@ export default function Dashboard() {
                         {timeAgo(new Date(check.date))}
                       </TableCell>
                       <TableCell className="text-right">
-                        <ResultBadge passed={stats.passed} total={stats.total} />
+                        {stats ? (
+                          <ResultBadge passed={stats.passed} total={stats.total} />
+                        ) : (
+                          <Skeleton className="ml-auto h-5 w-20" />
+                        )}
                         {/* TODO: Make this have a skeleton too, or something. */}
                       </TableCell>
                     </TableRow>

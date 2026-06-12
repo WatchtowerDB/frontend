@@ -59,7 +59,7 @@ export function AssertionsStatus({
   ).length
 
   return (
-    <div className={cn("flex items-center gap-2 px-4 py-1", className)}>
+    <div className={cn("flex items-center gap-2", className)}>
       {displayState === "idle" && (
         <>
           {latestCheck?.date ? (
