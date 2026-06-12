@@ -8,7 +8,7 @@ export interface CheckFilters {
   framework?: number
   // Pagination & Sorting
   page?: number
-  ordering?: string
+  ordering?: string[]
 }
 
 // to retrieve compliance checks per page

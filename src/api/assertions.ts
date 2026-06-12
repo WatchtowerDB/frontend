@@ -11,7 +11,7 @@ export interface AssertionFilters {
   schema?: number
   // Pagination & Sorting
   page?: number
-  ordering?: string
+  ordering?: string[]
 }
 
 // To retrieve assertions per page

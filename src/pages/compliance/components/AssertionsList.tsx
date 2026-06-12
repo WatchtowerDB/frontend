@@ -6,6 +6,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useAssertions } from "@/hooks/useAssertions"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useFrameworks } from "@/hooks/useFrameworks"
@@ -85,9 +86,18 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                           {item.id} • {item.sql_query}
                         </span>
                         <span className="text-muted-foreground text-[10px]">
-                          Check: {item.compliance_check} • Database:{" "}
-                          {clientdbMap[item.client_db] ?? "—"} • Framework:{" "}
-                          {frameworkMap[item.compliance_framework] ?? "—"}
+                          Check: {item.compliance_check} •{" "}
+                          {clientdbMap[item.client_db] ? (
+                            `Database: ${clientdbMap[item.client_db]}`
+                          ) : (
+                            <Skeleton className="mr-1 ml-1 inline-block h-3 w-20" />
+                          )}{" "}
+                          •{" "}
+                          {frameworkMap[item.compliance_framework] ? (
+                            `Framework: ${frameworkMap[item.compliance_framework]}`
+                          ) : (
+                            <Skeleton className="mr-1 ml-1 inline-block h-3 w-20" />
+                          )}
                         </span>
                       </div>
                       {isCurrentlyStreaming ? (
