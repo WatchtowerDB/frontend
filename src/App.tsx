@@ -6,6 +6,7 @@ import ComplianceLayout from "@/pages/compliance/ComplianceLayout"
 import Dashboard from "@/pages/dashboard/Dashboard"
 import ClientDBPage from "@/pages/databases/ClientDBPage"
 import DatabasesLayout from "@/pages/databases/DatabasesLayout"
+import Help from "@/pages/help/Help"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Toaster } from "./components/ui/sonner"
@@ -78,7 +79,7 @@ export default function App() {
                   </Route>
                   <Route path="/standards" element={<h2>Standards</h2>} />
                   <Route path="/settings" element={<h2>Settings</h2>} />
-                  <Route path="/help" element={<h2>Help</h2>} />
+                  <Route path="/help" element={<Help />} />
                   {/* <Route path="/dashboard" element={<Dashboard />} /> */}
                 </Route>
               </Route>
