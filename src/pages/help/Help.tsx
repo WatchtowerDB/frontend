@@ -1,11 +1,18 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ChevronDown, HelpCircle, Search, Zap } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { ArrowRight, ChevronDown, HelpCircle, Search, Zap } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { quickRunSteps, sections } from "./components/HelpData"
 import { InlineMarkdown, SubsectionContent, TextHighlighter } from "./components/MarkdownRenderers"
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface Subsection {
   title: string
@@ -27,7 +34,7 @@ export interface QuickRunStep {
   tip?: string
 }
 
-// ─── Subsection accordion ─────────────────────────────────────────────────────
+// Subsection accordion
 
 function SubsectionAccordion({ sub }: { sub: Subsection }) {
   const [open, setOpen] = useState(true)
@@ -53,7 +60,7 @@ function SubsectionAccordion({ sub }: { sub: Subsection }) {
   )
 }
 
-// ─── Quick Run section ────────────────────────────────────────────────────────
+// Quick Run section
 
 function QuickRunSection() {
   return (
@@ -114,7 +121,8 @@ export default function Help() {
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(searchQuery)
-    }, 200)
+      console.log("Debouncing!")
+    }, 300)
     return () => clearTimeout(handler)
   }, [searchQuery])
 
@@ -151,53 +159,63 @@ export default function Help() {
   return (
     <div className="bg-background flex h-full min-h-0 w-full flex-1 overflow-hidden">
       {/* Sidebar */}
-      <div className="border-border/40 bg-card/40 flex hidden h-full w-64 flex-col border-r md:flex">
+      <div className="border-border/40 bg-sidebar flex hidden h-full w-64 flex-col border-r md:flex">
         <div className="flex-1 overflow-y-auto p-4">
           <div className="text-muted-foreground mb-4 px-3 text-xs font-bold tracking-wider uppercase">
             Documentation
           </div>
           <nav className="space-y-1">
-            <button
+            <Button
+              variant={activeId === "home" ? "secondary" : "ghost"}
               onClick={() => {
                 setActiveId("home")
                 setSearchQuery("")
                 setDebouncedQuery("")
               }}
-              className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition-all ${
+              className={cn(
+                "w-full justify-start gap-3 px-3 py-2 text-sm font-medium transition-all",
                 activeId === "home"
-                  ? "bg-accent text-accent-foreground font-semibold shadow-sm"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              }`}
+                  ? "text-accent-foreground font-semibold shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
             >
               <span
-                className={`transition-colors ${activeId === "home" ? "text-primary" : "text-muted-foreground"}`}
+                className={cn(
+                  "transition-colors",
+                  activeId === "home" ? "text-primary" : "text-muted-foreground",
+                )}
               >
                 <HelpCircle className="size-4" />
               </span>
               <span>Search & Overview</span>
-            </button>
+            </Button>
 
             <div className="bg-border/40 my-3 h-px" />
 
             {sections.map((s) => {
               const isActive = activeId === s.id
               return (
-                <button
+                <Button
                   key={s.id}
+                  variant={isActive ? "secondary" : "ghost"}
                   onClick={() => setActiveId(s.id)}
-                  className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition-all ${
+                  className={cn(
+                    "w-full cursor-pointer justify-start gap-3 px-3 py-2 text-sm font-medium transition-all",
                     isActive
-                      ? "bg-accent text-accent-foreground font-semibold shadow-sm"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  }`}
+                      ? "text-accent-foreground font-semibold shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
                 >
                   <span
-                    className={`transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                    className={cn(
+                      "transition-colors",
+                      isActive ? "text-primary" : "text-muted-foreground",
+                    )}
                   >
                     {s.icon}
                   </span>
                   <span>{s.title}</span>
-                </button>
+                </Button>
               )
             })}
           </nav>
@@ -207,12 +225,11 @@ export default function Help() {
       {/* Main panel */}
       <div className="bg-background flex h-full min-h-0 flex-1 flex-col">
         <ScrollArea className="max-h-full min-h-0 flex-1">
-          <main className="mx-auto w-full px-6 py-10 md:px-12 lg:py-14">
+          <main className="mx-auto w-full px-6 py-8 md:px-12">
             {/* Home hub */}
             {activeId === "home" && (
-              <div className="animate-in fade-in slide-in-from-bottom-2 space-y-8 duration-300">
-                <div className="border-border/40 border-b pb-5">
-                  <div className="mb-2 flex items-center gap-3"></div>
+              <div className="animate-in fade-in slide-in-from-bottom-2 space-y-6 duration-300">
+                <div>
                   <h1 className="text-foreground text-3xl font-extrabold tracking-tight">
                     Watchtower Help Center
                   </h1>
@@ -233,7 +250,7 @@ export default function Help() {
                   />
                 </div>
 
-                {searchQuery.trim() ? (
+                {debouncedQuery.trim() ? (
                   <div className="space-y-4">
                     <h2 className="text-muted-foreground px-1 text-xs font-bold tracking-wider uppercase">
                       Query Results ({searchResults.length})
@@ -250,12 +267,14 @@ export default function Help() {
                                 {result.icon}
                                 <span>{result.sectionTitle}</span>
                               </div>
-                              <button
+                              <Button
+                                variant="link"
                                 onClick={() => setActiveId(result.sectionId)}
-                                className="text-primary font-semibold hover:underline"
+                                className="text-primary h-auto gap-1 p-0 font-mono text-xs font-semibold hover:underline"
                               >
-                                Jump to module &rarr;
-                              </button>
+                                Jump to module
+                                <ArrowRight className="size-3.5" />
+                              </Button>
                             </div>
                             <div className="px-5 pt-3 pb-4">
                               <h3 className="text-foreground mb-2 text-sm font-bold">
@@ -283,17 +302,26 @@ export default function Help() {
                       <button
                         key={s.id}
                         onClick={() => setActiveId(s.id)}
-                        className="border-border/60 bg-card hover:border-primary/30 group rounded-xl border p-5 text-left shadow-sm transition-all hover:shadow-md"
+                        className="group text-left focus-visible:outline-hidden"
                       >
-                        <div className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground mb-4 w-fit rounded-lg p-2 transition-colors">
-                          {s.icon}
-                        </div>
-                        <h3 className="text-foreground mb-1 text-sm font-bold">{s.title}</h3>
-                        <p className="text-muted-foreground line-clamp-2 text-xs">
-                          {s.id === "quick-run"
-                            ? "Step-by-step walkthrough from setup to your first compliance report."
-                            : `View details regarding ${s.subsections.map((sub) => sub.title).join(", ")}.`}
-                        </p>
+                        <Card className="border-border/60 bg-card hover:bg-primary/3 hover:border-primary/30 group-focus-visible:ring-ring cursor-pointer rounded-xl p-4 shadow-sm transition-all group-focus-visible:ring-2 group-focus-visible:ring-offset-2 hover:shadow-md">
+                          {/* Icon Container */}
+                          <div className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground mb-3 w-fit rounded-lg p-2 transition-colors">
+                            {s.icon}
+                          </div>
+
+                          {/* Typography Section */}
+                          <div className="space-y-1">
+                            <h3 className="text-foreground text-sm font-bold tracking-tight">
+                              {s.title}
+                            </h3>
+                            <p className="text-muted-foreground line-clamp-2 text-xs leading-normal font-normal">
+                              {s.id === "quick-run"
+                                ? "Step-by-step walkthrough from setup to your first compliance report."
+                                : `${s.subsections.map((sub) => sub.title).join(", ")}.`}
+                            </p>
+                          </div>
+                        </Card>
                       </button>
                     ))}
                   </div>
@@ -318,11 +346,28 @@ export default function Help() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <Accordion
+                  type="multiple"
+                  className="w-full space-y-3"
+                  defaultValue={currentSection.subsections.map((_, i) => `sub-${i}`)}
+                >
                   {currentSection.subsections.map((sub, i) => (
-                    <SubsectionAccordion key={i} sub={sub} />
+                    <AccordionItem
+                      value={`sub-${i}`}
+                      key={i}
+                      className="border-border/60 bg-card rounded-lg border px-5 shadow-sm transition-all duration-200 hover:shadow-md"
+                    >
+                      <AccordionTrigger className="text-foreground py-4 text-left text-sm font-semibold tracking-tight hover:no-underline">
+                        {sub.title}
+                      </AccordionTrigger>
+                      <AccordionContent className="border-border/40 h-full pt-1 pb-5">
+                        <div className="border-t pt-4">
+                          <SubsectionContent content={sub.content} />
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
                   ))}
-                </div>
+                </Accordion>
               </div>
             )}
           </main>
