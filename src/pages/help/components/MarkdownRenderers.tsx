@@ -1,3 +1,7 @@
+// I am painfully aware that we have libraries that handle markdown already.
+// However, it would not be compatible with the search idea for now.
+// TODO: Find an alternative that DOES work with our libraries.
+
 export function TextHighlighter({ text, search }: { text: string; search: string }) {
   if (!search.trim()) return <>{text}</>
 

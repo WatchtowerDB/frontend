@@ -211,7 +211,7 @@ export default function Help() {
                     maximum protection over your database architecture.
                   </p>
                 </div>
-
+                {/* Search bar */}
                 <div className="relative">
                   <Search className="text-muted-foreground absolute top-3.5 left-4 h-5 w-5" />
                   <input
@@ -222,7 +222,7 @@ export default function Help() {
                     className="border-border bg-card placeholder:text-muted-foreground/70 focus:ring-primary/40 focus:border-primary w-full rounded-xl border py-3.5 pr-4 pl-12 text-sm font-medium shadow-sm transition-all focus:ring-2 focus:outline-none"
                   />
                 </div>
-
+                {/* Search result */}
                 {debouncedQuery.trim() ? (
                   <div className="space-y-4">
                     <h2 className="text-muted-foreground px-1 text-xs font-bold tracking-wider uppercase">
@@ -271,6 +271,7 @@ export default function Help() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-4 pt-2 sm:grid-cols-2">
+                    {/* The grid while not searching */}
                     {sections.map((s) => (
                       <button
                         key={s.id}
@@ -318,7 +319,7 @@ export default function Help() {
                     </h1>
                   </div>
                 </div>
-
+                {/* Accordion for what is in each page */}
                 <Accordion
                   type="multiple"
                   className="w-full space-y-3"
