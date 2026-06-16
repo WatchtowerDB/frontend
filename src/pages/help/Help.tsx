@@ -6,10 +6,9 @@ import {
 } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { ArrowRight, ChevronDown, HelpCircle, Search, Zap } from "lucide-react"
+import { ArrowRight, HelpCircle, Search, Zap } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { quickRunSteps, sections } from "./components/HelpData"
 import { InlineMarkdown, SubsectionContent, TextHighlighter } from "./components/MarkdownRenderers"
@@ -32,32 +31,6 @@ export interface QuickRunStep {
   description: string
   icon: React.ReactNode
   tip?: string
-}
-
-// Subsection accordion
-
-function SubsectionAccordion({ sub }: { sub: Subsection }) {
-  const [open, setOpen] = useState(true)
-
-  return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <div className="border-border/60 bg-card overflow-hidden rounded-lg border shadow-sm transition-all duration-200 hover:shadow-md">
-        <CollapsibleTrigger className="hover:bg-muted/40 flex w-full items-center justify-between px-5 py-4 text-left transition-colors">
-          <span className="text-foreground text-sm font-semibold tracking-tight">{sub.title}</span>
-          <ChevronDown
-            className={`text-muted-foreground size-4 transition-transform duration-200 ease-in-out ${
-              open ? "rotate-180" : ""
-            }`}
-          />
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="border-border/40 bg-muted/10 border-t px-5 pt-4 pb-5">
-            <SubsectionContent content={sub.content} />
-          </div>
-        </CollapsibleContent>
-      </div>
-    </Collapsible>
-  )
 }
 
 // Quick Run section
@@ -111,7 +84,7 @@ function QuickRunSection() {
   )
 }
 
-// ─── Page Component ───────────────────────────────────────────────────────────
+// Page Component
 
 export default function Help() {
   const [activeId, setActiveId] = useState<string>("home")
