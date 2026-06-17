@@ -69,7 +69,7 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
     try {
       const rawSchemasData = await queryClient.fetchQuery({
         queryKey: ["clientDbSchemas", "list", { client_db: values.clientDbId }],
-        queryFn: () => getClientDBSchemas({ client_db: values.clientDbId }),
+        queryFn: () => getClientDBSchemas({ client_db: [values.clientDbId] }),
         staleTime: 1000 * 60 * 30,
       })
       const schemasArray = rawSchemasData?.results

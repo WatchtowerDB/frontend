@@ -57,6 +57,7 @@ interface ComplianceCheckState {
     patch: Partial<Omit<LiveAssertion, "checkId">>,
   ) => void
   appendToken: (assertionId: number, token: string) => void
+  removeLiveAssertionsByCheckId: (checkId: number) => void
   clearCompletedChecks: () => void
   reset: () => void
 }
@@ -131,6 +132,12 @@ export const useComplianceCheckStore = create<ComplianceCheckState>()(
           },
         })),
 
+      removeLiveAssertionsByCheckId: (checkId) =>
+        set((s) => ({
+          liveAssertions: Object.fromEntries(
+            Object.entries(s.liveAssertions).filter(([, a]) => a.checkId !== checkId),
+          ) as Record<number, LiveAssertion>,
+        })),
       // Removes check streams that are complete or errored;
       // leaves liveAssertions intact.
       clearCompletedChecks: () =>
