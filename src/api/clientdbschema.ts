@@ -8,7 +8,7 @@ import {
 } from "@/types/compliance"
 
 export interface ClientDBSchemaFilters {
-  client_db?: number
+  client_db?: number[]
   // Pagination & Sorting
   page?: number
   ordering?: string[]
