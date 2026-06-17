@@ -18,9 +18,9 @@ export function Navbar() {
   return (
     <NavigationMenu className="flex w-full max-w-none justify-between ps-2">
       {/* Logo */}
-      <div className="me-1 mt-1">
+      <Link to="/" className={"me-1 mt-1 h-9 w-9 shrink-0"}>
         <Logo width={35} height={35} />
-      </div>
+      </Link>
 
       {/* Navigation Options */}
       <div className="flex flex-1">
