@@ -1,14 +1,15 @@
 import api from "./axiosInstance"
 
 import { type PaginatedResponse } from "@/types/api"
-import { type AssertionItem } from "@/types/compliance"
+import { type AssertionItem, type AssertionStatus } from "@/types/compliance"
 
 export interface AssertionFilters {
-  check?: number
-  client_db?: number
-  compliance_framework?: number
+  check?: number[]
+  client_db?: number[]
+  compliance_framework?: number[]
   result?: boolean
-  schema?: number
+  schema?: number[]
+  status?: AssertionStatus[]
   // Pagination & Sorting
   page?: number
   ordering?: string[]

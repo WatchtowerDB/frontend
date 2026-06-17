@@ -1,11 +1,12 @@
 import api from "./axiosInstance"
 
 import { type PaginatedResponse } from "@/types/api"
-import { type Check } from "@/types/compliance"
+import { type Check, type CheckStatus } from "@/types/compliance"
 
 export interface CheckFilters {
-  client_db?: number
-  framework?: number
+  client_db?: number[]
+  framework?: number[]
+  status?: CheckStatus[]
   // Pagination & Sorting
   page?: number
   ordering?: string[]

@@ -1,10 +1,14 @@
 // The individual Assertion object.
+export type AssertionStatus = "ANALYZING" | "COMPLETED" | "EXECUTING" | "FAILED" | "PENDING"
+
 export interface AssertionItem {
   id: number
   sql_query: string
   query_output: string
   result: boolean
   recommendation: string
+  status: AssertionStatus
+  updated_at: string
   compliance_framework: number
   client_db: number
   schema: number
@@ -31,9 +35,9 @@ export interface ClientDBPatch {
 // Client Database Schema object
 export interface ClientDBSchema {
   id: number
-  client_db: number
   sql_definition: string
   created_at: string
+  client_db: number
 }
 
 export interface ClientDBSchemaCreate {
@@ -56,6 +60,15 @@ export interface Framework {
 }
 
 // Check object
+
+export type CheckStatus =
+  | "ANALYZING"
+  | "COMPLETED"
+  | "EXECUTING"
+  | "FAILED"
+  | "GENERATING"
+  | "PENDING"
+
 export interface Check {
   id: number
   framework: number
@@ -63,4 +76,6 @@ export interface Check {
   client_db: number
   user: number
   date: string
+  status: CheckStatus
+  updated_at: string
 }
