@@ -122,7 +122,7 @@ export function useComplianceStreams() {
           }
         } catch (e) {
           // Non-fatal — SSE will still backfill state as events arrive.
-          console.log(`[SSE] Failed to seed assertions for check ${checkId}`, e)
+          console.log("[SSE] Failed to seed assertions for check", checkId, e)
         }
 
         if (controller.signal.aborted) return
