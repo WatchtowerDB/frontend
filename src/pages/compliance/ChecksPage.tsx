@@ -18,6 +18,7 @@ import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAssertionsByChecks } from "@/hooks/useDataAggregation"
 import { useFrameworks } from "@/hooks/useFrameworks"
 import { useAssertionStore } from "@/stores/useAssertionStore"
+import type { CheckStatus } from "@/types/compliance"
 import {
   AlertTriangle,
   ArrowRight,
@@ -31,6 +32,8 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+
+const LIVE_CHECK_STATUSES: CheckStatus[] = ["PENDING", "GENERATING", "EXECUTING", "ANALYZING"]
 
 export default function ChecksPage() {
   // For filtering & handling the pages
