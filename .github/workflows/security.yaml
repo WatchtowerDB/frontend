@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: "26"
+  NODE_VERSION: "24"
 
 permissions:
   contents: read
@@ -30,7 +30,7 @@ jobs:
           reporters: console
           vulnerabilities: medium
           warnings: off # everything causes a warning I hate the js ecosystem
-      
+
       - name: npm audit
         run: npm audit --audit-level moderate
 
