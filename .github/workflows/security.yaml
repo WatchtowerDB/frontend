@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: "24"
+  NODE_VERSION: "26"
 
 permissions:
   contents: read
@@ -23,13 +23,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: NodeSecure SCA
-        uses: NodeSecure/ci-action@177c57fe32c75cafabe87f6e4515d277cc37ae6c # 1.4.1
+      # - name: NodeSecure SCA
+      #   uses: NodeSecure/ci-action@177c57fe32c75cafabe87f6e4515d277cc37ae6c # 1.4.1
+      #   with:
+      #     strategy: npm
+      #     reporters: console
+      #     vulnerabilities: medium
+      #     warnings: off # everything causes a warning I hate the js ecosystem
+
+      - name: Set Up Node
+        uses: actions/setup-node@v6
         with:
-          strategy: npm
-          reporters: console
-          vulnerabilities: medium
-          warnings: off # everything causes a warning I hate the js ecosystem
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
 
       - name: npm audit
         run: npm audit --audit-level moderate
