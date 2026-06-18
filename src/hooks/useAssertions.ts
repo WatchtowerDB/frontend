@@ -80,7 +80,7 @@ export function useAssertionsByCheckIds(checkIds: number[]) {
     queries: checkIds.map((id) => ({
       queryKey: ["assertions", "all", { check: id }],
       queryFn: async () => {
-        const firstPage = await getAssertions({ check: id, page: 1 })
+        const firstPage = await getAssertions({ check: [id], page: 1 })
         const totalCount = firstPage.count
         const allResults = [...firstPage.results]
         const totalPages = Math.ceil(totalCount / PAGE_SIZE)
@@ -88,7 +88,7 @@ export function useAssertionsByCheckIds(checkIds: number[]) {
         if (totalPages > 1) {
           const remainingPages = await Promise.all(
             Array.from({ length: totalPages - 1 }, (_, i) =>
-              getAssertions({ check: id, page: i + 2 }),
+              getAssertions({ check: [id], page: i + 2 }),
             ),
           )
           remainingPages.forEach((pageData) => {

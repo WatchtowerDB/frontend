@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -23,6 +24,10 @@ import * as z from "zod"
 
 const formSchema = z.object({
   client_db: z.string().min(1, "Please select a database"),
+  name: z
+    .string()
+    .min(1, "Schema name is required")
+    .max(100, "Schema name cannot exceed 100 characters"),
   sql_file: z
     .instanceof(FileList)
     .refine((files) => files?.length === 1, "SQL schema file is required."),
@@ -31,10 +36,11 @@ const formSchema = z.object({
 interface SchemaUploadFormProps {
   databases: { id: number; name: string }[]
   isUploading: boolean
-  onUpload: (data: { client_db: number; sql_file: File }) => Promise<unknown>
+  onUpload: (data: { client_db: number; name: string; sql_file: File }) => Promise<unknown>
   onPreviewChange: (content: string | null) => void
 }
 
+// TODO: add description.
 export function SchemaUploadForm({
   databases,
   isUploading,
@@ -46,10 +52,14 @@ export function SchemaUploadForm({
     defaultValues: { client_db: "" },
   })
 
-  const sqlFile = useWatch({
+  const [clientDb, sqlFile] = useWatch({
     control: form.control,
-    name: "sql_file",
+    name: ["client_db", "sql_file"],
   })
+
+  const dbId = clientDb ? parseInt(clientDb) : null
+
+  const { data: schemas } = useAllClientDBSchemas(dbId ? { client_db: [dbId] } : undefined)
 
   useEffect(() => {
     if (sqlFile && sqlFile.length > 0) {
@@ -64,6 +74,7 @@ export function SchemaUploadForm({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     await onUpload({
       client_db: parseInt(values.client_db),
+      name: values.name,
       sql_file: values.sql_file[0],
     })
     form.reset()
@@ -96,6 +107,45 @@ export function SchemaUploadForm({
                       ))}
                     </SelectContent>
                   </Select>
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+            <Controller
+              name="name"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Schema Name</FieldLabel>
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      type="text"
+                      disabled={!dbId}
+                      placeholder="Type a new name or select existing..."
+                      maxLength={200}
+                      className="w-full"
+                      // Ensure that if they manually type, it updates React Hook Form immediately
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
+                    <div className="bg-popover absolute z-10 mt-1 hidden max-h-60 w-full overflow-auto rounded-md border p-1 shadow-md group-focus-within:block hover:block">
+                      {schemas?.results
+                        .filter((schema) =>
+                          schema.name.toLowerCase().includes((field.value || "").toLowerCase()),
+                        )
+                        .map((schema) => (
+                          <button
+                            key={schema.id}
+                            type="button"
+                            className="hover:bg-accent hover:text-accent-foreground w-full rounded-sm px-2 py-1.5 text-left text-sm"
+                            onClick={() => field.onChange(schema.name)}
+                          >
+                            {schema.name} (v{schema.internal_version})
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
