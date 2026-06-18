@@ -55,7 +55,7 @@ export interface ClientDBSchemaUpload {
   sql_file: File
   client_db: number
   name: string
-  description: string | null
+  description?: string | null
 }
 
 // Frameworks object

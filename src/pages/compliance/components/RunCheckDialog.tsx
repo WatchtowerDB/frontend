@@ -21,9 +21,8 @@ import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { useFrameworks } from "@/hooks/useFrameworks"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
-import { Controller, FormProvider, useForm } from "react-hook-form"
+import { Controller, FormProvider, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import * as z from "zod"
 
@@ -41,7 +40,6 @@ interface RunCheckDialogProps {
 }
 
 export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogProps) {
-  const queryClient = useQueryClient()
   const [resolvingSchema, setResolvingSchema] = useState(false)
   const [resolutionError, setResolutionError] = useState<string | null>(null)
 
@@ -61,9 +59,10 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
   })
 
   // To disable submission if nothing is selected.
-  const watchedFrameworkId = form.watch("frameworkId") as number
-  const watchedClientDbId = form.watch("clientDbId") as number
-  const watchedSchemaName = form.watch("schemaName") as string
+  const [watchedFrameworkId, watchedClientDbId, watchedSchemaName] = useWatch({
+    control: form.control,
+    name: ["frameworkId", "clientDbId", "schemaName"],
+  }) as [number, number, string]
   const hasNoSelection = !watchedFrameworkId || !watchedClientDbId || !watchedSchemaName
 
   const dbId = watchedClientDbId || null

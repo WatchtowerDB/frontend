@@ -7,9 +7,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
@@ -19,7 +25,7 @@ import {
 } from "@/components/ui/select"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import * as z from "zod"
 
@@ -30,8 +36,9 @@ const formSchema = z.object({
     .min(1, "Schema name is required")
     .max(100, "Schema name cannot exceed 100 characters"),
   sql_file: z
-    .instanceof(FileList)
-    .refine((files) => files?.length === 1, "SQL schema file is required."),
+    .any()
+    .refine((files) => files instanceof FileList, "SQL schema file is required.")
+    .refine((files) => files?.length === 1, "Exactly one SQL schema file is required."),
 })
 
 interface SchemaUploadFormProps {
@@ -48,12 +55,12 @@ export function SchemaUploadForm({
   onUpload,
   onPreviewChange,
 }: SchemaUploadFormProps) {
-  const [open, setOpen] = useState(false)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       client_db: "",
       name: "",
+      sql_file: undefined,
     },
   })
 
@@ -65,6 +72,15 @@ export function SchemaUploadForm({
   const dbId = clientDb ? parseInt(clientDb) : null
 
   const { data: schemas } = useAllClientDBSchemas(dbId ? { client_db: [dbId] } : undefined)
+  const uniqueSchemas = Array.from(
+    new Map(
+      (schemas?.results || [])
+        .filter((s) => s?.name && s?.internal_version !== undefined)
+        // Sort ascending so higher versions come later and overwrite lower ones
+        .sort((a, b) => a.internal_version - b.internal_version)
+        .map((s) => [s.name, s]),
+    ).values(),
+  )
 
   useEffect(() => {
     if (sqlFile && sqlFile.length > 0) {
@@ -76,12 +92,18 @@ export function SchemaUploadForm({
     }
   }, [sqlFile, onPreviewChange])
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>, e?: React.BaseSyntheticEvent) => {
     await onUpload({
       client_db: parseInt(values.client_db),
       name: values.name,
       sql_file: values.sql_file[0],
     })
+    if (e?.target) {
+      const fileInput = (e.target as HTMLFormElement).querySelector(
+        'input[type="file"]',
+      ) as HTMLInputElement
+      if (fileInput) fileInput.value = ""
+    }
     form.reset()
   }
 
@@ -122,65 +144,52 @@ export function SchemaUploadForm({
               name="name"
               control={form.control}
               render={({ field, fieldState }) => {
-                const filteredSchemas = (schemas?.results || []).filter((s) =>
-                  s.name.toLowerCase().includes((field.value || "").toLowerCase()),
+                const search = field.value ?? ""
+
+                const filteredSchemas = (uniqueSchemas ?? []).filter((schema) =>
+                  schema.name.toLowerCase().includes(search.toLowerCase()),
                 )
+
                 return (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel>Schema Name</FieldLabel>
-                    <div className="relative">
-                      <Popover open={open && filteredSchemas.length > 0} onOpenChange={setOpen}>
-                        <PopoverAnchor asChild>
-                          <Input
-                            {...field}
-                            type="text"
-                            disabled={!dbId}
-                            onFocus={() => setOpen(true)}
-                            autoComplete="off"
-                            placeholder={
-                              dbId
-                                ? "Type a new name or select existing..."
-                                : "Select a database first"
-                            }
-                            maxLength={100}
-                            className="w-full"
-                            onChange={(e) => field.onChange(e.target.value)}
-                          />
-                        </PopoverAnchor>
 
-                        <PopoverContent
-                          className="bg-popover max-h-60 w-(--radix-popover-trigger-width) overflow-y-auto rounded-md border p-1 shadow-md"
-                          onOpenAutoFocus={(e) => e.preventDefault()}
-                          onInteractOutside={(e) => {
-                            // Prevent Radix from closing the popover
-                            if (e.target instanceof Element && e.target.closest("input")) {
-                              e.preventDefault()
-                            }
-                          }}
-                        >
-                          {(schemas?.results || [])
-                            .filter((schema) =>
-                              schema.name.toLowerCase().includes((field.value || "").toLowerCase()),
-                            )
-                            .map((schema) => (
-                              <button
-                                key={schema.id}
-                                type="button"
-                                className="hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-default items-center justify-between rounded-sm px-2.5 py-2 text-left text-sm transition-colors outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                                onClick={() => {
-                                  field.onChange(schema.name)
-                                  setOpen(false)
-                                }}
-                              >
-                                <span className="text-foreground font-medium">{schema.name}</span>
-                                <span className="bg-muted text-muted-foreground border-border/50 ml-2 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
-                                  v{schema.internal_version}
-                                </span>
-                              </button>
-                            ))}
-                        </PopoverContent>
-                      </Popover>
-                    </div>
+                    <Combobox
+                      items={uniqueSchemas}
+                      value={field.value || ""}
+                      onValueChange={(value) => {
+                        console.log("Combobox changed:", value)
+                        field.onChange(value)
+                      }}
+                    >
+                      <ComboboxInput
+                        disabled={!dbId}
+                        placeholder={
+                          dbId ? "Type a new name or select existing..." : "Select a database first"
+                        }
+                        value={field.value ?? ""}
+                        onChange={(value) => {
+                          console.log("Combobox changed:", value)
+                          field.onChange(value)
+                        }}
+                      />
+
+                      <ComboboxContent>
+                        <ComboboxList>
+                          {filteredSchemas.map((schema) => (
+                            <ComboboxItem key={schema.id} value={schema.name}>
+                              <span className="text-foreground font-medium">{schema.name}</span>
+                              <span className="bg-muted text-muted-foreground border-border/50 ml-2 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
+                                v{schema.internal_version}
+                              </span>
+                            </ComboboxItem>
+                          ))}
+                          {/* { (
+                            <ComboboxEmpty onClick={()=>console.log("hello")}>Create "{search}"</ComboboxEmpty>
+                          )} */}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
 
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -191,13 +200,14 @@ export function SchemaUploadForm({
             <Controller
               name="sql_file"
               control={form.control}
-              render={({ field: { value: _v, onChange, ...props }, fieldState }) => (
+              render={({ field: { value: _v, onChange, ref, ...props }, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>SQL Schema File</FieldLabel>
                   <Input
                     {...props}
                     type="file"
                     accept=".sql"
+                    ref={ref}
                     onChange={(e) => onChange(e.target.files)}
                   />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
