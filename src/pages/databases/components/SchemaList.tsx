@@ -22,6 +22,7 @@ export function SchemaList({ schemas, databases, selectedSchemaId, onSelect }: S
       <Table>
         <TableHeader className="bg-background sticky top-0">
           <TableRow>
+            <TableHead className="w-1/2">Name</TableHead>
             <TableHead className="w-1/2">Database</TableHead>
             <TableHead className="w-1/2">Created At</TableHead>
           </TableRow>
@@ -41,6 +42,9 @@ export function SchemaList({ schemas, databases, selectedSchemaId, onSelect }: S
                   selectedSchemaId === dbSchema.id ? "bg-accent" : "",
                 )}
               >
+                <TableCell className="font-medium">
+                  {dbSchema.name} v{dbSchema.internal_version}
+                </TableCell>
                 <TableCell className="font-medium">{dbName}</TableCell>
                 <TableCell className="text-muted-foreground text-xs">
                   {new Date(dbSchema.created_at).toLocaleString()}
