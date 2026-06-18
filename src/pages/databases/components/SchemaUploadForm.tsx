@@ -1,13 +1,5 @@
 import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   Combobox,
   ComboboxContent,
   ComboboxEmpty,
@@ -23,9 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import * as z from "zod"
 
@@ -35,6 +28,12 @@ const formSchema = z.object({
     .string()
     .min(1, "Schema name is required")
     .max(100, "Schema name cannot exceed 100 characters"),
+  description: z
+    .string()
+    .max(500, "Description cannot exceed 500 characters")
+    .nullable()
+    .or(z.string())
+    .transform((val) => (val && val.trim() !== "" ? val : null)),
   sql_file: z
     .any()
     .refine((files) => files instanceof FileList, "SQL schema file is required.")
@@ -44,11 +43,15 @@ const formSchema = z.object({
 interface SchemaUploadFormProps {
   databases: { id: number; name: string }[]
   isUploading: boolean
-  onUpload: (data: { client_db: number; name: string; sql_file: File }) => Promise<unknown>
+  onUpload: (data: {
+    client_db: number
+    name: string
+    description: string | null
+    sql_file: File
+  }) => Promise<unknown>
   onPreviewChange: (content: string | null) => void
 }
 
-// TODO: add description.
 export function SchemaUploadForm({
   databases,
   isUploading,
@@ -56,21 +59,20 @@ export function SchemaUploadForm({
   onPreviewChange,
 }: SchemaUploadFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const form = useForm<z.infer<typeof formSchema>>({
+
+  // Using z.input to keep React Hook Form types aligned perfectly
+  const form = useForm<z.input<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       client_db: "",
       name: "",
+      description: "",
       sql_file: undefined,
     },
   })
 
-  const [clientDb, name, sqlFile] = useWatch({
-    control: form.control,
-    name: ["client_db", "name", "sql_file"],
-  })
-
-  const hasNoSelection = !clientDb || !name || !sqlFile?.length
+  const clientDb = useWatch({ control: form.control, name: "client_db" })
+  const sqlFile = useWatch({ control: form.control, name: "sql_file" })
 
   const dbId = clientDb ? parseInt(clientDb) : null
 
@@ -79,7 +81,6 @@ export function SchemaUploadForm({
     new Map(
       (schemas?.results || [])
         .filter((s) => s?.name && s?.internal_version !== undefined)
-        // Sort ascending so higher versions come later and overwrite lower ones
         .sort((a, b) => a.internal_version - b.internal_version)
         .map((s) => [s.name, s]),
     ).values(),
@@ -95,156 +96,162 @@ export function SchemaUploadForm({
     }
   }, [sqlFile, onPreviewChange])
 
-  const onSubmit = async (values: z.infer<typeof formSchema>, e?: React.BaseSyntheticEvent) => {
-    await onUpload({
-      client_db: parseInt(values.client_db),
-      name: values.name,
-      sql_file: values.sql_file[0],
-    })
-    if (e?.target) {
-      const fileInput = (e.target as HTMLFormElement).querySelector(
-        'input[type="file"]',
-      ) as HTMLInputElement
-      if (fileInput) fileInput.value = ""
-    }
-    form.reset()
-  }
+  const onSubmit = useCallback(
+    async (values: z.infer<typeof formSchema>) => {
+      await onUpload({
+        client_db: parseInt(values.client_db, 10),
+        name: values.name,
+        description: values.description,
+        sql_file: values.sql_file[0],
+      })
 
+      form.reset()
+    },
+    [onUpload, form],
+  )
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Upload Schema</CardTitle>
-        <CardDescription>Select a database and upload its SQL schema file.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form id="schema-upload-form" onSubmit={form.handleSubmit(onSubmit)}>
-          <FieldGroup>
-            {/* Client database selector */}
-            <Controller
-              name="client_db"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Client Database</FieldLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a database" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {databases.map((db) => (
-                        <SelectItem key={db.id} value={db.id.toString()}>
-                          {db.name}
-                        </SelectItem>
+    <form
+      id="schema-upload-form"
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="w-full space-y-6"
+    >
+      <FieldGroup>
+        {/* Client database selector */}
+        <Controller
+          name="client_db"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Client Database</FieldLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a database" />
+                </SelectTrigger>
+                <SelectContent>
+                  {databases.map((db) => (
+                    <SelectItem key={db.id} value={db.id.toString()}>
+                      {db.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        {/* Schema name combobox */}
+        <Controller
+          name="name"
+          control={form.control}
+          render={({ field, fieldState }) => {
+            const search = (field.value ?? "").trim().toLowerCase()
+
+            const filteredSchemas = (uniqueSchemas ?? []).filter((schema) =>
+              schema.name.toLowerCase().includes(search),
+            )
+
+            return (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Schema Name</FieldLabel>
+                <Combobox
+                  items={filteredSchemas}
+                  value={field.value || ""}
+                  onValueChange={(value) => field.onChange(value ?? "")}
+                >
+                  <ComboboxInput
+                    disabled={!dbId}
+                    placeholder={
+                      dbId ? "Type a new name or select existing..." : "Select a database first"
+                    }
+                    value={field.value ?? ""}
+                    onChange={(value) => field.onChange(value ?? "")}
+                  />
+                  <ComboboxContent>
+                    <ComboboxList>
+                      {filteredSchemas.map((schema) => (
+                        <ComboboxItem key={schema.id} value={schema.name}>
+                          <span className="text-foreground font-medium">{schema.name}</span>
+                          <span className="bg-muted text-muted-foreground border-border/50 ml-2 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
+                            v{schema.internal_version}
+                          </span>
+                        </ComboboxItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-            {/* Schema name combobox */}
-            <Controller
-              name="name"
-              control={form.control}
-              render={({ field, fieldState }) => {
-                const search = (field.value ?? "").trim().toLowerCase()
+                      {filteredSchemas?.length === 0 && (
+                        <ComboboxEmpty>New schema "{search}"</ComboboxEmpty>
+                      )}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )
+          }}
+        />
 
-                const filteredSchemas = (uniqueSchemas ?? []).filter((schema) =>
-                  schema.name.toLowerCase().includes(search.toLowerCase()),
-                )
+        {/* Description Textarea (optional) */}
+        <Controller
+          name="description"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Description (Optional)</FieldLabel>
+              <Textarea
+                {...field}
+                value={field.value ?? ""}
+                placeholder="Enter schema description..."
+                rows={4}
+                className="max-h-35 resize-none overflow-y-auto"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
 
-                return (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Schema Name</FieldLabel>
+        {/* Schema file input */}
+        <Controller
+          name="sql_file"
+          control={form.control}
+          render={({ field: { value: _v, onChange, ref, ...props }, fieldState }) => {
+            const fileName = _v?.[0]?.name
 
-                    <Combobox
-                      items={uniqueSchemas}
-                      value={field.value || ""}
-                      onValueChange={(value) => {
-                        console.log("Combobox changed:", value)
-                        field.onChange(value ?? "")
-                      }}
-                    >
-                      <ComboboxInput
-                        disabled={!dbId}
-                        placeholder={
-                          dbId ? "Type a new name or select existing..." : "Select a database first"
-                        }
-                        value={field.value ?? ""}
-                        onChange={(value) => {
-                          console.log("Combobox changed:", value)
-                          field.onChange(value ?? "")
-                        }}
-                      />
+            return (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>SQL Schema File</FieldLabel>
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="sql-file-input"
+                    className="border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-9 cursor-pointer items-center justify-center rounded-md border px-3 text-sm font-medium shadow-xs transition-colors"
+                  >
+                    Choose file
+                  </label>
+                  <span className="text-muted-foreground truncate text-sm">
+                    {fileName ?? "No file selected"}
+                  </span>
+                </div>
+                <input
+                  id="sql-file-input"
+                  type="file"
+                  accept=".sql"
+                  className="hidden"
+                  ref={ref} // Handed over entirely to React Hook Form; no custom manipulation!
+                  // NO REFS METHOD 2: When key changes on reset, the input automatically clears itself completely!
+                  key={_v ? "file-loaded" : "file-empty"}
+                  onChange={(e) => onChange(e.target.files)}
+                />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )
+          }}
+        />
+      </FieldGroup>
 
-                      <ComboboxContent>
-                        <ComboboxList>
-                          {filteredSchemas.map((schema) => (
-                            <ComboboxItem key={schema.id} value={schema.name}>
-                              <span className="text-foreground font-medium">{schema.name}</span>
-                              <span className="bg-muted text-muted-foreground border-border/50 ml-2 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
-                                v{schema.internal_version}
-                              </span>
-                            </ComboboxItem>
-                          ))}
-                          {filteredSchemas?.length === 0 && (
-                            <ComboboxEmpty>New schema "{search}"</ComboboxEmpty>
-                          )}
-                        </ComboboxList>
-                      </ComboboxContent>
-                    </Combobox>
-
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )
-              }}
-            />
-            {/* Schema file input */}
-            <Controller
-              name="sql_file"
-              control={form.control}
-              render={({ field: { value: _v, onChange, ref, ...props }, fieldState }) => {
-                const fileName = _v?.[0]?.name
-
-                return (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>SQL Schema File</FieldLabel>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        Choose file
-                      </Button>
-                      <span className="text-muted-foreground truncate text-sm">
-                        {fileName ?? "No file selected"}
-                      </span>
-                    </div>
-                    <input
-                      {...props}
-                      type="file"
-                      accept=".sql"
-                      className="hidden"
-                      ref={(e) => {
-                        ref(e)
-                        fileInputRef.current = e
-                      }}
-                      onChange={(e) => onChange(e.target.files)}
-                    />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )
-              }}
-            />
-          </FieldGroup>
-        </form>
-      </CardContent>
-      <CardFooter>
-        <Button type="submit" form="schema-upload-form" disabled={isUploading || hasNoSelection}>
+      {/* Submit button */}
+      <div className="flex pt-2">
+        <Button type="submit" disabled={isUploading} className="w-full">
           {isUploading ? "Uploading..." : "Upload Schema"}
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </form>
   )
 }

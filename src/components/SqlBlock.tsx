@@ -55,7 +55,7 @@ export default function SqlBlock({
             margin: 0,
             padding: "0.30rem 1rem 1rem",
             fontSize: "0.8rem",
-            background: "transparent", // Cleaned! Let the parent container's background show through
+            background: "transparent",
             overflow: "visible",
           }}
           showLineNumbers

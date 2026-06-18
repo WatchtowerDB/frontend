@@ -34,6 +34,7 @@ export function useClientDBSchemas(filters?: ClientDBSchemaFilters) {
   return {
     schemas: listQuery.data?.results ?? [],
     databases: dbData?.results ?? [],
+    totalCount: listQuery.data?.count ?? 0,
     isLoading: isDBLoading || (!!filters && listQuery.isLoading),
     isUploading: uploadMutation.isPending,
     uploadSchema: uploadMutation.mutateAsync,

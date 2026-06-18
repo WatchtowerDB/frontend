@@ -1,10 +1,6 @@
 import SqlBlock from "@/components/SqlBlock"
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter"
 import sql from "react-syntax-highlighter/dist/esm/languages/hljs/sql"
-// DARK MODE CANDIDATES:
-// - nord
-// - hybrid
-// - stackoverflowDark
 
 SyntaxHighlighter.registerLanguage("sql", sql)
 
@@ -17,15 +13,6 @@ interface SchemaPreviewProps {
 export function SchemaPreview({ content, activeTab, selectedInfo }: SchemaPreviewProps) {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      {/* <header className="flex h-14 items-center border-b px-6">
-        <h2 className="text-sm font-semibold tracking-tight text-zinc-400">
-          SQL FILE PREVIEW
-          {activeTab === "schemas" && selectedInfo && (
-            <span className="ml-2 font-normal text-zinc-600">- {selectedInfo}</span>
-          )}
-        </h2>
-      </header> */}
-
       {content ? (
         <SqlBlock
           query={content}
