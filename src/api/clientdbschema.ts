@@ -9,6 +9,8 @@ import {
 
 export interface ClientDBSchemaFilters {
   client_db?: number[]
+  name?: string
+  search?: string
   // Pagination & Sorting
   page?: number
   ordering?: string[]
