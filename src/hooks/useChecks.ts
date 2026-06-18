@@ -56,8 +56,15 @@ export function useRunComplianceCheck() {
   const addActiveCheck = useComplianceCheckStore((s) => s.addActiveCheck)
 
   return useMutation({
-    mutationFn: ({ frameworkId, schemaId }: { frameworkId: number; schemaId: number }) =>
-      runComplianceCheck(frameworkId, schemaId),
+    mutationFn: ({
+      frameworkId,
+      clientDbId,
+      schemaName,
+    }: {
+      frameworkId: number
+      clientDbId: number
+      schemaName: string
+    }) => runComplianceCheck(frameworkId, clientDbId, schemaName),
     onSuccess: (data) => {
       // Register the new check — the stream hook picks it up automatically.
       addActiveCheck(data.id)

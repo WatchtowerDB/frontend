@@ -1,5 +1,12 @@
-import { getClientDBSchemas } from "@/api/clientdbschema"
 import { Button } from "@/components/ui/button"
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox"
 import {
   Dialog,
   DialogContent,
@@ -9,15 +16,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { useRunComplianceCheck } from "@/hooks/useChecks"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
+import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { useFrameworks } from "@/hooks/useFrameworks"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
@@ -29,6 +30,7 @@ import * as z from "zod"
 const schema = z.object({
   frameworkId: z.number({ message: "Select a framework" }),
   clientDbId: z.number({ message: "Select a client database" }),
+  schemaName: z.string({ message: "Select a schema" }),
 })
 
 type RunCheckForm = z.infer<typeof schema>
@@ -54,44 +56,33 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
     defaultValues: {
       frameworkId: undefined,
       clientDbId: undefined,
+      schemaName: undefined,
     },
   })
 
   // To disable submission if nothing is selected.
-  const watchedFrameworkId = form.watch("frameworkId")
-  const watchedClientDbId = form.watch("clientDbId")
-  const hasNoSelection = !watchedFrameworkId || !watchedClientDbId
+  const watchedFrameworkId = form.watch("frameworkId") as number
+  const watchedClientDbId = form.watch("clientDbId") as number
+  const watchedSchemaName = form.watch("schemaName") as string
+  const hasNoSelection = !watchedFrameworkId || !watchedClientDbId || !watchedSchemaName
+
+  const dbId = watchedClientDbId || null
+  const { data: schemas } = useAllClientDBSchemas(dbId ? { client_db: [dbId] } : undefined)
+  const schemaNames = Array.from(new Set((schemas?.results || []).map((s) => s.name)))
 
   const onSubmit = async (values: RunCheckForm) => {
     setResolvingSchema(true)
     setResolutionError(null)
+    console.log("something trigeodfhsdophfs")
 
+    // This is commpletely useless for now.
     try {
-      const rawSchemasData = await queryClient.fetchQuery({
-        queryKey: ["clientDbSchemas", "list", { client_db: values.clientDbId }],
-        queryFn: () => getClientDBSchemas({ client_db: values.clientDbId }),
-        staleTime: 1000 * 60 * 30,
-      })
-      const schemasArray = rawSchemasData?.results
-
-      if (!schemasArray || schemasArray.length === 0) {
-        setResolutionError("This Client Database has no schemas associated with it.")
-        setResolvingSchema(false)
-        return
-      }
-
-      const sorted = [...schemasArray].sort((a, b) => {
-        const timeA = new Date(a.created_at).getTime()
-        const timeB = new Date(b.created_at).getTime()
-
-        if (timeB !== timeA) return timeB - timeA
-        return b.id - a.id
-      })
-
-      const winningSchemaId = sorted[0].id
-
       mutate(
-        { frameworkId: values.frameworkId, schemaId: winningSchemaId },
+        {
+          frameworkId: values.frameworkId,
+          schemaName: values.schemaName,
+          clientDbId: values.clientDbId,
+        },
         {
           onSuccess: () => {
             toast.success("Compliance check initiated succcessfully!", {
@@ -111,6 +102,7 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
   const isWorking = isMutationPending || resolvingSchema
   const noFrameworks = !frameworks?.results || frameworks.results.length === 0
   const noDatabases = !clientDbs?.results || clientDbs.results.length === 0
+  const noSchemas = !schemas?.results || schemas.results.length === 0
 
   return (
     <Dialog
@@ -128,74 +120,137 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
 
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            {/* Framework Selector */}
-            <Controller
-              control={form.control}
-              name="frameworkId"
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel>Framework</FieldLabel>
-                  <Select
-                    disabled={noFrameworks}
-                    value={field.value ? String(field.value) : ""}
-                    onValueChange={(v) => {
-                      field.onChange(Number(v))
-                      if (resolutionError) setResolutionError(null)
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          noFrameworks ? "No frameworks available" : "Select a framework"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {frameworks?.results?.map((f) => (
-                        <SelectItem key={f.id} value={String(f.id)}>
-                          {f.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
-                </Field>
-              )}
-            />
-
             {/* Client Database Selector */}
             <Controller
               control={form.control}
               name="clientDbId"
+              render={({ field, fieldState }) => {
+                const databaseItems = clientDbs?.results || []
+
+                return (
+                  <Field>
+                    <FieldLabel>Client Database</FieldLabel>
+                    <Combobox
+                      items={databaseItems}
+                      disabled={noDatabases}
+                      itemToStringLabel={(db) => db?.name ?? ""}
+                      value={databaseItems.find((db) => db.id === field.value) ?? null}
+                      onValueChange={(db) => {
+                        console.log("Fixed the issue")
+                        field.onChange(db ? db.id : undefined)
+                        if (resolutionError) setResolutionError(null)
+                      }}
+                    >
+                      <ComboboxInput placeholder="Select a database..." />
+                      <ComboboxContent
+                        onWheel={(e) => e.stopPropagation()}
+                        className="pointer-events-auto"
+                      >
+                        <ComboboxEmpty>No databases found.</ComboboxEmpty>
+                        <ComboboxList>
+                          {(db) => (
+                            <ComboboxItem
+                              key={db.id}
+                              value={db}
+                              onClick={() => console.log("clicked", db)}
+                            >
+                              {db.name}
+                            </ComboboxItem>
+                          )}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                    {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
+                  </Field>
+                )
+              }}
+            />
+            {/* Schema Selector */}
+            <Controller
+              control={form.control}
+              name="schemaName"
               render={({ field, fieldState }) => (
                 <Field>
-                  <FieldLabel>Client Database</FieldLabel>
-                  <Select
-                    disabled={noDatabases}
-                    value={field.value ? String(field.value) : ""}
+                  <FieldLabel>Schema</FieldLabel>
+                  <Combobox
+                    items={schemaNames}
+                    disabled={noSchemas || !dbId}
+                    value={field.value || ""}
                     onValueChange={(v) => {
-                      field.onChange(Number(v))
+                      // Keep it as a pure string, no foolish Number() casting!
+                      field.onChange(v || undefined)
                       if (resolutionError) setResolutionError(null)
                     }}
                   >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={noDatabases ? "No databases available" : "Select a database"}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clientDbs?.results?.map((db) => (
-                        <SelectItem key={db.id} value={String(db.id)}>
-                          {db.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <ComboboxInput
+                      placeholder={dbId ? "Select a schema" : "Select a database first"}
+                      disabled={noSchemas || !dbId}
+                    />
+                    <ComboboxContent
+                      onWheel={(e) => e.stopPropagation()}
+                      className="pointer-events-auto"
+                    >
+                      <ComboboxEmpty>No schemas found.</ComboboxEmpty>
+                      <ComboboxList>
+                        {(schema) => (
+                          <ComboboxItem key={schema} value={schema}>
+                            {schema}
+                          </ComboboxItem>
+                        )}
+                      </ComboboxList>
+                    </ComboboxContent>
+                  </Combobox>
                   {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
                 </Field>
               )}
             />
+            {/* Framework Selector */}
+            <Controller
+              control={form.control}
+              name="frameworkId"
+              render={({ field, fieldState }) => {
+                const frameworkItems = frameworks?.results || []
 
+                return (
+                  <Field>
+                    <FieldLabel>Framework</FieldLabel>
+                    <Combobox
+                      items={frameworkItems}
+                      disabled={noFrameworks}
+                      itemToStringLabel={(framework) => framework?.name ?? ""}
+                      value={
+                        frameworkItems.find((framework) => framework.id === field.value) ?? null
+                      }
+                      onValueChange={(framework) => {
+                        field.onChange(framework ? framework.id : undefined)
+                        if (resolutionError) setResolutionError(null)
+                      }}
+                    >
+                      <ComboboxInput
+                        placeholder={
+                          noFrameworks ? "No frameworks available" : "Select a framework..."
+                        }
+                      />
+                      <ComboboxContent
+                        onWheel={(e) => e.stopPropagation()}
+                        className="pointer-events-auto"
+                      >
+                        <ComboboxEmpty>No frameworks found.</ComboboxEmpty>
+                        <ComboboxList>
+                          {(framework) => (
+                            /* FIXED: Pass the raw framework object, NOT String(framework.id) */
+                            <ComboboxItem key={framework.id} value={framework}>
+                              {framework.name}
+                            </ComboboxItem>
+                          )}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                    {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
+                  </Field>
+                )
+              }}
+            />
             {/* Error Feedback Display */}
             {resolutionError && (
               <p className="text-destructive text-sm font-medium">{resolutionError}</p>

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
@@ -18,7 +19,7 @@ import {
 } from "@/components/ui/select"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import * as z from "zod"
 
@@ -47,9 +48,13 @@ export function SchemaUploadForm({
   onUpload,
   onPreviewChange,
 }: SchemaUploadFormProps) {
+  const [open, setOpen] = useState(false)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { client_db: "" },
+    defaultValues: {
+      client_db: "",
+      name: "",
+    },
   })
 
   const [clientDb, sqlFile] = useWatch({
@@ -87,8 +92,12 @@ export function SchemaUploadForm({
         <CardDescription>Select a database and upload its SQL schema file.</CardDescription>
       </CardHeader>
       <CardContent>
+        <Button onClick={() => console.log("Billie jean", schemas)}>
+          <img src="/mambo/mambo.gif" className="h-6 w-6" />
+        </Button>
         <form id="schema-upload-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
+            {/* Client database selector */}
             <Controller
               name="client_db"
               control={form.control}
@@ -111,45 +120,77 @@ export function SchemaUploadForm({
                 </Field>
               )}
             />
+            {/* Schema name combobox */}
             <Controller
               name="name"
               control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Schema Name</FieldLabel>
-                  <div className="relative">
-                    <Input
-                      {...field}
-                      type="text"
-                      disabled={!dbId}
-                      placeholder="Type a new name or select existing..."
-                      maxLength={200}
-                      className="w-full"
-                      // Ensure that if they manually type, it updates React Hook Form immediately
-                      onChange={(e) => field.onChange(e.target.value)}
-                    />
-                    <div className="bg-popover absolute z-10 mt-1 hidden max-h-60 w-full overflow-auto rounded-md border p-1 shadow-md group-focus-within:block hover:block">
-                      {schemas?.results
-                        .filter((schema) =>
-                          schema.name.toLowerCase().includes((field.value || "").toLowerCase()),
-                        )
-                        .map((schema) => (
-                          <button
-                            key={schema.id}
-                            type="button"
-                            className="hover:bg-accent hover:text-accent-foreground w-full rounded-sm px-2 py-1.5 text-left text-sm"
-                            onClick={() => field.onChange(schema.name)}
-                          >
-                            {schema.name} (v{schema.internal_version})
-                          </button>
-                        ))}
-                    </div>
-                  </div>
+              render={({ field, fieldState }) => {
+                const filteredSchemas = (schemas?.results || []).filter((s) =>
+                  s.name.toLowerCase().includes((field.value || "").toLowerCase()),
+                )
+                return (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Schema Name</FieldLabel>
+                    <div className="relative">
+                      <Popover open={open && filteredSchemas.length > 0} onOpenChange={setOpen}>
+                        <PopoverAnchor asChild>
+                          <Input
+                            {...field}
+                            type="text"
+                            disabled={!dbId}
+                            onFocus={() => setOpen(true)}
+                            autoComplete="off"
+                            placeholder={
+                              dbId
+                                ? "Type a new name or select existing..."
+                                : "Select a database first"
+                            }
+                            maxLength={100}
+                            className="w-full"
+                            onChange={(e) => field.onChange(e.target.value)}
+                          />
+                        </PopoverAnchor>
 
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
+                        <PopoverContent
+                          className="bg-popover max-h-60 w-(--radix-popover-trigger-width) overflow-y-auto rounded-md border p-1 shadow-md"
+                          onOpenAutoFocus={(e) => e.preventDefault()}
+                          onInteractOutside={(e) => {
+                            // Prevent Radix from closing the popover
+                            if (e.target instanceof Element && e.target.closest("input")) {
+                              e.preventDefault()
+                            }
+                          }}
+                        >
+                          {(schemas?.results || [])
+                            .filter((schema) =>
+                              schema.name.toLowerCase().includes((field.value || "").toLowerCase()),
+                            )
+                            .map((schema) => (
+                              <button
+                                key={schema.id}
+                                type="button"
+                                className="hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-default items-center justify-between rounded-sm px-2.5 py-2 text-left text-sm transition-colors outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                                onClick={() => {
+                                  field.onChange(schema.name)
+                                  setOpen(false)
+                                }}
+                              >
+                                <span className="text-foreground font-medium">{schema.name}</span>
+                                <span className="bg-muted text-muted-foreground border-border/50 ml-2 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
+                                  v{schema.internal_version}
+                                </span>
+                              </button>
+                            ))}
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )
+              }}
             />
+            {/* Schema file input */}
             <Controller
               name="sql_file"
               control={form.control}

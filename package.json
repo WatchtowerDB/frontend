@@ -16,6 +16,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@base-ui/react": "^1.5.0",
     "@fontsource-variable/geist": "^5.2.9",
     "@hookform/resolvers": "^5.4.0",
     "@microsoft/fetch-event-source": "^2.0.1",
@@ -26,6 +27,7 @@
     "axios-auth-refresh": "^5.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.20.0",
     "next-themes": "^0.4.6",
