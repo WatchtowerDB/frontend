@@ -19,9 +19,12 @@ export default function SchemasPage() {
   const selectedSchema = schemas?.find((s) => s.id === selectedSchemaId)
   const previewContent = activeTab === "upload" ? fileContent : selectedSchema?.sql_definition
 
-  const selectedInfo = selectedSchema
-    ? `${databases.find((db) => db.id === selectedSchema.client_db)?.name} (v${selectedSchema.id})`
-    : ""
+  const selectedInfo =
+    activeTab === "upload"
+      ? "Preview"
+      : selectedSchema
+        ? `${databases.find((db) => db.id === selectedSchema.client_db)?.name} › ${selectedSchema.name} (v${selectedSchema.internal_version})`
+        : ""
 
   if (isLoading) {
     return (
