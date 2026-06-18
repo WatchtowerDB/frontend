@@ -14,15 +14,18 @@ export default function ViewLatestCheck({ className }: ViewLatestCheckProps) {
 
   const complianceCheckId = useAssertionStore((s) => s.complianceCheckId)
   const setComplianceCheckId = useAssertionStore((s) => s.setComplianceCheckId)
-  const isChecked = latestCheckId ? complianceCheckId === latestCheckId : false
+  const isChecked =
+    latestCheckId !== null &&
+    complianceCheckId.length === 1 &&
+    complianceCheckId[0] === latestCheckId
 
   const handleCheckedChange = (checkedValue: boolean | "indeterminate") => {
     if (!latestCheckId) return
 
     if (checkedValue === true) {
-      setComplianceCheckId(latestCheckId)
+      setComplianceCheckId([latestCheckId])
     } else {
-      setComplianceCheckId(null)
+      setComplianceCheckId([])
     }
   }
 

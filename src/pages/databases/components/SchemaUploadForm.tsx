@@ -209,7 +209,7 @@ export function SchemaUploadForm({
         <Controller
           name="sql_file"
           control={form.control}
-          render={({ field: { value: _v, onChange, ref, ...props }, fieldState }) => {
+          render={({ field: { value: _v, onChange, ref }, fieldState }) => {
             const fileName = _v?.[0]?.name
 
             return (

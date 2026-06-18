@@ -269,7 +269,7 @@ export default function ChecksPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  setComplianceCheckId(check.id)
+                                  setComplianceCheckId([check.id])
                                   navigate("/compliance/assertions")
                                 }}
                               >
