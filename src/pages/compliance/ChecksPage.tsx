@@ -243,10 +243,10 @@ export default function ChecksPage() {
           <ScrollArea className="max-h-full min-h-0 flex-1">
             <div className="px-4 pb-4">
               <Accordion className="flex w-full flex-col gap-3" type="multiple">
-                {/* {checkData?.results.map((check) => { */}
-                {mockChecks?.map((check) => {
-                  // const stats = summaryMap?.[check.id]
-                  const stats = mockSummaryMap?.[check.id]
+                {checkData?.results.map((check) => {
+                {/* {mockChecks?.map((check) => { */}
+                  const stats = summaryMap?.[check.id]
+                  // const stats = mockSummaryMap?.[check.id]
                   // const status = !stats
                   //   ? "loading"
                   //   : stats.failed === 0
