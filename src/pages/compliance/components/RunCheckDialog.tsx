@@ -57,6 +57,11 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
     },
   })
 
+  // To disable submission if nothing is selected.
+  const watchedFrameworkId = form.watch("frameworkId")
+  const watchedClientDbId = form.watch("clientDbId")
+  const hasNoSelection = !watchedFrameworkId || !watchedClientDbId
+
   const onSubmit = async (values: RunCheckForm) => {
     setResolvingSchema(true)
     setResolutionError(null)
@@ -104,6 +109,8 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
   }
 
   const isWorking = isMutationPending || resolvingSchema
+  const noFrameworks = !frameworks?.results || frameworks.results.length === 0
+  const noDatabases = !clientDbs?.results || clientDbs.results.length === 0
 
   return (
     <Dialog
@@ -129,6 +136,7 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                 <Field>
                   <FieldLabel>Framework</FieldLabel>
                   <Select
+                    disabled={noFrameworks}
                     value={field.value ? String(field.value) : ""}
                     onValueChange={(v) => {
                       field.onChange(Number(v))
@@ -136,7 +144,11 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a framework" />
+                      <SelectValue
+                        placeholder={
+                          noFrameworks ? "No frameworks available" : "Select a framework"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {frameworks?.results?.map((f) => (
@@ -159,6 +171,7 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                 <Field>
                   <FieldLabel>Client Database</FieldLabel>
                   <Select
+                    disabled={noDatabases}
                     value={field.value ? String(field.value) : ""}
                     onValueChange={(v) => {
                       field.onChange(Number(v))
@@ -166,7 +179,9 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a database" />
+                      <SelectValue
+                        placeholder={noDatabases ? "No databases available" : "Select a database"}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {clientDbs?.results?.map((db) => (
@@ -187,7 +202,7 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
             )}
 
             <DialogFooter>
-              <Button type="submit" disabled={isWorking}>
+              <Button type="submit" disabled={isWorking || hasNoSelection}>
                 {resolvingSchema ? "Loading…" : isMutationPending ? "Starting…" : "Run Check"}
               </Button>
             </DialogFooter>

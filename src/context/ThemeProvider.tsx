@@ -51,6 +51,10 @@ export function ThemeProvider({
     theme,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme)
+      document.documentElement.classList.add("theme-transitioning")
+      setTimeout(() => {
+        document.documentElement.classList.remove("theme-transitioning")
+      }, 300)
       setTheme(theme)
     },
   }

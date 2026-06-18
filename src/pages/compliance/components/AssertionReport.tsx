@@ -1,6 +1,6 @@
 import { AlertCircle, CheckCircle2, InfoIcon } from "lucide-react"
 import { useEffect, useRef } from "react"
-import ReactMarkdown from "react-markdown"
+import ReactMarkdown, { type Components } from "react-markdown"
 import remarkGfm from "remark-gfm"
 
 import SqlBlock from "@/components/SqlBlock"
@@ -10,11 +10,10 @@ import Loader from "@/components/ui/loader"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAssertionDetails } from "@/hooks/useAssertions"
 import { cn } from "@/lib/utils"
 import { useComplianceCheckStore, type LiveAssertion } from "@/stores/useComplianceCheckStore"
-
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import type { AssertionItem } from "@/types/compliance"
 
 interface AssertionReportProps {
@@ -41,6 +40,20 @@ function deriveViewState(params: {
   if (assertion?.result === false && (assertion?.recommendation || live?.recommendation))
     return "failed" // completed failure report, show the report
   return "loading" // is just loading. waiting for first token.
+}
+
+// This is for handling markdown in-report, to color the code.
+const markdownComponents: Components = {
+  pre({ children }) {
+    return <>{children}</>
+  },
+  code({ className, children }) {
+    const match = /language-(\w+)/.exec(className || "")
+    if (match) {
+      return <SqlBlock query={String(children).trim()} label={match[1].toUpperCase()} />
+    }
+    return <code className={className}>{children}</code>
+  },
 }
 
 export default function AssertionReport({
@@ -107,114 +120,110 @@ export default function AssertionReport({
   }, [recommendation, isStreaming])
 
   return (
-    <TooltipProvider>
-      <div className="flex h-full flex-col">
-        {/* Header */}
-        <div className="flex-none border-b px-6 py-4">
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Tooltip delayDuration={500}>
-              <TooltipTrigger asChild>
-                <SidebarTrigger />
-              </TooltipTrigger>
-              <TooltipContent>{open ? "Hide assertions" : "Show assertions"}</TooltipContent>
-            </Tooltip>
-            {title}
-            {assertion ? (
-              <Badge variant={result ? "outline" : "destructive"} className="ml-2">
-                {result ? "Pass" : "Fail"}
-              </Badge>
-            ) : null}
-          </h2>
-        </div>
-
-        <div className="relative min-h-0 flex-1">
-          <ScrollArea key={assertionId} className="h-full w-full">
-            {(() => {
-              switch (viewState) {
-                case "empty":
-                  return (
-                    <div className="flex h-full flex-col items-center justify-center py-20 text-slate-400 italic">
-                      <InfoIcon className="mb-2 h-8 w-8 opacity-20" />
-                      <p>Select an assertion to view its audit intelligence.</p>
-                    </div>
-                  )
-
-                case "error":
-                  return (
-                    <div className="flex h-full flex-col items-center justify-center gap-3 py-20 text-slate-500">
-                      <Loader className="h-8 w-8 animate-spin text-indigo-500" />
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <AlertCircle className="h-4 w-4 text-amber-500" />
-                        <span>Stream disconnected. Please refresh the page.</span>
-                      </div>
-                    </div>
-                  )
-
-                case "passed":
-                  return (
-                    <div className="p-6">
-                      {assertion?.sql_query && (
-                        <SqlBlock query={assertion.sql_query} label="SQL Audited" />
-                      )}
-                      <div className="flex flex-col items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-12 text-center shadow-sm">
-                        <CheckCircle2 className="mb-4 h-16 w-16 text-emerald-500" />
-                        <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-400">
-                          Compliance Verified
-                        </h3>
-                        <p className="mt-2 max-w-md text-sm text-emerald-600/80 dark:text-emerald-400/70">
-                          This target database constraint successfully passed all automated
-                          compliance checks. No structural anomalies detected.
-                        </p>
-                      </div>
-                    </div>
-                  )
-
-                case "streaming":
-                case "failed":
-                  return (
-                    <div className="p-6">
-                      {assertion?.sql_query && (
-                        <SqlBlock query={assertion.sql_query} label="SQL Target" />
-                      )}
-                      <article
-                        className={cn(
-                          "prose prose-slate dark:prose-invert max-w-none",
-                          viewState === "streaming" && [
-                            "[&_p:last-child]:after:content-['▍']",
-                            "[&_p:last-child]:after:inline-block",
-                            "[&_p:last-child]:after:ml-1",
-                            "[&_p:last-child]:after:text-indigo-500",
-                            "[&_p:last-child]:after:animate-pulse",
-                          ],
-                        )}
-                      >
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{recommendation}</ReactMarkdown>
-                      </article>
-                      <div ref={bottomRef} className="h-2" />
-                    </div>
-                  )
-
-                case "loading":
-                  return (
-                    <div className="flex h-full flex-col items-center justify-center gap-2 py-20 text-slate-400">
-                      <Loader className="h-6 w-6 animate-spin text-indigo-500" />
-                      <p className="text-sm italic">Generating audit intelligence...</p>
-                    </div>
-                  )
-              }
-            })()}
-          </ScrollArea>
-        </div>
-        <div className="border-t bg-white px-6 transition-colors duration-200 dark:bg-slate-950">
-          <Alert className="rounded-none border-none bg-transparent p-0 py-3">
-            <AlertDescription className="text-muted-foreground text-center text-[10px] leading-relaxed tracking-widest uppercase">
-              All responses are AI-generated and may not always be accurate or complete. They should
-              be independently reviewed and verified by a domain expert. WatchtowerDB is NOT
-              responsible for any actions taken based on these responses.
-            </AlertDescription>
-          </Alert>
-        </div>
+    <div className="flex h-full flex-col">
+      {/* Header */}
+      <div className="flex-none border-b px-6 py-4">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <Tooltip delayDuration={500}>
+            <TooltipTrigger asChild>
+              <SidebarTrigger />
+            </TooltipTrigger>
+            <TooltipContent>{open ? "Hide assertions" : "Show assertions"}</TooltipContent>
+          </Tooltip>
+          {title}
+          {assertion ? (
+            <Badge variant={result ? "outline" : "destructive"} className="ml-2">
+              {result ? "Pass" : "Fail"}
+            </Badge>
+          ) : null}
+        </h2>
       </div>
-    </TooltipProvider>
+
+      <div className="relative min-h-0 flex-1">
+        <ScrollArea key={assertionId} className="h-full w-full">
+          {(() => {
+            switch (viewState) {
+              case "empty":
+                return (
+                  <div className="flex h-full flex-col items-center justify-center py-20 text-slate-400 italic">
+                    <InfoIcon className="mb-2 h-8 w-8 opacity-20" />
+                    <p>Select an assertion to view its audit intelligence.</p>
+                  </div>
+                )
+
+              case "error":
+                return (
+                  <div className="flex h-full flex-col items-center justify-center gap-3 py-20 text-slate-500">
+                    <Loader className="h-8 w-8 animate-spin text-indigo-500" />
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                      <span>Stream disconnected. Please refresh the page.</span>
+                    </div>
+                  </div>
+                )
+
+              case "passed":
+                return (
+                  <div className="p-6">
+                    {assertion?.sql_query && <SqlBlock query={assertion.sql_query} label="SQL" />}
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-12 text-center shadow-sm">
+                      <CheckCircle2 className="mb-4 h-16 w-16 text-emerald-500" />
+                      <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-400">
+                        Compliance Verified
+                      </h3>
+                      <p className="mt-2 max-w-md text-sm text-emerald-600/80 dark:text-emerald-400/70">
+                        This target database constraint successfully passed all automated compliance
+                        checks. No structural anomalies detected.
+                      </p>
+                    </div>
+                  </div>
+                )
+
+              case "streaming":
+              case "failed":
+                return (
+                  <div className="p-6">
+                    {assertion?.sql_query && <SqlBlock query={assertion.sql_query} label="SQL" />}
+                    <article
+                      className={cn(
+                        "prose prose-slate dark:prose-invert max-w-none",
+                        viewState === "streaming" && [
+                          "[&_p:last-child]:after:content-['▍']",
+                          "[&_p:last-child]:after:inline-block",
+                          "[&_p:last-child]:after:ml-1",
+                          "[&_p:last-child]:after:text-indigo-500",
+                          "[&_p:last-child]:after:animate-pulse",
+                        ],
+                      )}
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                        {recommendation}
+                      </ReactMarkdown>
+                    </article>
+                    <div ref={bottomRef} className="h-2" />
+                  </div>
+                )
+
+              case "loading":
+                return (
+                  <div className="flex h-full flex-col items-center justify-center gap-2 py-20 text-slate-400">
+                    <Loader className="h-6 w-6 animate-spin text-indigo-500" />
+                    <p className="text-sm italic">Generating audit intelligence...</p>
+                  </div>
+                )
+            }
+          })()}
+        </ScrollArea>
+      </div>
+      <div className="border-t px-6 transition-colors duration-200">
+        <Alert className="rounded-none border-none bg-transparent p-0 py-3">
+          <AlertDescription className="text-muted-foreground text-center text-[10px] leading-relaxed tracking-widest uppercase">
+            All responses are AI-generated and may not always be accurate or complete. They should
+            be independently reviewed and verified by a domain expert. WatchtowerDB is NOT
+            responsible for any actions taken based on these responses.
+          </AlertDescription>
+        </Alert>
+      </div>
+    </div>
   )
 }

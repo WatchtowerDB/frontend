@@ -4,10 +4,13 @@ import { type PaginatedResponse } from "@/types/api"
 import { type ClientDB, type ClientDBCreate, type ClientDBPatch } from "@/types/compliance"
 
 export interface ClientDBFilters {
+  name?: string
+  // Pagination & Sorting
   page?: number
+  ordering?: string[]
 }
 
-// To retrieve ALL client databases
+// To retrieve client databases per page
 export const getClientDBs = async (
   filters: ClientDBFilters = {},
 ): Promise<PaginatedResponse<ClientDB>> => {

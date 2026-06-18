@@ -231,6 +231,10 @@ export const useClientDBs = (): UseClientDBsResult => {
 
   // Execute all pending changes in parallel, then refresh data from server
   const applyChanges = async () => {
+    const totalDeletedCount = deleted.size
+    const totalCreatedCount = created.length
+    const currentTotalCount = data?.count ?? 0
+
     const createOps = created.map((db) =>
       createMutation.mutateAsync({ name: db.name, connection_string: db.connection_string }),
     )
@@ -238,6 +242,16 @@ export const useClientDBs = (): UseClientDBsResult => {
       updateMutation.mutateAsync({ id: Number(id), data: fields }),
     )
     const deleteOps = Array.from(deleted).map((id) => deleteMutation.mutateAsync(id))
+
+    // To deal with edge cases associated with batch editing
+    if (totalDeletedCount > 0 || totalCreatedCount > 0) {
+      const projectedCount = currentTotalCount - totalDeletedCount + totalCreatedCount
+      const projectedTotalPages = Math.ceil(projectedCount / PAGE_SIZE) || 1
+
+      if (page > projectedTotalPages) {
+        setPage(projectedTotalPages)
+      }
+    }
 
     // Wait for all mutations to complete before proceeding
     await Promise.all([...createOps, ...updateOps, ...deleteOps])

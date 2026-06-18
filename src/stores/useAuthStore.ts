@@ -12,7 +12,7 @@ interface AuthState {
   setAccessToken: (token: string | null) => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   userName: null,
   isAuthenticated: false,
@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
       })
     } catch (error) {
-      console.error("useAuthStore.ts: Login failed, the error is:", error)
+      console.log("[AUTH] Failed to log in: ", error)
       throw error
     }
   },
@@ -37,6 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAccessToken: (token) => set({ accessToken: token }),
 
   logout: () => {
+    if (!get().isAuthenticated) return
     useComplianceCheckStore.getState().reset()
     set({ accessToken: null, userName: null, isAuthenticated: false })
     toast.info("You have been logged out.", {

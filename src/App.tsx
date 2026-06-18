@@ -2,31 +2,50 @@ import { MainLayout } from "@/layout/MainLayout"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom"
 // import Home from './pages/Home';
-import { Toaster } from "@/components/ui/sonner"
-import { AuthProvider } from "@/context/AuthProvider"
-import { ProtectedRoute } from "@/context/ProtectedRoute"
-import { ThemeProvider } from "@/context/ThemeProvider"
-import AssertionsPage from "@/pages/compliance/AssertionsPage"
+
 import ComplianceLayout from "@/pages/compliance/ComplianceLayout"
-import SummaryPage from "@/pages/compliance/SummaryPage"
 import Dashboard from "@/pages/dashboard/Dashboard"
 import ClientDBsPage from "@/pages/databases/ClientDBsPage"
 import DatabasesLayout from "@/pages/databases/DatabasesLayout"
 import SchemasPage from "@/pages/databases/SchemasPage"
-import Login from "@/pages/login/Login"
-import NotFound from "@/pages/not-found/NotFound"
+import Help from "@/pages/help/Help"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { toast } from "sonner"
+import { Toaster } from "./components/ui/sonner"
+import { AuthProvider } from "./context/AuthProvider"
+import { ProtectedRoute } from "./context/ProtectedRoute"
+import { ThemeProvider } from "./context/ThemeProvider"
+import AssertionsPage from "./pages/compliance/AssertionsPage"
+import ChecksPage from "./pages/compliance/ChecksPage"
+import SummaryPage from "./pages/compliance/SummaryPage"
+import Login from "./pages/login/Login"
+import NotFound from "./pages/not-found/NotFound"
+import type { APIError } from "./types/api"
 
-export default function App() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 1000 * 60 * 5, // 5 minutes and TODO: Make sure i dont have staleTime otherwhere.
-        retry: 1,
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+      throwOnError: (error) => {
+        console.log("App queries tsx says", error)
+        const apiError = error as APIError
+        const message = apiError.detail ?? "An unexpected error occurred."
+        toast.error(message, { id: message })
+        return false
       },
     },
-  })
-
+    mutations: {
+      onError: (error) => {
+        console.log("App tsx mutations says", error)
+        const apiError = error as APIError
+        const message = apiError.detail ?? "An unexpected error occurred."
+        toast.error(message, { id: message })
+      },
+    },
+  },
+})
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="theme">
@@ -47,6 +66,9 @@ export default function App() {
 
                     {/* The Sub-Route: Renders at /compliance/queries */}
                     <Route path="assertions" element={<AssertionsPage />} />
+
+                    {/* The Sub-Route: Renders at /compliance/checks */}
+                    <Route path="checks" element={<ChecksPage />} />
                   </Route>
 
                   <Route path="databases" element={<DatabasesLayout />}>
@@ -59,7 +81,7 @@ export default function App() {
                   </Route>
                   <Route path="/standards" element={<h2>Standards</h2>} />
                   <Route path="/settings" element={<h2>Settings</h2>} />
-                  <Route path="/help" element={<h2>Help</h2>} />
+                  <Route path="/help" element={<Help />} />
                   {/* <Route path="/dashboard" element={<Dashboard />} /> */}
                 </Route>
               </Route>

@@ -4,11 +4,15 @@ import { type PaginatedResponse } from "@/types/api"
 import { type Framework } from "@/types/compliance"
 
 export interface FrameworkFilters {
-  framework?: number
+  description?: string
+  name?: string
+  search?: string
+  // Pagination & Sorting
   page?: number
+  ordering?: string[]
 }
 
-// To retrieve ALL frameworks
+// To retrieve frameworks per page
 export const getFrameworks = async (
   filters: FrameworkFilters = {},
 ): Promise<PaginatedResponse<Framework>> => {

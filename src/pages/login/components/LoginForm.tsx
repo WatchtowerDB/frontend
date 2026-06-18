@@ -4,6 +4,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/useAuthStore"
+import type { APIError } from "@/types/api"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -36,8 +37,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     try {
       await login(data)
     } catch (error) {
-      console.error("Login failed:", error)
-      if (error === 401) {
+      const apiError = error as APIError
+      if (apiError.status === 401) {
         setError("username", { type: "manual", message: "Invalid credentials" })
         setError("password", { type: "manual", message: "Invalid credentials" })
       }
