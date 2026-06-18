@@ -92,9 +92,6 @@ export function SchemaUploadForm({
         <CardDescription>Select a database and upload its SQL schema file.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Button onClick={() => console.log("Billie jean", schemas)}>
-          <img src="/mambo/mambo.gif" className="h-6 w-6" />
-        </Button>
         <form id="schema-upload-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
             {/* Client database selector */}
