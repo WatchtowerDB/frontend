@@ -18,7 +18,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import * as z from "zod"
 
@@ -58,9 +58,6 @@ export function SchemaUploadForm({
   onUpload,
   onPreviewChange,
 }: SchemaUploadFormProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Using z.input to keep React Hook Form types aligned perfectly
   const form = useForm<z.input<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
