@@ -18,7 +18,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import * as z from "zod"
 
@@ -58,6 +58,7 @@ export function SchemaUploadForm({
   onUpload,
   onPreviewChange,
 }: SchemaUploadFormProps) {
+  const [openSchema, setOpenSchema] = useState(false)
   const form = useForm<z.input<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -68,10 +69,14 @@ export function SchemaUploadForm({
     },
   })
 
-  const clientDb = useWatch({ control: form.control, name: "client_db" })
-  const sqlFile = useWatch({ control: form.control, name: "sql_file" })
+  const [clientDb, sqlFile, schemaName] = useWatch({
+    control: form.control,
+    name: ["client_db", "sql_file", "name"],
+  })
 
   const dbId = clientDb ? parseInt(clientDb) : null
+
+  const noSelection = !dbId || !schemaName?.trim() || !sqlFile || sqlFile.length === 0
 
   const { data: schemas } = useAllClientDBSchemas(dbId ? { client_db: [dbId] } : undefined)
   const uniqueSchemas = Array.from(
@@ -152,9 +157,14 @@ export function SchemaUploadForm({
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel>Schema Name</FieldLabel>
                 <Combobox
+                  open={openSchema}
+                  onOpenChange={setOpenSchema}
                   items={filteredSchemas}
                   value={field.value || ""}
-                  onValueChange={(value) => field.onChange(value ?? "")}
+                  onValueChange={(value) => {
+                    field.onChange(value ?? "")
+                    setOpenSchema(false)
+                  }}
                 >
                   <ComboboxInput
                     disabled={!dbId}
@@ -162,7 +172,10 @@ export function SchemaUploadForm({
                       dbId ? "Type a new name or select existing..." : "Select a database first"
                     }
                     value={field.value ?? ""}
-                    onChange={(value) => field.onChange(value ?? "")}
+                    onChange={(value) => {
+                      field.onChange(value ?? "")
+                      if (!open && dbId) setOpenSchema(true)
+                    }}
                   />
                   <ComboboxContent>
                     <ComboboxList>
@@ -174,8 +187,27 @@ export function SchemaUploadForm({
                           </span>
                         </ComboboxItem>
                       ))}
-                      {filteredSchemas?.length === 0 && (
-                        <ComboboxEmpty>New schema "{search}"</ComboboxEmpty>
+
+                      {/* Case 1: The input is empty, and there's nothing to show.*/}
+                      {filteredSchemas?.length === 0 && !field.value?.trim() && (
+                        <ComboboxEmpty className="text-muted-foreground cursor-default px-2 py-1.5 text-sm select-none">
+                          No schemas found.
+                        </ComboboxEmpty>
+                      )}
+
+                      {/* Case 2: The user has typed a new name. */}
+                      {filteredSchemas?.length === 0 && field.value?.trim() && (
+                        <ComboboxEmpty
+                          className="hover:bg-accent hover:text-accent-foreground cursor-pointer px-2 py-1.5 text-sm outline-hidden select-none"
+                          role="button"
+                          onClick={() => {
+                            const trimmedValue = field.value.trim()
+                            field.onChange(trimmedValue)
+                            setOpenSchema(false)
+                          }}
+                        >
+                          New schema "{field.value.trim()}"
+                        </ComboboxEmpty>
                       )}
                     </ComboboxList>
                   </ComboboxContent>
@@ -245,7 +277,7 @@ export function SchemaUploadForm({
 
       {/* Submit button */}
       <div className="flex pt-2">
-        <Button type="submit" disabled={isUploading} className="w-full">
+        <Button type="submit" disabled={isUploading || noSelection} className="w-full">
           {isUploading ? "Uploading..." : "Upload Schema"}
         </Button>
       </div>
