@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # - name: NodeSecure SCA
       #   uses: NodeSecure/ci-action@177c57fe32c75cafabe87f6e4515d277cc37ae6c # 1.4.1
@@ -51,7 +51,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Semgrep scan
         run: semgrep scan --config p/default --error
