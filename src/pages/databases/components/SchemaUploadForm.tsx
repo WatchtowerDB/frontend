@@ -43,6 +43,7 @@ const formSchema = z.object({
 
 interface SchemaUploadFormProps {
   databases: { id: number; name: string }[]
+  schemasLoading: boolean
   isUploading: boolean
   onUpload: (data: {
     client_db: number
@@ -55,6 +56,7 @@ interface SchemaUploadFormProps {
 
 export function SchemaUploadForm({
   databases,
+  schemasLoading,
   isUploading,
   onUpload,
   onPreviewChange,
@@ -166,7 +168,6 @@ export function SchemaUploadForm({
           control={form.control}
           render={({ field, fieldState }) => {
             const search = (field.value ?? "").trim().toLowerCase()
-
             const filteredSchemas = (uniqueSchemas ?? []).filter((schema) =>
               schema.name.toLowerCase().includes(search),
             )
@@ -188,14 +189,22 @@ export function SchemaUploadForm({
                   }}
                 >
                   <ComboboxInput
-                    disabled={!dbId}
+                    showClear
+                    showClearCondition={!!field.value}
+                    disabled={!dbId || schemasLoading}
+                    onClear={() => setOpenSchema(false)}
                     placeholder={
-                      dbId ? "Type a new name or select existing..." : "Select a database first"
+                      schemasLoading
+                        ? "Loading..."
+                        : dbId
+                          ? "Type a new name or select existing..."
+                          : "Select a database first"
                     }
                     value={field.value ?? ""}
                     onChange={(value) => {
+                      console.log("HELLOLOO")
                       field.onChange(value ?? "")
-                      if (!open && dbId) setOpenSchema(true)
+                      if (!openSchema && dbId) setOpenSchema(true)
                     }}
                   />
                   <ComboboxContent>

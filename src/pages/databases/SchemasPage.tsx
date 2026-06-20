@@ -11,7 +11,7 @@ import { SchemaUploadForm } from "./components/SchemaUploadForm"
 export default function SchemasPage() {
   const [currentPage, setCurrentPage] = useState(1)
 
-  const { databases, schemas, isLoading, isUploading, uploadSchema, totalCount } =
+  const { databases, schemas, isLoading, schemasLoading, isUploading, uploadSchema, totalCount } =
     useClientDBSchemas({
       page: currentPage,
       latest: true,
@@ -67,6 +67,7 @@ export default function SchemasPage() {
               isUploading={isUploading}
               onUpload={uploadSchema}
               onPreviewChange={setFileContent}
+              schemasLoading={schemasLoading}
             />
           </TabsContent>
           {/* Schemas list tab */}

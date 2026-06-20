@@ -8,6 +8,10 @@ import { AxiosError } from "axios"
 import { toast } from "sonner"
 import { useAllClientDBs } from "./useClientDBs"
 
+// TODO: Because you didn't specify an enabled condition inside useAllClientDBSchemas,
+// TanStack Query will instantly fire a request to the backend the millisecond the dialog mounts,
+//  passing an empty object {} or undefined filters. thanks ai review
+
 export function useClientDBSchemas(filters?: ClientDBSchemaFilters) {
   const queryClient = useQueryClient()
 
@@ -33,6 +37,7 @@ export function useClientDBSchemas(filters?: ClientDBSchemaFilters) {
 
   return {
     schemas: listQuery.data?.results ?? [],
+    schemasLoading: listQuery.isLoading,
     databases: dbData?.results ?? [],
     totalCount: listQuery.data?.count ?? 0,
     isLoading: isDBLoading || (!!filters && listQuery.isLoading),

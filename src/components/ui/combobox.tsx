@@ -32,11 +32,18 @@ function ComboboxTrigger({ className, children, ...props }: ComboboxPrimitive.Tr
   )
 }
 
-function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
+// I added the whole of onClick on the ComboboxClear
+
+function ComboboxClear({
+  className,
+  onClick,
+  ...props
+}: ComboboxPrimitive.Clear.Props & { onClick?: React.MouseEventHandler<HTMLButtonElement> }) {
   return (
     <ComboboxPrimitive.Clear
       data-slot="combobox-clear"
       render={<InputGroupButton variant="ghost" size="icon-xs" />}
+      onClick={onClick}
       className={cn(className)}
       {...props}
     >
@@ -52,11 +59,13 @@ function ComboboxInput({
   showTrigger = true,
   showClear = false,
   showClearCondition = false,
+  onClear,
   ...props
 }: ComboboxPrimitive.Input.Props & {
   showTrigger?: boolean
   showClear?: boolean
   showClearCondition?: boolean
+  onClear?: React.MouseEventHandler<HTMLButtonElement>
 }) {
   return (
     <InputGroup className={cn("w-auto", className)}>
@@ -74,13 +83,13 @@ function ComboboxInput({
             <ComboboxTrigger />
           </InputGroupButton>
         )}
-        {showClear && showClearCondition && <ComboboxClear disabled={disabled} />}
+        {showClear && showClearCondition && <ComboboxClear onClick={onClear} disabled={disabled} />}
       </InputGroupAddon>
       {children}
     </InputGroup>
   )
 }
-// Note. I added a showClearCondition here.
+// Note. I added a showClearCondition here and onClear.
 
 function ComboboxContent({
   className,
