@@ -32,14 +32,6 @@ export default function SchemasPage() {
         ? `${databases.find((db) => db.id === selectedSchema.client_db)?.name} › ${selectedSchema.name} (v${selectedSchema.internal_version})`
         : ""
 
-  if (isLoading) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <Loader />
-      </div>
-    )
-  }
-
   return (
     <div className="flex h-full w-full flex-row overflow-hidden">
       {/* Left Column */}
@@ -72,14 +64,20 @@ export default function SchemasPage() {
           </TabsContent>
           {/* Schemas list tab */}
           <TabsContent value="schemas" className="flex h-full flex-1 flex-col overflow-hidden pt-4">
-            <ScrollArea className="h-full min-h-0">
-              <SchemaList
-                schemas={schemas || []}
-                databases={databases}
-                selectedSchemaId={selectedSchemaId}
-                onSelect={setSelectedSchemaId}
-              />
-            </ScrollArea>
+            {isLoading ? (
+              <div className="flex h-full min-h-0 w-full items-center justify-center">
+                <Loader />
+              </div>
+            ) : (
+              <ScrollArea className="h-full min-h-0">
+                <SchemaList
+                  schemas={schemas || []}
+                  databases={databases}
+                  selectedSchemaId={selectedSchemaId}
+                  onSelect={setSelectedSchemaId}
+                />
+              </ScrollArea>
+            )}
             <div className="bg-muted/20 border-t p-2">
               <Pagination
                 page={currentPage}
