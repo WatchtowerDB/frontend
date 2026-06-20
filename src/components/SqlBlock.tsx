@@ -35,7 +35,7 @@ export default function SqlBlock({
   return (
     <div
       className={cn(
-        "not-prose! border-border relative mb-6 rounded-md border-2 bg-(--syntax-bg) shadow-lg",
+        "not-prose! border-border relative flex flex-col overflow-hidden rounded-md border-2 bg-(--syntax-bg) shadow-lg",
         className,
       )}
     >
@@ -47,7 +47,7 @@ export default function SqlBlock({
         )}
         {copyButton && <CopyButton textToCopy={query} variant="ghost" size="xs" />}
       </div>
-      <ScrollArea className="h-full w-full">
+      <ScrollArea className="min-h-0 w-full flex-1">
         <SyntaxHighlighter
           language="sql"
           style={isDark ? dark : light}
