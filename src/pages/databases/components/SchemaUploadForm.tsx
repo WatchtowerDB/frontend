@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
+import type { ClientDBSchema } from "@/types/compliance"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useCallback, useEffect, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -82,15 +83,10 @@ export function SchemaUploadForm({
 
   const noSelection = !dbId || !schemaName?.trim() || !sqlFile || sqlFile.length === 0
 
-  const { data: schemas } = useAllClientDBSchemas(dbId ? { client_db: [dbId] } : undefined)
-  const uniqueSchemas = Array.from(
-    new Map(
-      (schemas?.results || [])
-        .filter((s) => s?.name && s?.internal_version !== undefined)
-        .sort((a, b) => a.internal_version - b.internal_version)
-        .map((s) => [s.name, s]),
-    ).values(),
+  const { data: schemas } = useAllClientDBSchemas(
+    dbId ? { client_db: [dbId], latest: true } : undefined,
   )
+  const uniqueSchemas = (schemas?.results || []) as ClientDBSchema[]
 
   // The following is purely so there's no 0.2 seconds delay when the user clears the form for Schema Name (above the useEffect)
   const [cachedItems, setCachedItems] = useState(uniqueSchemas)
