@@ -44,13 +44,14 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
   const [resolutionError, setResolutionError] = useState<string | null>(null)
 
   // Fetching frameworks and clientDbs to populate the dropdowns.
-  const { data: frameworks } = useFrameworks()
-  const { data: clientDbs } = useAllClientDBs()
+  const { data: frameworks, isLoading: frameworksLoading } = useFrameworks()
+  const { data: clientDbs, isLoading: clientDbsLoading } = useAllClientDBs()
 
   const { mutate, isPending: isMutationPending } = useRunComplianceCheck()
 
   const form = useForm<RunCheckForm>({
     resolver: zodResolver(schema),
+    mode: "onSubmit",
     defaultValues: {
       frameworkId: undefined,
       clientDbId: undefined,
@@ -67,7 +68,9 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
   const hasNoSelection = !watchedFrameworkId || !watchedClientDbId || !watchedSchemaName
 
   const dbId = watchedClientDbId || null
-  const { data: schemas } = useAllClientDBSchemas(dbId ? { client_db: [dbId] } : undefined)
+  const { data: schemas, isLoading: schemasLoading } = useAllClientDBSchemas(
+    dbId ? { client_db: [dbId] } : undefined,
+  )
   const schemaNames = Array.from(new Set((schemas?.results || []).map((s) => s.name)))
 
   const onSubmit = async (values: RunCheckForm) => {
@@ -75,7 +78,6 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
     setResolutionError(null)
     console.log("something trigeodfhsdophfs")
 
-    // This is commpletely useless for now.
     try {
       mutate(
         {
@@ -100,9 +102,9 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
   }
 
   const isWorking = isMutationPending || resolvingSchema
-  const noFrameworks = !frameworks?.results || frameworks.results.length === 0
-  const noDatabases = !clientDbs?.results || clientDbs.results.length === 0
-  const noSchemas = !schemas?.results || schemas.results.length === 0
+  const noFrameworks = !frameworksLoading && frameworks?.results?.length === 0
+  const noDatabases = !clientDbsLoading && clientDbs?.results?.length === 0
+  const noSchemas = !schemasLoading && dbId && schemas?.results?.length === 0
 
   return (
     <Dialog
@@ -132,7 +134,6 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                     <FieldLabel>Client Database</FieldLabel>
                     <Combobox
                       items={databaseItems}
-                      disabled={noDatabases}
                       itemToStringLabel={(db) => db?.name ?? ""}
                       value={databaseItems.find((db) => db.id === field.value) ?? null}
                       onValueChange={(db) => {
@@ -142,7 +143,12 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                         if (resolutionError) setResolutionError(null)
                       }}
                     >
-                      <ComboboxInput placeholder="Select a database..." />
+                      <ComboboxInput
+                        showClear
+                        showClearCondition={!!field.value}
+                        placeholder={clientDbsLoading ? "Loading..." : "Select a database..."}
+                        disabled={noDatabases || clientDbsLoading}
+                      />
                       <ComboboxContent
                         onWheel={(e) => e.stopPropagation()}
                         className="pointer-events-auto"
@@ -175,7 +181,6 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                   <FieldLabel>Schema</FieldLabel>
                   <Combobox
                     items={schemaNames}
-                    disabled={noSchemas || !dbId}
                     value={field.value || ""}
                     onValueChange={(v) => {
                       // Keep it as a pure string, no foolish Number() casting!
@@ -184,8 +189,16 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                     }}
                   >
                     <ComboboxInput
-                      placeholder={dbId ? "Select a schema" : "Select a database first"}
-                      disabled={noSchemas || !dbId}
+                      showClear
+                      showClearCondition={typeof field.value === "string" && field.value.length > 0}
+                      placeholder={
+                        schemasLoading
+                          ? "Loading..."
+                          : dbId
+                            ? "Select a schema"
+                            : "Select a database first"
+                      }
+                      disabled={noSchemas || !dbId || schemasLoading}
                     />
                     <ComboboxContent
                       onWheel={(e) => e.stopPropagation()}
@@ -217,7 +230,6 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                     <FieldLabel>Framework</FieldLabel>
                     <Combobox
                       items={frameworkItems}
-                      disabled={noFrameworks}
                       itemToStringLabel={(framework) => framework?.name ?? ""}
                       value={
                         frameworkItems.find((framework) => framework.id === field.value) ?? null
@@ -228,9 +240,16 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                       }}
                     >
                       <ComboboxInput
+                        showClear
+                        showClearCondition={!!field.value}
                         placeholder={
-                          noFrameworks ? "No frameworks available" : "Select a framework..."
+                          frameworksLoading
+                            ? "Loading..."
+                            : noFrameworks
+                              ? "No frameworks available"
+                              : "Select a framework..."
                         }
+                        disabled={noFrameworks || frameworksLoading}
                       />
                       <ComboboxContent
                         onWheel={(e) => e.stopPropagation()}
