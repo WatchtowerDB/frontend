@@ -20,6 +20,7 @@ import { useRunComplianceCheck } from "@/hooks/useChecks"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { useFrameworks } from "@/hooks/useFrameworks"
+import type { ClientDBSchema } from "@/types/compliance"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form"
@@ -69,9 +70,9 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
 
   const dbId = watchedClientDbId || null
   const { data: schemas, isLoading: schemasLoading } = useAllClientDBSchemas(
-    dbId ? { client_db: [dbId] } : undefined,
+    dbId ? { client_db: [dbId], latest: true } : undefined,
   )
-  const schemaNames = Array.from(new Set((schemas?.results || []).map((s) => s.name)))
+  const uniqueSchemas = (schemas?.results || []) as ClientDBSchema[]
 
   const onSubmit = async (values: RunCheckForm) => {
     setResolvingSchema(true)
@@ -173,6 +174,7 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
               }}
             />
             {/* Schema Selector */}
+            {/* Schema Selector */}
             <Controller
               control={form.control}
               name="schemaName"
@@ -180,10 +182,14 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                 <Field>
                   <FieldLabel>Schema</FieldLabel>
                   <Combobox
-                    items={schemaNames}
+                    items={uniqueSchemas}
+                    itemToStringLabel={(schema: string) => {
+                      if (!schema) return ""
+                      if (typeof schema === "string") return schema
+                      return (schema as ClientDBSchema).name
+                    }}
                     value={field.value || ""}
                     onValueChange={(v) => {
-                      // Keep it as a pure string, no foolish Number() casting!
                       field.onChange(v || "")
                       if (resolutionError) setResolutionError(null)
                     }}
@@ -207,8 +213,16 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                       <ComboboxEmpty>No schemas found.</ComboboxEmpty>
                       <ComboboxList>
                         {(schema) => (
-                          <ComboboxItem key={schema} value={schema}>
-                            {schema}
+                          <ComboboxItem
+                            key={schema.id}
+                            value={schema.name}
+                            className="flex w-full items-center justify-between pr-1"
+                            indicatorClassName="pr-12"
+                          >
+                            <span className="text-foreground font-medium">{schema.name}</span>
+                            <span className="bg-muted text-muted-foreground border-border/50 ml-2 inline-flex w-9 shrink-0 items-center justify-center rounded-md border py-0.5 text-[10px] font-semibold tracking-wider uppercase">
+                              v{schema.internal_version}
+                            </span>
                           </ComboboxItem>
                         )}
                       </ComboboxList>

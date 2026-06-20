@@ -226,9 +226,14 @@ export function SchemaUploadForm({
                   <ComboboxContent>
                     <ComboboxList>
                       {displayItems.map((schema) => (
-                        <ComboboxItem key={schema.id} value={schema.name}>
+                        <ComboboxItem
+                          key={schema.id}
+                          value={schema.name}
+                          className="flex w-full items-center justify-between pr-1"
+                          indicatorClassName="pr-12"
+                        >
                           <span className="text-foreground font-medium">{schema.name}</span>
-                          <span className="bg-muted text-muted-foreground border-border/50 ml-2 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
+                          <span className="bg-muted text-muted-foreground border-border/50 ml-2 inline-flex w-9 shrink-0 items-center justify-center rounded-md border py-0.5 text-[10px] font-semibold tracking-wider uppercase">
                             v{schema.internal_version}
                           </span>
                         </ComboboxItem>
