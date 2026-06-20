@@ -110,12 +110,17 @@ export default function ClientDBsPage() {
                     ? "line-through text-rose-900/80 dark:text-white"
                     : ""
 
+                  const showValidationError =
+                    db.isEditing &&
+                    db.connection_string.trim() !== "" &&
+                    !isValidConnectionString(db.connection_string)
+
                   return (
                     <TableRow key={db.id} className={rowClassName}>
                       <TableCell className="text-muted-foreground pl-3 font-mono">
                         {db.isNew ? "" : db.id}
                       </TableCell>
-                      <TableCell className="align-top">
+                      <TableCell className={cn(showValidationError && "align-top")}>
                         {db.isEditing ? (
                           <Input
                             value={db.name}
@@ -127,7 +132,7 @@ export default function ClientDBsPage() {
                           <span className={textClassName}>{db.name}</span>
                         )}
                       </TableCell>
-                      <TableCell className="align-top">
+                      <TableCell className={cn(showValidationError && "align-top")}>
                         {db.isEditing ? (
                           <div>
                             <Input
