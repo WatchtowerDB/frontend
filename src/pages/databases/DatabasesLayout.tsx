@@ -7,7 +7,7 @@ const DATABASES_NAV = {
   title: "Databases",
   items: [
     {
-      title: "Client DBs",
+      title: "Client Databases",
       url: "/databases/clientdbs",
       icon: Database,
     },

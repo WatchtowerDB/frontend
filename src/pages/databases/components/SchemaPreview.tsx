@@ -18,7 +18,7 @@ export function SchemaPreview({ content, activeTab, selectedInfo }: SchemaPrevie
           query={content}
           label={selectedInfo}
           copyButton={false}
-          className="h-full w-full border-none"
+          className="h-full w-full rounded-none border-none"
         />
       ) : (
         <div className="flex h-full flex-col items-center justify-center gap-2 text-zinc-500 italic">

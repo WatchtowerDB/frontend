@@ -20,6 +20,7 @@ import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useCallback, useEffect, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
+import { Link } from "react-router-dom"
 import * as z from "zod"
 
 const formSchema = z.object({
@@ -125,9 +126,17 @@ export function SchemaUploadForm({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel>Client Database</FieldLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                disabled={databases.length === 0}
+                onValueChange={field.onChange}
+                value={field.value}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a database" />
+                  <SelectValue
+                    placeholder={
+                      databases.length === 0 ? "No databases available" : "Select a database"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {databases.map((db) => (
@@ -137,6 +146,15 @@ export function SchemaUploadForm({
                   ))}
                 </SelectContent>
               </Select>
+              {databases.length === 0 && (
+                <p className="text-destructive mt-1 text-sm">
+                  No databases available. Please add one on the{" "}
+                  <Link to="/databases/clientdbs" className="hover:text-destructive/80 underline">
+                    databases page
+                  </Link>
+                  .
+                </p>
+              )}
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -224,7 +242,9 @@ export function SchemaUploadForm({
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Description (Optional)</FieldLabel>
+              <FieldLabel>
+                Description <span className="text-muted-foreground">(Optional)</span>
+              </FieldLabel>
               <Textarea
                 {...field}
                 value={field.value ?? ""}
