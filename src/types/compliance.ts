@@ -79,10 +79,14 @@ export type CheckStatus =
 export interface Check {
   id: number
   framework: number
-  schema: number
   client_db: number
+  client_db_name: string
   user: number
+  schema: {
+    id: number
+    name: string
+    internal_version: number
+  }
   date: string
   status: CheckStatus
-  updated_at: string
 }
