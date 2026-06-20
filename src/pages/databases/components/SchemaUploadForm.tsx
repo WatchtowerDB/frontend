@@ -64,6 +64,7 @@ export function SchemaUploadForm({
   const [openSchema, setOpenSchema] = useState(false)
   const form = useForm<z.input<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onSubmit",
     defaultValues: {
       client_db: "",
       name: "",
@@ -89,6 +90,14 @@ export function SchemaUploadForm({
         .sort((a, b) => a.internal_version - b.internal_version)
         .map((s) => [s.name, s]),
     ).values(),
+  )
+
+  // The following is purely so there's no 0.2 seconds delay when the user clears the form for Schema Name.
+  // Yeah. A whole useEffect and quarters.
+  const [cachedItems, setCachedItems] = useState(uniqueSchemas)
+  const search = (schemaName ?? "").trim().toLowerCase()
+  const activeFilteredSchemas = uniqueSchemas.filter((schema) =>
+    schema.name.toLowerCase().includes(search),
   )
 
   useEffect(() => {
@@ -167,10 +176,7 @@ export function SchemaUploadForm({
           name="name"
           control={form.control}
           render={({ field, fieldState }) => {
-            const search = (field.value ?? "").trim().toLowerCase()
-            const filteredSchemas = (uniqueSchemas ?? []).filter((schema) =>
-              schema.name.toLowerCase().includes(search),
-            )
+            const displayItems = openSchema ? activeFilteredSchemas : cachedItems
             // Note that the same behavior isn't shared with the run compliance check dialog.
             // Where changing the database name invalidates the schema name selected.
             // That is precisely because the user can use the same name as a new one in another.
@@ -180,8 +186,11 @@ export function SchemaUploadForm({
                 <FieldLabel>Schema Name</FieldLabel>
                 <Combobox
                   open={openSchema}
-                  onOpenChange={setOpenSchema}
-                  items={filteredSchemas}
+                  onOpenChange={(open) => {
+                    if (open) setCachedItems(activeFilteredSchemas)
+                    setOpenSchema(open)
+                  }}
+                  items={displayItems}
                   value={field.value || ""}
                   onValueChange={(value) => {
                     field.onChange(value ?? "")
@@ -192,7 +201,11 @@ export function SchemaUploadForm({
                     showClear
                     showClearCondition={!!field.value}
                     disabled={!dbId || schemasLoading}
-                    onClear={() => setOpenSchema(false)}
+                    onClear={() => {
+                      setCachedItems(activeFilteredSchemas)
+                      field.onChange("")
+                      setOpenSchema(false)
+                    }}
                     placeholder={
                       schemasLoading
                         ? "Loading..."
@@ -201,15 +214,23 @@ export function SchemaUploadForm({
                           : "Select a database first"
                     }
                     value={field.value ?? ""}
-                    onChange={(value) => {
-                      console.log("HELLOLOO")
-                      field.onChange(value ?? "")
-                      if (!openSchema && dbId) setOpenSchema(true)
+                    onChange={(e) => {
+                      const strValue = e.target.value ?? ""
+
+                      field.onChange(strValue)
+                      if (dbId) {
+                        setCachedItems(
+                          uniqueSchemas.filter((s) =>
+                            s.name.toLowerCase().includes(strValue.trim().toLowerCase()),
+                          ),
+                        )
+                        if (!openSchema) setOpenSchema(true)
+                      }
                     }}
                   />
                   <ComboboxContent>
                     <ComboboxList>
-                      {filteredSchemas.map((schema) => (
+                      {displayItems.map((schema) => (
                         <ComboboxItem key={schema.id} value={schema.name}>
                           <span className="text-foreground font-medium">{schema.name}</span>
                           <span className="bg-muted text-muted-foreground border-border/50 ml-2 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
@@ -219,14 +240,14 @@ export function SchemaUploadForm({
                       ))}
 
                       {/* Case 1: The input is empty, and there's nothing to show.*/}
-                      {filteredSchemas?.length === 0 && !field.value?.trim() && (
+                      {activeFilteredSchemas.length === 0 && !field.value?.trim() && (
                         <ComboboxEmpty className="text-muted-foreground cursor-default px-2 py-1.5 text-sm select-none">
                           No schemas found.
                         </ComboboxEmpty>
                       )}
 
                       {/* Case 2: The user has typed a new name. */}
-                      {filteredSchemas?.length === 0 && field.value?.trim() && (
+                      {activeFilteredSchemas.length === 0 && field.value?.trim() && (
                         <ComboboxEmpty
                           className="hover:bg-accent hover:text-accent-foreground cursor-pointer px-2 py-1.5 text-sm outline-hidden select-none"
                           role="button"
