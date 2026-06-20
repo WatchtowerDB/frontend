@@ -115,7 +115,7 @@ export default function ClientDBsPage() {
                       <TableCell className="text-muted-foreground pl-3 font-mono">
                         {db.isNew ? "" : db.id}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top">
                         {db.isEditing ? (
                           <Input
                             value={db.name}
@@ -127,7 +127,7 @@ export default function ClientDBsPage() {
                           <span className={textClassName}>{db.name}</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top">
                         {db.isEditing ? (
                           <div>
                             <Input
