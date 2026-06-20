@@ -11,6 +11,7 @@ export interface ClientDBSchemaFilters {
   client_db?: number[]
   name?: string
   search?: string
+  latest?: boolean
   // Pagination & Sorting
   page?: number
   ordering?: string[]

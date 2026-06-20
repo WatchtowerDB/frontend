@@ -14,6 +14,7 @@ export default function SchemasPage() {
   const { databases, schemas, isLoading, isUploading, uploadSchema, totalCount } =
     useClientDBSchemas({
       page: currentPage,
+      latest: true,
     })
   const [activeTab, setActiveTab] = useState("upload")
   const [selectedSchemaId, setSelectedSchemaId] = useState<number | null>(null)
