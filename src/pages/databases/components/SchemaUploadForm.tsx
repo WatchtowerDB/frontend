@@ -92,8 +92,7 @@ export function SchemaUploadForm({
     ).values(),
   )
 
-  // The following is purely so there's no 0.2 seconds delay when the user clears the form for Schema Name.
-  // Yeah. A whole useEffect and quarters.
+  // The following is purely so there's no 0.2 seconds delay when the user clears the form for Schema Name (above the useEffect)
   const [cachedItems, setCachedItems] = useState(uniqueSchemas)
   const search = (schemaName ?? "").trim().toLowerCase()
   const activeFilteredSchemas = uniqueSchemas.filter((schema) =>
