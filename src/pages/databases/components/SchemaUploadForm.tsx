@@ -138,7 +138,7 @@ export function SchemaUploadForm({
                     }
                   />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" side="bottom" sideOffset={4}>
                   {databases.map((db) => (
                     <SelectItem key={db.id} value={db.id.toString()}>
                       {db.name}
@@ -170,6 +170,9 @@ export function SchemaUploadForm({
             const filteredSchemas = (uniqueSchemas ?? []).filter((schema) =>
               schema.name.toLowerCase().includes(search),
             )
+            // Note that the same behavior isn't shared with the run compliance check dialog.
+            // Where changing the database name invalidates the schema name selected.
+            // That is precisely because the user can use the same name as a new one in another.
 
             return (
               <Field data-invalid={fieldState.invalid}>
