@@ -24,7 +24,6 @@ export default function SchemasPage() {
   const previewContent = activeTab === "upload" ? fileContent : selectedSchema?.sql_definition
 
   const totalPages = Math.ceil(totalCount / (Number(import.meta.env.VITE_DEFAULT_PAGE_SIZE) || 20))
-  // TODO: FIGURE OUT WHY THERE IS NO HORIZONTAL SCROLL ON THE PREVIEWS
   const selectedInfo =
     activeTab === "upload"
       ? "Preview"
