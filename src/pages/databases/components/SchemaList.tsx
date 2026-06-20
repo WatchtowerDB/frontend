@@ -76,9 +76,10 @@ export function SchemaList({ schemas, databases, selectedSchemaId, onSelect }: S
                         )}
                       >
                         <div className="w-full">
+                          {/* If needed, you may change the chevron behaviors from within the accordion component but for now [&>svg]:hidden! does the trick */}
                           <AccordionTrigger
                             className={cn(
-                              "flex w-full flex-row items-center justify-between p-4 text-left backdrop-blur-sm transition-all hover:no-underline [&>svg]:hidden",
+                              "flex w-full flex-row items-center justify-between p-4 text-left backdrop-blur-sm transition-all hover:no-underline [&>svg]:hidden!",
                               "bg-linear-to-br from-neutral-500/5 via-transparent to-transparent",
                               isSelected && "rounded-b-none",
                             )}
