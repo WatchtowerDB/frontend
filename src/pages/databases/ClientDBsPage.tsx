@@ -1,3 +1,4 @@
+// ClientDBsPage.tsx
 import Pagination from "@/components/Pagination"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -192,25 +193,7 @@ export default function ClientDBsPage() {
                             </TooltipContent>
                           </Tooltip>
                         ) : db.isEditing ? (
-                          <div className="flex gap-2">
-                            <Tooltip delayDuration={500}>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  onClick={() => saveEdit(db.id)}
-                                  disabled={
-                                    !db.name?.trim() ||
-                                    !isValidConnectionString(db.connection_string)
-                                  }
-                                  aria-label="Save"
-                                >
-                                  <Check className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Save</p>
-                              </TooltipContent>
-                            </Tooltip>
+                          db.isNew ? (
                             <Tooltip delayDuration={500}>
                               <TooltipTrigger asChild>
                                 <Button
@@ -226,7 +209,46 @@ export default function ClientDBsPage() {
                                 <p>Cancel</p>
                               </TooltipContent>
                             </Tooltip>
-                          </div>
+                          ) : (
+                            <div className="flex gap-2">
+                              {/* Save button appears only when there are actual local changes */}
+                              {db.hasLocalChanges && (
+                                <Tooltip delayDuration={500}>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => saveEdit(db.id)}
+                                      disabled={
+                                        !db.name?.trim() ||
+                                        !isValidConnectionString(db.connection_string)
+                                      }
+                                      aria-label="Save"
+                                    >
+                                      <Check className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Save</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                              <Tooltip delayDuration={500}>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => cancelEdit(db.id)}
+                                    aria-label="Cancel"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Cancel</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                          )
                         ) : (
                           <div className="flex gap-2">
                             <Tooltip delayDuration={500}>
@@ -314,7 +336,7 @@ export default function ClientDBsPage() {
             onClick={applyChanges}
             disabled={
               isPending ||
-              rows.some((db) => db.isEditing) ||
+              rows.some((db) => !db.isNew && db.isEditing) ||
               rows.some(
                 (db) =>
                   !db.isDeleted &&
