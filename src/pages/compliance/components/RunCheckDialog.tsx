@@ -29,7 +29,7 @@ import * as z from "zod"
 const schema = z.object({
   frameworkId: z.number({ message: "Select a framework" }),
   clientDbId: z.number({ message: "Select a client database" }),
-  schemaName: z.string({ message: "Select a schema" }),
+  schemaName: z.string().min(1, { message: "Select a schema" }),
 })
 
 type RunCheckForm = z.infer<typeof schema>
@@ -54,7 +54,8 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
     defaultValues: {
       frameworkId: undefined,
       clientDbId: undefined,
-      schemaName: undefined,
+      schemaName: "",
+      // Schema name's empty is "" because it is not an ID like the rest + so changing DB invalidates schemaName.
     },
   })
 
@@ -137,6 +138,7 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                       onValueChange={(db) => {
                         console.log("Fixed the issue")
                         field.onChange(db ? db.id : undefined)
+                        form.setValue("schemaName", "")
                         if (resolutionError) setResolutionError(null)
                       }}
                     >
@@ -177,7 +179,7 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                     value={field.value || ""}
                     onValueChange={(v) => {
                       // Keep it as a pure string, no foolish Number() casting!
-                      field.onChange(v || undefined)
+                      field.onChange(v || "")
                       if (resolutionError) setResolutionError(null)
                     }}
                   >
