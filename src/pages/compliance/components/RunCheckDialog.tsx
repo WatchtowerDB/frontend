@@ -271,7 +271,6 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
                         <ComboboxEmpty>No frameworks found.</ComboboxEmpty>
                         <ComboboxList>
                           {(framework) => (
-                            /* FIXED: Pass the raw framework object, NOT String(framework.id) */
                             <ComboboxItem key={framework.id} value={framework}>
                               {framework.name}
                             </ComboboxItem>
