@@ -35,20 +35,27 @@ export interface ClientDBPatch {
 // Client Database Schema object
 export interface ClientDBSchema {
   id: number
-  sql_definition: string
+  internal_version: number
+  name: string
+  description: string | null
+  sql_definition: string | null
   created_at: string
   client_db: number
 }
 
 export interface ClientDBSchemaCreate {
+  name: string
+  description: string | null
+  sql_definition: string | null
   client_db: number
-  sql_definition: string
 }
 
 // For uploading schema
 export interface ClientDBSchemaUpload {
-  client_db: number
   sql_file: File
+  client_db: number
+  name: string
+  description?: string | null
 }
 
 // Frameworks object
@@ -72,10 +79,14 @@ export type CheckStatus =
 export interface Check {
   id: number
   framework: number
-  schema: number
   client_db: number
+  client_db_name: string
   user: number
+  schema: {
+    id: number
+    name: string
+    internal_version: number
+  }
   date: string
   status: CheckStatus
-  updated_at: string
 }

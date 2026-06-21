@@ -6,10 +6,10 @@ export const PAGE_SIZE = Number(import.meta.env.VITE_DEFAULT_PAGE_SIZE) || 20
 
 interface AssertionFilterState {
   // --- Filter selections ---
-  clientDb: number | null
-  schema: number | null
-  complianceFramework: number | null
-  complianceCheckId: number | null
+  clientDb: number[]
+  schema: number[]
+  complianceFramework: number[]
+  complianceCheckId: number[]
   result: boolean | null
 
   // --- Search ---
@@ -22,10 +22,10 @@ interface AssertionFilterState {
 }
 
 interface AssertionFilterActions {
-  setClientDb: (id: number | null) => void
-  setSchema: (id: number | null) => void
-  setComplianceFramework: (id: number | null) => void
-  setComplianceCheckId: (id: number | null) => void
+  setClientDb: (ids: number[]) => void
+  setSchema: (ids: number[]) => void
+  setComplianceFramework: (ids: number[]) => void
+  setComplianceCheckId: (ids: number[]) => void
   setResult: (result: boolean | null) => void
   setFilterSearch: (query: string) => void
   setAssertionSearch: (query: string) => void
@@ -40,10 +40,10 @@ interface AssertionFilterActions {
 }
 
 const initialFilterState: AssertionFilterState = {
-  clientDb: null,
-  schema: null,
-  complianceFramework: null,
-  complianceCheckId: null,
+  clientDb: [],
+  schema: [],
+  complianceFramework: [],
+  complianceCheckId: [],
   result: null,
   filterSearch: "",
   assertionSearch: "",
@@ -56,13 +56,13 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
     ...initialFilterState,
 
     // These setters change the page to 1 immediately.
-    setClientDb: (id) => set({ clientDb: id, page: 1 }),
-    setSchema: (id) => set({ schema: id, page: 1 }),
-    setComplianceFramework: (id) => set({ complianceFramework: id, page: 1 }),
-    setComplianceCheckId: (id) => set({ complianceCheckId: id, page: 1 }),
-    setResult: (result) => set({ result, page: 1 }),
+    setClientDb: (ids: number[]) => set({ clientDb: ids, page: 1 }),
+    setSchema: (ids: number[]) => set({ schema: ids, page: 1 }),
+    setComplianceFramework: (ids: number[]) => set({ complianceFramework: ids, page: 1 }),
+    setComplianceCheckId: (ids: number[]) => set({ complianceCheckId: ids, page: 1 }),
 
     // Search state does NOT reset page however, if needed, I will change that.
+    setResult: (result) => set({ result, page: 1 }),
     setFilterSearch: (query) => set({ filterSearch: query }),
     setAssertionSearch: (query) => set({ assertionSearch: query }),
 
@@ -72,13 +72,18 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
     getApiFilters: () => {
       const { clientDb, schema, complianceFramework, complianceCheckId, result, page, ordering } =
         get()
+
       return {
         // Only include a param if it has a value — the API treats
         // missing params as "no filter", which is what we want.
-        ...(clientDb !== null && { client_db: clientDb }),
-        ...(schema !== null && { schema }),
-        ...(complianceFramework !== null && { compliance_framework: complianceFramework }),
-        ...(complianceCheckId !== null && { check: complianceCheckId }),
+        ...(clientDb.length > 0 && { client_db: clientDb }),
+        ...(schema.length > 0 && { schema }),
+        ...(complianceFramework.length > 0 && {
+          compliance_framework: complianceFramework,
+        }),
+        ...(complianceCheckId.length > 0 && {
+          check: complianceCheckId,
+        }),
         ...(result !== null && { result }),
         ...(ordering !== null && { ordering }),
         page,
@@ -87,10 +92,10 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
 
     resetFilters: () =>
       set({
-        clientDb: null,
-        schema: null,
-        complianceFramework: null,
-        complianceCheckId: null,
+        clientDb: [],
+        schema: [],
+        complianceFramework: [],
+        complianceCheckId: [],
         result: null,
         page: 1,
       }),

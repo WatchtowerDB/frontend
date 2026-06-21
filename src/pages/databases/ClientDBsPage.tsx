@@ -1,3 +1,4 @@
+// ClientDBsPage.tsx
 import Pagination from "@/components/Pagination"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,8 +16,24 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useClientDBs } from "@/hooks/useClientDBs"
 import { cn } from "@/lib/utils"
 import { Check, Edit, History, Plus, Trash2, Undo2, X } from "lucide-react"
+import { useState } from "react"
 
-export default function ClientDBPage() {
+function isValidConnectionString(value: string): boolean {
+  const trimmed = value.trim()
+  return trimmed.startsWith("postgresql://") || trimmed.startsWith("mysql://")
+}
+
+function maskConnectionString(connString: string): string {
+  // Match: protocol://username:password@rest
+  const match = connString.match(/^([a-z]+:\/\/)([^:]+):([^@]+)@(.*)$/) // Made with AI. I do NOT know how this regex works LMAO
+  if (match) {
+    const [, protocol, username, , rest] = match // ignore full and password group
+    return `${protocol}${username}:****@${rest}`
+  }
+  return connString
+}
+
+export default function ClientDBsPage() {
   const {
     rows,
     isLoading,
@@ -37,6 +54,19 @@ export default function ClientDBPage() {
     totalCount,
     setPage,
   } = useClientDBs()
+
+  // State for copy feedback
+  const [copiedId, setCopiedId] = useState<number | null>(null)
+
+  const handleCopy = async (id: number, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedId(id)
+      setTimeout(() => setCopiedId(null), 2000)
+    } catch {
+      // Silently fail; clipboard API may be denied in some contexts :/
+    }
+  }
 
   if (isLoading) {
     return (
@@ -80,12 +110,17 @@ export default function ClientDBPage() {
                     ? "line-through text-rose-900/80 dark:text-white"
                     : ""
 
+                  const showValidationError =
+                    db.isEditing &&
+                    db.connection_string.trim() !== "" &&
+                    !isValidConnectionString(db.connection_string)
+
                   return (
                     <TableRow key={db.id} className={rowClassName}>
                       <TableCell className="text-muted-foreground pl-3 font-mono">
                         {db.isNew ? "" : db.id}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={cn(showValidationError && "align-top")}>
                         {db.isEditing ? (
                           <Input
                             value={db.name}
@@ -97,19 +132,51 @@ export default function ClientDBPage() {
                           <span className={textClassName}>{db.name}</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={cn(showValidationError && "align-top")}>
                         {db.isEditing ? (
-                          <Input
-                            value={db.connection_string}
-                            onChange={(e) =>
-                              updateField(db.id, "connection_string", e.target.value)
-                            }
-                            placeholder="e.g., postgresql://user:password@localhost:5432/database"
-                            required
-                          />
+                          <div>
+                            <Input
+                              value={db.connection_string}
+                              onChange={(e) =>
+                                updateField(db.id, "connection_string", e.target.value)
+                              }
+                              placeholder="e.g., postgresql://user:pass@host:5432/db"
+                              required
+                              className={cn(
+                                !isValidConnectionString(db.connection_string) &&
+                                  db.connection_string.trim() !== "" &&
+                                  "border-destructive ring-destructive",
+                              )}
+                            />
+                            {db.connection_string.trim() !== "" &&
+                              !isValidConnectionString(db.connection_string) && (
+                                <p className="text-destructive mt-1 text-xs">
+                                  Must start with <code>postgresql://</code> or{" "}
+                                  <code>mysql://</code>
+                                </p>
+                              )}
+                          </div>
                         ) : (
-                          <span className={cn(textClassName, "font-mono tracking-widest")}>
-                            {"•".repeat(32)}
+                          <span
+                            className={cn(
+                              textClassName,
+                              "cursor-pointer hover:underline",
+                              copiedId === db.id && "text-emerald-600 dark:text-emerald-400",
+                            )}
+                            role="button"
+                            tabIndex={0}
+                            title="Click to copy full connection string"
+                            onClick={() => handleCopy(db.id, db.connection_string)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault()
+                                handleCopy(db.id, db.connection_string)
+                              }
+                            }}
+                          >
+                            {copiedId === db.id
+                              ? "Copied!"
+                              : maskConnectionString(db.connection_string)}
                           </span>
                         )}
                       </TableCell>
@@ -131,22 +198,7 @@ export default function ClientDBPage() {
                             </TooltipContent>
                           </Tooltip>
                         ) : db.isEditing ? (
-                          <div className="flex gap-2">
-                            <Tooltip delayDuration={500}>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  onClick={() => saveEdit(db.id)}
-                                  disabled={!db.name?.trim() || !db.connection_string?.trim()}
-                                  aria-label="Save"
-                                >
-                                  <Check className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Save</p>
-                              </TooltipContent>
-                            </Tooltip>
+                          db.isNew ? (
                             <Tooltip delayDuration={500}>
                               <TooltipTrigger asChild>
                                 <Button
@@ -162,7 +214,46 @@ export default function ClientDBPage() {
                                 <p>Cancel</p>
                               </TooltipContent>
                             </Tooltip>
-                          </div>
+                          ) : (
+                            <div className="flex gap-2">
+                              {/* Save button appears only when there are actual local changes */}
+                              {db.hasLocalChanges && (
+                                <Tooltip delayDuration={500}>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => saveEdit(db.id)}
+                                      disabled={
+                                        !db.name?.trim() ||
+                                        !isValidConnectionString(db.connection_string)
+                                      }
+                                      aria-label="Save"
+                                    >
+                                      <Check className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Save</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                              <Tooltip delayDuration={500}>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => cancelEdit(db.id)}
+                                    aria-label="Cancel"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Cancel</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                          )
                         ) : (
                           <div className="flex gap-2">
                             <Tooltip delayDuration={500}>
@@ -250,9 +341,11 @@ export default function ClientDBPage() {
             onClick={applyChanges}
             disabled={
               isPending ||
-              rows.some((db) => db.isEditing) ||
+              rows.some((db) => !db.isNew && db.isEditing) ||
               rows.some(
-                (db) => !db.isDeleted && (!db.name?.trim() || !db.connection_string?.trim()),
+                (db) =>
+                  !db.isDeleted &&
+                  (!db.name?.trim() || !isValidConnectionString(db.connection_string)),
               )
             }
             aria-label="Apply"

@@ -23,7 +23,7 @@ function AssertionsPage() {
   const handleJumpToStreaming = () => {
     if (!streamingAssertionId) return
     const checkId = liveAssertions[streamingAssertionId]?.checkId
-    if (checkId) useAssertionStore.getState().setComplianceCheckId(checkId)
+    if (checkId) useAssertionStore.getState().setComplianceCheckId([checkId])
     setSelectedId(streamingAssertionId)
   }
   return (

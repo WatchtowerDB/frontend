@@ -16,7 +16,6 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useChecks } from "@/hooks/useChecks"
-import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAssertionsByChecks } from "@/hooks/useDataAggregation"
 import { useFrameworks } from "@/hooks/useFrameworks"
 import { useAssertionStore } from "@/stores/useAssertionStore"
@@ -184,12 +183,8 @@ export default function ChecksPage() {
 
   // For check details
   const { data: frameworks } = useFrameworks()
-  const { data: clientDBs } = useAllClientDBs()
   const frameworkMap = frameworks?.results
     ? Object.fromEntries(frameworks.results.map((f) => [f.id, f.name]))
-    : {}
-  const dbMap = clientDBs?.results
-    ? Object.fromEntries(clientDBs.results.map((f) => [f.id, f.name]))
     : {}
 
   // For jumping to an assertion
@@ -354,8 +349,8 @@ export default function ChecksPage() {
                           {/* Context/Left Block */}
                           <div className="flex flex-col gap-1 text-left font-sans">
                             <p className="text-foreground ms-0.5 text-sm font-semibold">
-                              {dbMap[check.client_db] ? (
-                                `${dbMap[check.client_db]} · ${frameworkMap[check.framework]}`
+                              {check ? (
+                                `${check.client_db_name} · ${frameworkMap[check.framework]}`
                               ) : (
                                 <Skeleton className="mb-2 h-4 w-32" />
                               )}
@@ -436,33 +431,52 @@ export default function ChecksPage() {
                         <Separator className="my-1" />
                         {/* General Info */}
                         <div className="grid grid-cols-4 gap-3">
-                          {[
-                            {
-                              label: "client database",
-                              name: dbMap[check.client_db],
-                            },
-                            {
-                              label: "framework",
-                              name: frameworkMap[check.framework],
-                            },
-                            {
-                              label: "schema",
-                              name: check.schema,
-                            },
-                            {
-                              label: "user",
-                              name: check.user,
-                            },
-                          ].map(({ label, name }) => (
-                            <div key={label} className="bg-card flex flex-col gap-1 rounded-lg p-3">
-                              <span className="text-muted-foreground text-xs">{label}</span>
-                              {name ? (
-                                <span className="text-sm font-medium">{name}</span>
-                              ) : (
-                                <Skeleton className="h-4 w-24" />
-                              )}
-                            </div>
-                          ))}
+                          {/* Client Database Box */}
+                          <div className="bg-card flex flex-col gap-1 rounded-lg p-3">
+                            <span className="text-muted-foreground text-xs">client database</span>
+                            {check.client_db_name ? (
+                              <span className="text-sm font-medium">{check.client_db_name}</span>
+                            ) : (
+                              <Skeleton className="h-4 w-24" />
+                            )}
+                          </div>
+
+                          {/* Framework Box */}
+                          <div className="bg-card flex flex-col gap-1 rounded-lg p-3">
+                            <span className="text-muted-foreground text-xs">framework</span>
+                            {frameworkMap[check.framework] ? (
+                              <span className="text-sm font-medium">
+                                {frameworkMap[check.framework]}
+                              </span>
+                            ) : (
+                              <Skeleton className="h-4 w-24" />
+                            )}
+                          </div>
+
+                          {/* Schema Box */}
+                          <div className="bg-card flex flex-col gap-1 rounded-lg p-3">
+                            <span className="text-muted-foreground text-xs">schema</span>
+                            {check.schema?.name ? (
+                              <div className="flex w-full items-center justify-between pr-1">
+                                <span className="text-sm font-medium">{check.schema.name}</span>
+                                <span className="bg-muted text-muted-foreground border-border/50 ml-2 inline-flex w-9 shrink-0 items-center justify-center rounded-md border py-0.5 text-[10px] font-semibold tracking-wider uppercase">
+                                  v{check.schema.internal_version}
+                                </span>
+                              </div>
+                            ) : (
+                              <Skeleton className="h-4 w-24" />
+                            )}
+                          </div>
+
+                          {/* User Box */}
+                          <div className="bg-card flex flex-col gap-1 rounded-lg p-3">
+                            <span className="text-muted-foreground text-xs">user</span>
+                            {check.user ? (
+                              <span className="text-sm font-medium">{check.user}</span>
+                            ) : (
+                              <Skeleton className="h-4 w-24" />
+                            )}
+                          </div>
                         </div>
 
                         <div className="text-muted-foreground flex flex-col items-center justify-between text-xs">
@@ -497,7 +511,7 @@ export default function ChecksPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  setComplianceCheckId(check.id)
+                                  setComplianceCheckId([check.id])
                                   navigate("/compliance/assertions")
                                 }}
                               >

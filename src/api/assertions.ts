@@ -34,10 +34,15 @@ export const getAssertionById = async (id: number) => {
 }
 
 // Run the pipeline for a compliance check
-export const runComplianceCheck = async (frameworkId: number, schemaId: number) => {
+export const runComplianceCheck = async (
+  frameworkId: number,
+  clientDbId: number,
+  schemaName: string,
+) => {
   const response = await api.post("/api/compliance/checks/", {
     framework: frameworkId,
-    schema: schemaId,
+    client_db: clientDbId,
+    schema_name: schemaName,
   })
   return response.data
 }

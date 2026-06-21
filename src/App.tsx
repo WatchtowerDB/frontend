@@ -2,10 +2,12 @@ import { MainLayout } from "@/layout/MainLayout"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom"
 // import Home from './pages/Home';
+
 import ComplianceLayout from "@/pages/compliance/ComplianceLayout"
 import Dashboard from "@/pages/dashboard/Dashboard"
-import ClientDBPage from "@/pages/databases/ClientDBPage"
+import ClientDBsPage from "@/pages/databases/ClientDBsPage"
 import DatabasesLayout from "@/pages/databases/DatabasesLayout"
+import SchemasPage from "@/pages/databases/SchemasPage"
 import Help from "@/pages/help/Help"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -73,9 +75,9 @@ export default function App() {
                     {/* Redirect /databases and /databases/ to /databases/clientdbs */}
                     <Route index element={<Navigate to="clientdbs" replace />} />
 
-                    <Route path="clientdbs" element={<ClientDBPage />} />
+                    <Route path="clientdbs" element={<ClientDBsPage />} />
 
-                    <Route path="schemas" element={<h2>Schemas</h2>} />
+                    <Route path="schemas" element={<SchemasPage />} />
                   </Route>
                   <Route path="/standards" element={<h2>Standards</h2>} />
                   <Route path="/settings" element={<h2>Settings</h2>} />
