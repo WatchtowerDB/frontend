@@ -8,7 +8,10 @@ import {
 } from "@/types/compliance"
 
 export interface ClientDBSchemaFilters {
-  client_db?: number
+  client_db?: number[]
+  name?: string
+  search?: string
+  latest?: boolean
   // Pagination & Sorting
   page?: number
   ordering?: string[]
@@ -46,6 +49,8 @@ export const createClientDBSchema = async (data: ClientDBSchemaCreate): Promise<
 export const uploadClientDBSchema = async (data: ClientDBSchemaUpload): Promise<ClientDBSchema> => {
   const formData = new FormData()
   formData.append("client_db", data.client_db.toString())
+  formData.append("name", data.name)
+  if (data.description) formData.append("description", data.description)
   formData.append("sql_file", data.sql_file)
 
   const response = await api.post("/api/compliance/clientdbschema/upload-schema/", formData, {

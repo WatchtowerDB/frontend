@@ -1,14 +1,15 @@
 import api from "./axiosInstance"
 
 import { type PaginatedResponse } from "@/types/api"
-import { type AssertionItem } from "@/types/compliance"
+import { type AssertionItem, type AssertionStatus } from "@/types/compliance"
 
 export interface AssertionFilters {
-  check?: number
-  client_db?: number
-  compliance_framework?: number
+  check?: number[]
+  client_db?: number[]
+  compliance_framework?: number[]
   result?: boolean
-  schema?: number
+  schema?: number[]
+  status?: AssertionStatus[]
   // Pagination & Sorting
   page?: number
   ordering?: string[]
@@ -33,10 +34,15 @@ export const getAssertionById = async (id: number) => {
 }
 
 // Run the pipeline for a compliance check
-export const runComplianceCheck = async (frameworkId: number, schemaId: number) => {
+export const runComplianceCheck = async (
+  frameworkId: number,
+  clientDbId: number,
+  schemaName: string,
+) => {
   const response = await api.post("/api/compliance/checks/", {
     framework: frameworkId,
-    schema: schemaId,
+    client_db: clientDbId,
+    schema_name: schemaName,
   })
   return response.data
 }

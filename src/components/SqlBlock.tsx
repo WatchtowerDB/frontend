@@ -1,4 +1,5 @@
 import { useTheme } from "@/context/ThemeProvider"
+import { cn } from "@/lib/utils"
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter"
 import sql from "react-syntax-highlighter/dist/esm/languages/hljs/sql"
 import {
@@ -6,6 +7,7 @@ import {
   colorBrewer as light,
 } from "react-syntax-highlighter/dist/esm/styles/hljs"
 import CopyButton from "./CopyButton"
+import { ScrollArea } from "./ui/scroll-area"
 // DARK MODE CANDIDATES:
 // - nord
 // - hybrid
@@ -17,10 +19,12 @@ export default function SqlBlock({
   query,
   label,
   copyButton = true,
+  className,
 }: {
   query: string
-  label: string
+  label?: string
   copyButton?: boolean
+  className?: string
 }) {
   const { theme } = useTheme()
 
@@ -29,34 +33,36 @@ export default function SqlBlock({
     (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
 
   return (
-    <div className="not-prose! relative mb-6">
-      <span className="absolute top-2 left-3 z-10 font-mono text-[10px] tracking-widest text-slate-500 uppercase">
-        {label}
-      </span>
-      {copyButton && (
-        <CopyButton
-          textToCopy={query}
-          variant={"ghost"}
-          className="absolute top-1 right-1"
-          size={"xs"}
-        />
+    <div
+      className={cn(
+        "not-prose! border-border relative flex flex-col overflow-hidden rounded-md border-2 bg-(--syntax-bg) shadow-lg",
+        className,
       )}
-      <SyntaxHighlighter
-        language="sql"
-        style={isDark ? dark : light}
-        customStyle={{
-          margin: 0,
-          padding: "1.75rem 1rem 1rem",
-          fontSize: "0.8rem",
-          borderRadius: "0.375rem",
-          border: "2px solid var(--border)",
-          boxShadow: "var(--shadow-lg)",
-          background: "var(--syntax-bg)",
-        }}
-        showLineNumbers
-      >
-        {query}
-      </SyntaxHighlighter>
+    >
+      <div className="flex items-center justify-between px-3 pt-1">
+        {label && (
+          <span className="font-mono text-[10px] tracking-widest text-slate-500 uppercase">
+            {label}
+          </span>
+        )}
+        {copyButton && <CopyButton textToCopy={query} variant="ghost" size="xs" />}
+      </div>
+      <ScrollArea className="min-h-0 w-full flex-1">
+        <SyntaxHighlighter
+          language="sql"
+          style={isDark ? dark : light}
+          customStyle={{
+            margin: 0,
+            padding: "0.30rem 1rem 1rem",
+            fontSize: "0.8rem",
+            background: "transparent",
+            overflow: "visible",
+          }}
+          showLineNumbers
+        >
+          {query}
+        </SyntaxHighlighter>
+      </ScrollArea>
     </div>
   )
 }

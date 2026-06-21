@@ -165,7 +165,9 @@ export default function AssertionReport({
               case "passed":
                 return (
                   <div className="p-6">
-                    {assertion?.sql_query && <SqlBlock query={assertion.sql_query} label="SQL" />}
+                    {assertion?.sql_query && (
+                      <SqlBlock query={assertion.sql_query} label="SQL" className="mb-6" />
+                    )}
                     <div className="flex flex-col items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-12 text-center shadow-sm">
                       <CheckCircle2 className="mb-4 h-16 w-16 text-emerald-500" />
                       <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-400">
@@ -183,7 +185,9 @@ export default function AssertionReport({
               case "failed":
                 return (
                   <div className="p-6">
-                    {assertion?.sql_query && <SqlBlock query={assertion.sql_query} label="SQL" />}
+                    {assertion?.sql_query && (
+                      <SqlBlock query={assertion.sql_query} label="SQL" className="mb-6" />
+                    )}
                     <article
                       className={cn(
                         "prose prose-slate dark:prose-invert max-w-none",
