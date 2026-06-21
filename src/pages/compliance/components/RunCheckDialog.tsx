@@ -174,7 +174,6 @@ export default function RunCheckDialog({ open, onOpenChange }: RunCheckDialogPro
               }}
             />
             {/* Schema Selector */}
-            {/* Schema Selector */}
             <Controller
               control={form.control}
               name="schemaName"
