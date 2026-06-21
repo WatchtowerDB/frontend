@@ -14,7 +14,6 @@ import Loader from "@/components/ui/loader"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useChecks } from "@/hooks/useChecks"
 import { useAssertionsByChecks } from "@/hooks/useDataAggregation"
 import { useFrameworks } from "@/hooks/useFrameworks"
@@ -32,6 +31,7 @@ import {
   Ellipsis,
   List,
   Loader2,
+  ShieldAlert,
   XCircle,
 } from "lucide-react"
 import { useState } from "react"
@@ -41,104 +41,145 @@ const mockChecks: Check[] = [
   {
     id: 1,
     framework: 1,
-    schema: 101,
     client_db: 1,
+    client_db_name: "DB_Primary_Alpha",
     user: 5,
+    schema: {
+      id: 101,
+      name: "Schema_Alpha_v1",
+      internal_version: 1,
+    },
     date: new Date().toISOString(),
     status: "COMPLETED",
-    updated_at: new Date().toISOString(),
   }, // -> success (failed === 0)
   {
     id: 2,
     framework: 1,
-    schema: 102,
     client_db: 1,
+    client_db_name: "DB_Primary_Alpha",
     user: 5,
+    schema: {
+      id: 102,
+      name: "Schema_Beta_v1",
+      internal_version: 1,
+    },
     date: new Date().toISOString(),
     status: "COMPLETED",
-    updated_at: new Date().toISOString(),
   }, // -> success (failed === 0)
   {
     id: 3,
     framework: 1,
-    schema: 103,
     client_db: 1,
+    client_db_name: "DB_Primary_Alpha",
     user: 6,
+    schema: {
+      id: 103,
+      name: "Schema_Gamma_v1",
+      internal_version: 2,
+    },
     date: new Date().toISOString(),
     status: "COMPLETED",
-    updated_at: new Date().toISOString(),
   }, // -> failed (passed === 0)
   {
     id: 4,
     framework: 1,
-    schema: 104,
     client_db: 1,
+    client_db_name: "DB_Primary_Alpha",
     user: 7,
+    schema: {
+      id: 104,
+      name: "Schema_Delta_v1",
+      internal_version: 1,
+    },
     date: new Date().toISOString(),
     status: "COMPLETED",
-    updated_at: new Date().toISOString(),
   }, // -> partial (mix)
   {
     id: 5,
     framework: 1,
-    schema: 105,
     client_db: 1,
+    client_db_name: "DB_Primary_Alpha",
     user: 5,
+    schema: {
+      id: 105,
+      name: "Schema_Epsilon_v1",
+      internal_version: 3,
+    },
     date: new Date().toISOString(),
     status: "COMPLETED",
-    updated_at: new Date().toISOString(),
   }, // -> partial (mix)
   {
     id: 6,
     framework: 1,
-    schema: 106,
     client_db: 1,
+    client_db_name: "DB_Primary_Alpha",
     user: 8,
+    schema: {
+      id: 106,
+      name: "Schema_Zeta_v1",
+      internal_version: 1,
+    },
     date: new Date().toISOString(),
     status: "PENDING",
-    updated_at: new Date().toISOString(),
   }, // -> running
   {
     id: 7,
     framework: 1,
-    schema: 107,
     client_db: 1,
+    client_db_name: "DB_Primary_Alpha",
     user: 5,
+    schema: {
+      id: 107,
+      name: "Schema_Eta_v1",
+      internal_version: 1,
+    },
     date: new Date().toISOString(),
     status: "GENERATING",
-    updated_at: new Date().toISOString(),
   }, // -> running
   {
     id: 8,
     framework: 1,
-    schema: 108,
     client_db: 1,
+    client_db_name: "DB_Primary_Alpha",
     user: 9,
+    schema: {
+      id: 108,
+      name: "Schema_Theta_v1",
+      internal_version: 4,
+    },
     date: new Date().toISOString(),
     status: "EXECUTING",
-    updated_at: new Date().toISOString(),
   }, // -> running
   {
     id: 9,
     framework: 1,
-    schema: 109,
     client_db: 1,
+    client_db_name: "DB_Primary_Alpha",
     user: 5,
+    schema: {
+      id: 109,
+      name: "Schema_Iota_v1",
+      internal_version: 1,
+    },
     date: new Date().toISOString(),
     status: "ANALYZING",
-    updated_at: new Date().toISOString(),
   }, // -> running
   {
     id: 10,
     framework: 1,
-    schema: 110,
     client_db: 1,
+    client_db_name: "DB_Primary_Alpha",
     user: 10,
+    schema: {
+      id: 110,
+      name: "Schema_Kappa_v2",
+      internal_version: 2,
+    },
     date: new Date().toISOString(),
     status: "FAILED",
-    updated_at: new Date().toISOString(),
   }, // -> incomplete (trumps everything else)
 ]
+
 const mockSummaryMap: Record<number, { passed: number; failed: number; total: number }> = {
   1: { passed: 4, failed: 0, total: 4 },
   2: { passed: 1, failed: 0, total: 1 },
@@ -195,8 +236,6 @@ export default function ChecksPage() {
   const totalCount = checkData?.count || 0
   const totalPages = Math.ceil(totalCount / (Number(import.meta.env.VITE_DEFAULT_PAGE_SIZE) || 20))
 
-  // TODO: If it's generating, it would not show most of these elements.
-  // To be added when we get generating status on checks/assertions.
   return (
     <div className="flex h-full w-full flex-col">
       <div className="flex items-center justify-between">
@@ -239,7 +278,9 @@ export default function ChecksPage() {
             <div className="px-4 pb-4">
               <Accordion className="flex w-full flex-col gap-3" type="multiple">
                 {checkData?.results.map((check) => {
-                {/* {mockChecks?.map((check) => { */}
+                  {
+                    /* {mockChecks?.map((check) => { */
+                  }
                   const stats = summaryMap?.[check.id]
                   // const stats = mockSummaryMap?.[check.id]
                   // const status = !stats
@@ -286,58 +327,6 @@ export default function ChecksPage() {
                     "ANALYZING",
                   ]
 
-                  if (LIVE_CHECK_STATUSES.includes(check.status)) {
-                    // if (true) {
-                    return (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            key={check.id}
-                            className="bg-accent/60 border-border/60 hover:bg-muted w-full cursor-pointer rounded-lg border px-4 font-mono text-xs backdrop-blur-sm"
-                            onClick={() => {
-                              setComplianceCheckId(check.id)
-                              navigate("/compliance/assertions")
-                            }}
-                          >
-                            {/* Mirroring the AccordionTrigger layout exactly */}
-                            <div className="flex flex-1 items-center justify-between py-4 pr-8">
-                              {/* Context/Left Block */}
-                              <div className="flex flex-col gap-1 text-left font-sans">
-                                <div className="flex flex-row items-center gap-4">
-                                  <p className="text-foreground/70 ms-0.5 text-sm font-semibold">
-                                    {dbMap[check.client_db] && frameworkMap[check.framework] ? (
-                                      `${dbMap[check.client_db]} · ${frameworkMap[check.framework]}`
-                                    ) : (
-                                      <Skeleton className="mb-2 h-4 w-32" />
-                                    )}
-                                  </p>
-                                  {["ANALYZING", "GENERATING", "EXECUTING"].includes(
-                                    check?.status,
-                                  ) ? (
-                                    <Disc3 className="h-6! w-6! shrink-0 animate-spin self-center text-red-500" />
-                                  ) : check?.status === "PENDING" ? (
-                                    <Loader2 className="text-primary h-6! w-6! shrink-0 animate-spin self-center" />
-                                  ) : null}
-                                </div>
-                                <div className="flex flex-row items-center gap-1">
-                                  {/* Ghost Placeholder Skeleton representing incoming data stats */}
-                                  <Skeleton className="bg-muted/40 h-5 w-24" />
-                                </div>
-                              </div>
-
-                              {/* Far Right Block: Badge ID & Loading */}
-                              <span className="text-muted-foreground/50 self-start pt-[1.1px] font-mono text-xs">
-                                #{check.id}
-                              </span>
-                            </div>
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Jump to assertion</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )
-                  }
                   return (
                     <AccordionItem
                       key={check.id}
@@ -347,22 +336,51 @@ export default function ChecksPage() {
                       <AccordionTrigger className="py-4 hover:no-underline">
                         <div className="flex flex-1 items-center justify-between pr-4">
                           {/* Context/Left Block */}
-                          <div className="flex flex-col gap-1 text-left font-sans">
+                          <div className="flex flex-col gap-2 text-left font-sans">
                             <p className="text-foreground ms-0.5 text-sm font-semibold">
                               {check ? (
-                                `${check.client_db_name} · ${frameworkMap[check.framework]}`
+                                <div className="flex items-center gap-2 text-sm">
+                                  {/* ID Anchor*/}
+                                  <span className="text-muted-foreground pt-[2px] font-mono text-xs font-bold">
+                                    #{check.id}
+                                  </span>
+
+                                  {/* Database Indicator */}
+                                  <div className="text-foreground flex items-center gap-1.5 font-semibold">
+                                    <Database className="text-muted-foreground/70 h-3.5 w-3.5" />
+                                    <span>{check.client_db_name}</span>
+                                  </div>
+
+                                  {/* Separator Dot */}
+                                  <span className="text-muted-foreground/40 text-xs select-none">
+                                    ·
+                                  </span>
+
+                                  {/* Framework Indicator */}
+                                  <div className="text-foreground flex items-center gap-1.5 font-semibold">
+                                    <ShieldAlert className="h-3.5 w-3.5 text-indigo-500/80" />
+                                    <span>
+                                      {frameworkMap[check.framework] ||
+                                        `Framework: ${check.framework}`}
+                                    </span>
+                                  </div>
+                                </div>
                               ) : (
-                                <Skeleton className="mb-2 h-4 w-32" />
+                                <div className="flex items-center gap-2">
+                                  <Skeleton className="h-5 w-10" />
+                                  <Skeleton className="h-4 w-24" />
+                                  <Skeleton className="h-4 w-20" />
+                                </div>
                               )}
                             </p>
                             <div className="flex flex-row items-center gap-1">
-                              {statusBadge && (
+                              {statusBadge && !LIVE_CHECK_STATUSES.includes(check.status) && (
                                 <Badge className={`${statusBadge.className} gap-1`}>
                                   <statusBadge.icon className="h-3 w-3" />
                                   {statusBadge.label}
                                 </Badge>
                               )}
-                              {stats ? (
+                              {stats && !LIVE_CHECK_STATUSES.includes(check.status) ? (
                                 <>
                                   {stats.passed > 0 && (
                                     <Badge className="gap-1 bg-green-100 text-green-800">
@@ -387,20 +405,11 @@ export default function ChecksPage() {
                             </div>
                           </div>
                           {/* On the far right end of a check, it shows check ID */}
-                          {/* <span className="text-muted-foreground self-start pt-[1.1px] font-mono text-xs">
-                              #{check.id}
-                            </span> */}
-                          <Button
-                            className="self-start pt-[1.1px]"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setComplianceCheckId(check.id)
-                              navigate("/compliance/assertions")
-                            }}
-                          >
-                            <ArrowRight className="h-3.5 w-3.5" />
-                          </Button>
+                          {["ANALYZING", "GENERATING", "EXECUTING"].includes(check?.status) ? (
+                            <Disc3 className="h-6! w-6! shrink-0 animate-spin self-start pt-[1.1px] text-red-500" />
+                          ) : check?.status === "PENDING" ? (
+                            <Loader2 className="text-primary h-6! w-6! shrink-0 animate-spin self-start pt-[1.1px]" />
+                          ) : null}
                         </div>
                       </AccordionTrigger>
 
@@ -486,7 +495,7 @@ export default function ChecksPage() {
                             <div className="mt-2 flex items-center gap-4">
                               {/* Pass rate bar (passed/failed on assertions) */}
                               <div className="flex-1">
-                                {stats ? (
+                                {stats && !LIVE_CHECK_STATUSES.includes(check.status) ? (
                                   <>
                                     <div className="flex justify-between">
                                       <span>Pass rate</span>
