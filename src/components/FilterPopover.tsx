@@ -1,4 +1,4 @@
-import { ChevronRight, RotateCcw, type LucideIcon } from "lucide-react"
+import { ChevronRight, Filter, RotateCcw, type LucideIcon } from "lucide-react"
 import { useState } from "react"
 import { ClearableInput } from "./ClearableInput"
 import { Button } from "./ui/button"
@@ -21,7 +21,7 @@ type FilterPopoverProps = {
   filters: FilterPopoverValues
   onToggle: (key: string, id: number | string) => void
   onReset: () => void
-  activeCount?: number
+  activeCount: number
 }
 
 export function FilterPopover({
@@ -68,8 +68,14 @@ export function FilterPopover({
     <Popover>
       <PopoverTrigger asChild>
         {/* <Button variant="outline">Filters {activeCount > 0 && <Badge>{activeCount}</Badge>}</Button> */}
-        <Button variant="default">
-          <img src="/mambo/mambo.gif" className="h-5 w-16"></img>
+        <Button variant="default" className="gap-2">
+          <Filter className="h-4 w-4" />
+          Filters
+          {activeCount > 0 && (
+            <span className="bg-primary text-primary-foreground ml-1 rounded-full px-1.5 py-0.5 text-xs">
+              {activeCount > 9 ? "9+" : activeCount}
+            </span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-0">
@@ -103,7 +109,7 @@ export function FilterPopover({
                     className={`h-3 w-3 transition-transform ${group.isOpen ? "rotate-90" : ""}`}
                   />
                   {group.icon && (
-                    <group.icon className="text-muted-foreground h-3.5 w-3.5 shrink-0 mb-0.5" />
+                    <group.icon className="text-muted-foreground mb-0.5 h-3.5 w-3.5 shrink-0" />
                     // TODO: using mb-0.5 is a very bandaid way for me to center the icon. let's figure that out later yeah?
                   )}
                   <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">

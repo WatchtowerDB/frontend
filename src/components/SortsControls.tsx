@@ -12,9 +12,15 @@ type SortControlsProps = {
   options: SortOption[]
   value: string[]
   onChange: (value: string[]) => void
+  allowEmptySort?: boolean
 }
 
-export default function SortsControls({ options, value, onChange }: SortControlsProps) {
+export default function SortsControls({
+  options,
+  value,
+  onChange,
+  allowEmptySort = false,
+}: SortControlsProps) {
   // To keep the order the options are in visually
   const sortedOptions = [
     ...value.map((v) => options.find((o) => o.value === v.replace(/^-/, ""))!).filter(Boolean),
@@ -29,8 +35,8 @@ export default function SortsControls({ options, value, onChange }: SortControls
       // ascending to descending
       onChange(value.map((v) => (v === option.value ? `-${option.value}` : v)))
     } else if (isDesc) {
-      // descending to inactive (but only if there's at least a single selected sort)
-      if (value.length === 1) {
+      // descending to inactive (but only if there's at least a single selected sort and it doesn't allow empty sort)
+      if (value.length === 1 && !allowEmptySort) {
         onChange(value.map((v) => (v === `-${option.value}` ? option.value : v)))
       } else {
         onChange(value.filter((v) => v !== `-${option.value}`))

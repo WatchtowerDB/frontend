@@ -1,4 +1,6 @@
 import { FilterPopover, type FilterGroup } from "@/components/FilterPopover"
+import { SelectedFilters } from "@/components/SelectedFilters"
+import SortsControls from "@/components/SortsControls"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
@@ -15,8 +17,7 @@ import { useState } from "react"
 import { AssertionsStatus } from "./AssertionsStatus"
 import { RefreshAssertionsButton } from "./RefreshAssertionsButton"
 import RunCheckDialog from "./RunCheckDialog"
-import ViewLatestCheck from "./ViewLatestCheck"
-import { SelectedFilters } from "@/components/SelectedFilters"
+import { Separator } from "@/components/ui/separator"
 
 interface AssertionsHeaderProps {
   className?: string
@@ -44,7 +45,9 @@ export default function AssertionsHeader({
   const clientDb = useAssertionStore((s) => s.clientDb)
   const schema = useAssertionStore((s) => s.schema)
   const complianceFramework = useAssertionStore((s) => s.complianceFramework)
-  const setClientDb = useAssertionStore((s) => s.setClientDb)
+
+  const ordering = useAssertionStore((s) => s.ordering)
+  const setOrdering = useAssertionStore((s) => s.setOrdering)
   const resetFilters = useAssertionStore((s) => s.resetFilters)
 
   const { data: dbs } = useAllClientDBs()
@@ -80,6 +83,8 @@ export default function AssertionsHeader({
 
   const filters = Object.fromEntries(Object.entries(filterMap).map(([key, [arr]]) => [key, arr]))
 
+  const activeFilterCount = Object.values(filterMap).reduce((sum, [arr]) => sum + arr.length, 0)
+
   function handleToggle(key: string, id: number | string) {
     filterMap[key as AssertionFilterKey][1](id)
   }
@@ -87,12 +92,6 @@ export default function AssertionsHeader({
   return (
     <div className={cn("w-full", className)}>
       <div className="flex w-full flex-row items-center justify-between gap-1">
-        <FilterPopover
-          groups={groups}
-          filters={filters}
-          onToggle={handleToggle}
-          onReset={resetFilters}
-        />
         <Button className="flex-1" variant="default" onClick={() => setIsRunDialogOpen(true)}>
           Run Compliance Check
         </Button>
@@ -114,6 +113,26 @@ export default function AssertionsHeader({
       </div>
       <AssertionsStatus />
       {/* <ViewLatestCheck className="mt-3" /> */}
+      <div className="flex flex-row gap-2 items-center">
+        <FilterPopover
+          groups={groups}
+          filters={filters}
+          onToggle={handleToggle}
+          onReset={resetFilters}
+          activeCount={activeFilterCount}
+        />
+        <Separator orientation="vertical" className="h-8" />
+        <SortsControls
+          allowEmptySort={true}
+          value={ordering ?? []}
+          onChange={(newOrdering) => setOrdering(newOrdering)}
+          options={[
+            { label: "Status", value: "status", icon: Activity },
+            { label: "Client DB", value: "client_db", icon: Database },
+            // { label: "Framework", value: "framework", icon: Box },
+          ]}
+        />
+      </div>
       <SelectedFilters groups={groups} filters={filters} onToggle={handleToggle} />
       <RunCheckDialog open={isRunDialogOpen} onOpenChange={setIsRunDialogOpen} />
     </div>
