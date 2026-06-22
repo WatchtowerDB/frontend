@@ -7,7 +7,7 @@ import { useAuthStore } from "../stores/useAuthStore"
 const api = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
   withCredentials: true,
-  paramsSerializer: (params) => qs.stringify(params, { arrayFormat: "repeat" }),
+  paramsSerializer: (params) => qs.stringify(params, { arrayFormat: "comma" }),
   // Axios is now a smart cookie that can take an array and automatically handle the params thanks to this Serializer.
 })
 
