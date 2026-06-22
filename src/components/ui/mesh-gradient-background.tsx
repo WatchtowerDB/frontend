@@ -74,7 +74,7 @@ export function MeshGradientBackground({
           style={{
             left: "-10%",
             top: "-10%",
-            background: `radial-gradient(circle, ${colors[0]}40 0%, transparent 70%)`,
+            background: `radial-gradient(circle, color-mix(in srgb, ${colors[0]} var(--mesh-mix-1, 25%), transparent) 0%, transparent 70%)`,
             filter: "blur(80px)",
             animation: `meshMove1 ${duration1}s ease-in-out infinite`,
           }}
@@ -86,7 +86,7 @@ export function MeshGradientBackground({
           style={{
             right: "-5%",
             top: "10%",
-            background: `radial-gradient(circle, ${colors[1]}35 0%, transparent 70%)`,
+            background: `radial-gradient(circle, color-mix(in srgb, ${colors[1]} var(--mesh-mix-2, 21%), transparent) 0%, transparent 70%)`,
             filter: "blur(100px)",
             animation: `meshMove2 ${duration2}s ease-in-out infinite`,
           }}
@@ -98,7 +98,7 @@ export function MeshGradientBackground({
           style={{
             left: "20%",
             bottom: "-15%",
-            background: `radial-gradient(circle, ${colors[2]}30 0%, transparent 70%)`,
+            background: `radial-gradient(circle, color-mix(in srgb, ${colors[2]} var(--mesh-mix-3, 19%), transparent) 0%, transparent 70%)`,
             filter: "blur(120px)",
             animation: `meshMove3 ${duration3}s ease-in-out infinite`,
           }}
@@ -110,7 +110,7 @@ export function MeshGradientBackground({
           style={{
             left: "40%",
             top: "30%",
-            background: `radial-gradient(circle, ${colors[3] || colors[0]}25 0%, transparent 70%)`,
+            background: `radial-gradient(circle, color-mix(in srgb, ${colors[3] || colors[0]} var(--mesh-mix-4, 14.5%), transparent) 0%, transparent 70%)`,
             filter: "blur(90px)",
             animation: `meshMove4 ${duration4}s ease-in-out infinite`,
           }}
