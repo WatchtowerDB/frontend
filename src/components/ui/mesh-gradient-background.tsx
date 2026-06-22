@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 
 export interface MeshGradientBackgroundProps {
   className?: string
@@ -19,8 +19,6 @@ export function MeshGradientBackground({
   speed = 1,
   backgroundColor = "#030014",
 }: MeshGradientBackgroundProps) {
-  const styleRef = useRef<HTMLStyleElement | null>(null)
-
   useEffect(() => {
     // Create and inject keyframes if they don't exist
     if (!document.getElementById("mesh-gradient-keyframes")) {
