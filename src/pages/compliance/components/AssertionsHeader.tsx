@@ -16,6 +16,7 @@ import { AssertionsStatus } from "./AssertionsStatus"
 import { RefreshAssertionsButton } from "./RefreshAssertionsButton"
 import RunCheckDialog from "./RunCheckDialog"
 import ViewLatestCheck from "./ViewLatestCheck"
+import { SelectedFilters } from "@/components/SelectedFilters"
 
 interface AssertionsHeaderProps {
   className?: string
@@ -112,8 +113,8 @@ export default function AssertionsHeader({
         </Tooltip>
       </div>
       <AssertionsStatus />
-      <ViewLatestCheck className="mt-3" />
-
+      {/* <ViewLatestCheck className="mt-3" /> */}
+      <SelectedFilters groups={groups} filters={filters} onToggle={handleToggle} />
       <RunCheckDialog open={isRunDialogOpen} onOpenChange={setIsRunDialogOpen} />
     </div>
   )

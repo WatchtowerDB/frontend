@@ -105,9 +105,9 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                           )}
                         </span>
                       </div>
-                      {isCurrentlyStreaming ? (
+                      {isCurrentlyStreaming && item.status !== "FAILED" ? (
                         <Disc3 className="h-6! w-6! shrink-0 animate-spin self-center text-red-500" />
-                      ) : isAssertionLoading ? (
+                      ) : (isAssertionLoading && item.status !== "FAILED") ? (
                         <Loader2 className="text-primary h-6! w-6! shrink-0 animate-spin self-center" />
                       ) : null}
                     </button>
