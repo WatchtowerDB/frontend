@@ -2,6 +2,7 @@ import { FilterPopover, type FilterGroup } from "@/components/FilterPopover"
 import { SelectedFilters } from "@/components/SelectedFilters"
 import SortsControls from "@/components/SortsControls"
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
@@ -17,7 +18,6 @@ import { useState } from "react"
 import { AssertionsStatus } from "./AssertionsStatus"
 import { RefreshAssertionsButton } from "./RefreshAssertionsButton"
 import RunCheckDialog from "./RunCheckDialog"
-import { Separator } from "@/components/ui/separator"
 
 interface AssertionsHeaderProps {
   className?: string
@@ -113,7 +113,8 @@ export default function AssertionsHeader({
       </div>
       <AssertionsStatus />
       {/* <ViewLatestCheck className="mt-3" /> */}
-      <div className="flex flex-row gap-2 items-center">
+      {/* Filters & Sorting*/}
+      <div className="flex flex-row items-center gap-2 mb-1">
         <FilterPopover
           groups={groups}
           filters={filters}
@@ -123,6 +124,7 @@ export default function AssertionsHeader({
         />
         <Separator orientation="vertical" className="h-8" />
         <SortsControls
+          size="xs"
           allowEmptySort={true}
           value={ordering ?? []}
           onChange={(newOrdering) => setOrdering(newOrdering)}

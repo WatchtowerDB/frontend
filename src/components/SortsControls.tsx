@@ -8,11 +8,38 @@ type SortOption = {
   icon?: LucideIcon
 }
 
+type SortControlsSize = "xs" | "sm" | "default"
+
 type SortControlsProps = {
   options: SortOption[]
   value: string[]
   onChange: (value: string[]) => void
   allowEmptySort?: boolean
+  size?: SortControlsSize
+}
+
+const sizeClasses: Record<SortControlsSize, string> = {
+  xs: "h-7 px-2.5 text-xs gap-1",
+  sm: "h-8 px-3 text-sm gap-1.5",
+  default: "h-9 px-4 text-sm gap-2",
+}
+
+const iconSizeClasses: Record<SortControlsSize, string> = {
+  xs: "h-3 w-3",
+  sm: "h-3.5 w-3.5",
+  default: "h-3.5 w-3.5",
+}
+
+const chevronSizeClasses: Record<SortControlsSize, string> = {
+  xs: "h-2.5 w-2.5",
+  sm: "h-3 w-3",
+  default: "h-3 w-3",
+}
+
+const labelTextClasses: Record<SortControlsSize, string> = {
+  xs: "text-xs",
+  sm: "text-sm",
+  default: "text-sm",
 }
 
 export default function SortsControls({
@@ -20,6 +47,7 @@ export default function SortsControls({
   value,
   onChange,
   allowEmptySort = false,
+  size = "default",
 }: SortControlsProps) {
   // To keep the order the options are in visually
   const sortedOptions = [
@@ -49,7 +77,7 @@ export default function SortsControls({
 
   return (
     <div className="flex w-full items-center">
-      <span className="text-muted-foreground me-2 text-sm">Sort by</span>
+      <span className={`text-muted-foreground me-2 ${labelTextClasses[size]}`}>Sort by</span>
       <AnimatePresence mode="popLayout">
         {sortedOptions.map((option, index) => {
           const IconComponent = option.icon
@@ -68,14 +96,14 @@ export default function SortsControls({
                 variant={isActive ? "default" : "secondary"}
                 key={option.label}
                 onClick={() => handleClick(option)}
-                className={`rounded-none border-r-0 ${isFirst ? "rounded-l-full" : ""} ${isLast ? "rounded-r-full border-r" : ""}`}
+                className={`rounded-none border-r-0 ${sizeClasses[size]} ${isFirst ? "rounded-l-full" : ""} ${isLast ? "rounded-r-full border-r" : ""}`}
               >
-                {IconComponent && <IconComponent className="h-3.5 w-3.5" />}
+                {IconComponent && <IconComponent className={iconSizeClasses[size]} />}
                 <span>{option.label}</span>
                 {isAsc ? (
-                  <ChevronUp className="h-3 w-3" />
+                  <ChevronUp className={chevronSizeClasses[size]} />
                 ) : isDesc ? (
-                  <ChevronDown className="h-3 w-3" />
+                  <ChevronDown className={chevronSizeClasses[size]} />
                 ) : null}
               </Button>
             </motion.div>
