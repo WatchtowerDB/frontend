@@ -67,7 +67,6 @@ export function FilterPopover({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        {/* <Button variant="outline">Filters {activeCount > 0 && <Badge>{activeCount}</Badge>}</Button> */}
         <Button variant="default" className="gap-2">
           <Filter className="h-4 w-4" />
           Filters
@@ -78,7 +77,7 @@ export function FilterPopover({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-64 p-0">
+      <PopoverContent align="start" className="w-64 p-0">
         {/* Search & Reset */}
         <div className="flex gap-2 p-3">
           <ClearableInput
@@ -150,13 +149,6 @@ export function FilterPopover({
         </ScrollArea>
 
         <Separator />
-
-        {/* ─── Reset ────────────────────────────────────────────────── */}
-        {/* {activeCount > 0 && (
-          <Button variant="ghost" onClick={onReset}>
-            Reset
-          </Button>
-        )} */}
       </PopoverContent>
     </Popover>
   )

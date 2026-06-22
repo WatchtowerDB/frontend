@@ -1,5 +1,7 @@
 import type { CheckFilters } from "@/api/check"
+import { FilterPopover, type FilterGroup } from "@/components/FilterPopover"
 import Pagination from "@/components/Pagination"
+import { SelectedFilters } from "@/components/SelectedFilters"
 import SortsControls from "@/components/SortsControls"
 import {
   Accordion,
@@ -15,8 +17,10 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useChecks } from "@/hooks/useChecks"
+import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAssertionsByChecks } from "@/hooks/useDataAggregation"
-import { useFrameworks } from "@/hooks/useFrameworks"
+import { useFilterState } from "@/hooks/useFilterState"
+import { useAllFrameworks } from "@/hooks/useFrameworks"
 import { useAssertionStore } from "@/stores/useAssertionStore"
 import type { Check, CheckStatus } from "@/types/compliance"
 import {
@@ -37,157 +41,6 @@ import {
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
-const mockChecks: Check[] = [
-  {
-    id: 1,
-    framework: 1,
-    client_db: 1,
-    client_db_name: "DB_Primary_Alpha",
-    user: 5,
-    schema: {
-      id: 101,
-      name: "Schema_Alpha_v1",
-      internal_version: 1,
-    },
-    date: new Date().toISOString(),
-    status: "COMPLETED",
-  }, // -> success (failed === 0)
-  {
-    id: 2,
-    framework: 1,
-    client_db: 1,
-    client_db_name: "DB_Primary_Alpha",
-    user: 5,
-    schema: {
-      id: 102,
-      name: "Schema_Beta_v1",
-      internal_version: 1,
-    },
-    date: new Date().toISOString(),
-    status: "COMPLETED",
-  }, // -> success (failed === 0)
-  {
-    id: 3,
-    framework: 1,
-    client_db: 1,
-    client_db_name: "DB_Primary_Alpha",
-    user: 6,
-    schema: {
-      id: 103,
-      name: "Schema_Gamma_v1",
-      internal_version: 2,
-    },
-    date: new Date().toISOString(),
-    status: "COMPLETED",
-  }, // -> failed (passed === 0)
-  {
-    id: 4,
-    framework: 1,
-    client_db: 1,
-    client_db_name: "DB_Primary_Alpha",
-    user: 7,
-    schema: {
-      id: 104,
-      name: "Schema_Delta_v1",
-      internal_version: 1,
-    },
-    date: new Date().toISOString(),
-    status: "COMPLETED",
-  }, // -> partial (mix)
-  {
-    id: 5,
-    framework: 1,
-    client_db: 1,
-    client_db_name: "DB_Primary_Alpha",
-    user: 5,
-    schema: {
-      id: 105,
-      name: "Schema_Epsilon_v1",
-      internal_version: 3,
-    },
-    date: new Date().toISOString(),
-    status: "COMPLETED",
-  }, // -> partial (mix)
-  {
-    id: 6,
-    framework: 1,
-    client_db: 1,
-    client_db_name: "DB_Primary_Alpha",
-    user: 8,
-    schema: {
-      id: 106,
-      name: "Schema_Zeta_v1",
-      internal_version: 1,
-    },
-    date: new Date().toISOString(),
-    status: "PENDING",
-  }, // -> running
-  {
-    id: 7,
-    framework: 1,
-    client_db: 1,
-    client_db_name: "DB_Primary_Alpha",
-    user: 5,
-    schema: {
-      id: 107,
-      name: "Schema_Eta_v1",
-      internal_version: 1,
-    },
-    date: new Date().toISOString(),
-    status: "GENERATING",
-  }, // -> running
-  {
-    id: 8,
-    framework: 1,
-    client_db: 1,
-    client_db_name: "DB_Primary_Alpha",
-    user: 9,
-    schema: {
-      id: 108,
-      name: "Schema_Theta_v1",
-      internal_version: 4,
-    },
-    date: new Date().toISOString(),
-    status: "EXECUTING",
-  }, // -> running
-  {
-    id: 9,
-    framework: 1,
-    client_db: 1,
-    client_db_name: "DB_Primary_Alpha",
-    user: 5,
-    schema: {
-      id: 109,
-      name: "Schema_Iota_v1",
-      internal_version: 1,
-    },
-    date: new Date().toISOString(),
-    status: "ANALYZING",
-  }, // -> running
-  {
-    id: 10,
-    framework: 1,
-    client_db: 1,
-    client_db_name: "DB_Primary_Alpha",
-    user: 10,
-    schema: {
-      id: 110,
-      name: "Schema_Kappa_v2",
-      internal_version: 2,
-    },
-    date: new Date().toISOString(),
-    status: "FAILED",
-  }, // -> incomplete (trumps everything else)
-]
-
-const mockSummaryMap: Record<number, { passed: number; failed: number; total: number }> = {
-  1: { passed: 4, failed: 0, total: 4 },
-  2: { passed: 1, failed: 0, total: 1 },
-  3: { passed: 0, failed: 5, total: 5 },
-  4: { passed: 2, failed: 1, total: 3 },
-  // 5: intentionally omitted — simulates stats still loading for a COMPLETED check
-}
-
 function getCheckStatus(
   check: Check,
   stats?: { passed: number; failed: number; total: number },
@@ -202,31 +55,93 @@ function getCheckStatus(
 
 export default function ChecksPage() {
   // For filtering & handling the pages
-  const [filters, setFilters] = useState<CheckFilters>({
+  const {
+    filters: filterValues,
+    activeCount,
+    toggle,
+    reset,
+    removeSingle,
+  } = useFilterState(["client_db", "framework", "status"])
+
+  const [pageState, setPageState] = useState<{ page: number; ordering: string[] | null }>({
     page: 1,
     ordering: ["-date"],
-    client_db: undefined,
-    framework: undefined,
   })
+
   const handlePageChange = (newPage: number) => {
-    setFilters((prev) => ({ ...prev, page: newPage }))
+    setPageState((prev) => ({ ...prev, page: newPage }))
   }
+
+  function handleToggle(key: string, id: number | string) {
+    toggle(key, id)
+    setPageState((prev) => ({ ...prev, page: 1 }))
+  }
+
+  const apiFilters: CheckFilters = {
+    page: pageState.page,
+    ordering: pageState.ordering ?? undefined,
+    ...(filterValues.client_db?.length > 0 && {
+      client_db: filterValues.client_db as unknown as number[],
+    }),
+    ...(filterValues.framework?.length > 0 && {
+      framework: filterValues.framework as unknown as number[],
+    }),
+    ...(filterValues.status?.length > 0 && {
+      status: filterValues.status as unknown as CheckStatus[],
+    }),
+  }
+
   const {
     data: checkData,
     isLoading: checkLoading,
     isError: checkError,
     isPlaceholderData,
-  } = useChecks(filters)
+  } = useChecks(apiFilters)
+
   const currentCheckIds = checkData?.results?.map((check) => check.id) ?? []
 
   // For data aggregation
   const { summaryMap, isLoading: isAssertionsLoading } = useAssertionsByChecks(currentCheckIds)
 
-  // For check details
-  const { data: frameworks } = useFrameworks()
+  // For check details & filtration listing
+  const { data: dbs } = useAllClientDBs()
+  const { data: frameworks } = useAllFrameworks()
+  // const { data: schemas } = useAllClientDBSchemas({ latest: true })
+  // TODO: implement that ^
+
   const frameworkMap = frameworks?.results
     ? Object.fromEntries(frameworks.results.map((f) => [f.id, f.name]))
     : {}
+
+  const STATUS_OPTIONS: { id: CheckStatus; name: string }[] = [
+    { id: "PENDING", name: "Pending" },
+    { id: "GENERATING", name: "Generating" },
+    { id: "EXECUTING", name: "Executing" },
+    { id: "ANALYZING", name: "Analyzing" },
+    { id: "COMPLETED", name: "Completed" },
+    { id: "FAILED", name: "Failed" },
+  ]
+
+  const groups: FilterGroup[] = [
+    {
+      key: "framework",
+      label: "Framework",
+      icon: ShieldAlert,
+      options: frameworks?.results?.map((f) => ({ id: f.id, name: f.name })) ?? [],
+    },
+    {
+      key: "client_db",
+      label: "Database",
+      icon: Database,
+      options: dbs?.results?.map((db) => ({ id: db.id, name: db.name })) ?? [],
+    },
+    {
+      key: "status",
+      label: "Status",
+      icon: CheckCircle,
+      options: STATUS_OPTIONS,
+    },
+  ]
 
   // For jumping to an assertion
   const setComplianceCheckId = useAssertionStore((s) => s.setComplianceCheckId)
@@ -245,9 +160,16 @@ export default function ChecksPage() {
         </header>
 
         <div className="flex items-center gap-2 px-6 pb-2">
+          <FilterPopover
+            groups={groups}
+            filters={filterValues}
+            onToggle={handleToggle}
+            onReset={reset}
+            activeCount={activeCount}
+          />
           <SortsControls
-            value={filters.ordering ?? ["-date"]}
-            onChange={(ordering) => setFilters((prev) => ({ ...prev, ordering, page: 1 }))}
+            value={pageState.ordering ?? ["-date"]}
+            onChange={(ordering) => setPageState((prev) => ({ ...prev, ordering, page: 1 }))}
             options={[
               { label: "Date", value: "date", icon: Calendar },
               { label: "Client DB", value: "client_db", icon: Database },
@@ -257,6 +179,9 @@ export default function ChecksPage() {
         </div>
       </div>
 
+      <div className="px-6 pb-2">
+        <SelectedFilters groups={groups} filters={filterValues} onToggle={removeSingle} />
+      </div>
       <main className="flex min-h-0 w-full flex-1 flex-col gap-2">
         {checkLoading || isAssertionsLoading ? (
           <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-2 text-sm">
@@ -278,18 +203,7 @@ export default function ChecksPage() {
             <div className="px-4 pb-4">
               <Accordion className="flex w-full flex-col gap-3" type="multiple">
                 {checkData?.results.map((check) => {
-                  {
-                    /* {mockChecks?.map((check) => { */
-                  }
                   const stats = summaryMap?.[check.id]
-                  // const stats = mockSummaryMap?.[check.id]
-                  // const status = !stats
-                  //   ? "loading"
-                  //   : stats.failed === 0
-                  //     ? "success"
-                  //     : stats.passed === 0
-                  //       ? "failed"
-                  //       : "partial"
                   const status = getCheckStatus(check, stats)
 
                   const statusBadge = {
@@ -341,7 +255,7 @@ export default function ChecksPage() {
                               {check ? (
                                 <div className="flex items-center gap-2 text-sm">
                                   {/* ID Anchor*/}
-                                  <span className="text-muted-foreground pt-[2px] font-mono text-xs font-bold">
+                                  <span className="text-muted-foreground pt-0.5 font-mono text-xs font-bold">
                                     #{check.id}
                                   </span>
 
@@ -543,7 +457,7 @@ export default function ChecksPage() {
       {/* Pagination */}
       <div className="bg-background border-t p-4">
         <Pagination
-          page={filters.page || 1}
+          page={apiFilters.page || 1}
           totalPages={totalPages}
           totalCount={totalCount}
           isFetching={isPlaceholderData}

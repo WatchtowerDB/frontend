@@ -2,7 +2,6 @@ import { FilterPopover, type FilterGroup } from "@/components/FilterPopover"
 import { SelectedFilters } from "@/components/SelectedFilters"
 import SortsControls from "@/components/SortsControls"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
@@ -13,7 +12,7 @@ import {
   useAssertionStore,
   type AssertionFilterKey,
 } from "@/stores/useAssertionStore"
-import { Activity, Box, Database, FastForward, Network } from "lucide-react"
+import { Activity, Database, FastForward, Network, ShieldAlert } from "lucide-react"
 import { useState } from "react"
 import { AssertionsStatus } from "./AssertionsStatus"
 import { RefreshAssertionsButton } from "./RefreshAssertionsButton"
@@ -40,12 +39,8 @@ export default function AssertionsHeader({
 }: AssertionsHeaderProps) {
   const [isRunDialogOpen, setIsRunDialogOpen] = useState(false)
 
+  // Filtration & Sorting
   const filterMap = useAssertionFilterMap()
-
-  const clientDb = useAssertionStore((s) => s.clientDb)
-  const schema = useAssertionStore((s) => s.schema)
-  const complianceFramework = useAssertionStore((s) => s.complianceFramework)
-
   const ordering = useAssertionStore((s) => s.ordering)
   const setOrdering = useAssertionStore((s) => s.setOrdering)
   const resetFilters = useAssertionStore((s) => s.resetFilters)
@@ -58,7 +53,7 @@ export default function AssertionsHeader({
     {
       key: "complianceFramework",
       label: "Framework",
-      icon: Box,
+      icon: ShieldAlert,
       options: frameworks?.results?.map((f) => ({ id: f.id, name: f.name })) ?? [],
     },
     {
@@ -71,7 +66,11 @@ export default function AssertionsHeader({
       key: "schema",
       label: "Schema",
       icon: Network,
-      options: schemas?.results?.map((s) => ({ id: s.id, name: s.name })) ?? [],
+      options:
+        schemas?.results?.map((s) => ({
+          id: s.id,
+          name: s.internal_version ? `${s.name} v${s.internal_version}` : s.name,
+        })) ?? [],
     },
     {
       key: "status",
@@ -90,9 +89,9 @@ export default function AssertionsHeader({
   }
 
   return (
-   <div className={cn("flex w-full flex-col gap-1", className)}>
+    <div className={cn("flex w-full flex-col gap-1", className)}>
       <div className="flex w-full flex-row items-start justify-between gap-1">
-        <div className="flex flex-col items-start flex-1">
+        <div className="flex flex-1 flex-col items-start">
           <Button variant="default" className="w-full" onClick={() => setIsRunDialogOpen(true)}>
             Run Compliance Check
           </Button>
@@ -124,7 +123,7 @@ export default function AssertionsHeader({
           onReset={resetFilters}
           activeCount={activeFilterCount}
         />
-        <div className="h-6 w-px shrink-0 bg-border" />
+        <div className="bg-border h-6 w-px shrink-0" />
         <SortsControls
           size="xs"
           allowEmptySort={true}
@@ -133,7 +132,6 @@ export default function AssertionsHeader({
           options={[
             { label: "Status", value: "status", icon: Activity },
             { label: "Client DB", value: "client_db", icon: Database },
-            // { label: "Framework", value: "framework", icon: Box },
           ]}
         />
       </div>

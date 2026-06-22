@@ -41,7 +41,7 @@ export function Navbar() {
                   <Link
                     to={item.url}
                     className={`flex items-center gap-2 ${
-                      isActive ? "text-foreground font-medium" : "text-muted-foreground"
+                      isActive ? "text-foreground font-medium border-b-primary border-b-3" : "text-muted-foreground"
                     }`}
                   >
                     {item.title}
