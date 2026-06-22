@@ -21,7 +21,7 @@ export default function Login() {
       <MeshGradientBackground
         className="-z-50"
         colors={["var(--mesh-1)", "var(--mesh-1)", "var(--mesh-2)", "var(--mesh-2)"]}
-        speed={1.5}
+        speed={1.75}
         backgroundColor="var(--mesh-bg)"
       />
       <div className="absolute top-4 right-4 md:top-6 md:right-6">
