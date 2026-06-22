@@ -90,11 +90,14 @@ export default function AssertionsHeader({
   }
 
   return (
-    <div className={cn("w-full", className)}>
-      <div className="flex w-full flex-row items-center justify-between gap-1">
-        <Button className="flex-1" variant="default" onClick={() => setIsRunDialogOpen(true)}>
-          Run Compliance Check
-        </Button>
+   <div className={cn("flex w-full flex-col gap-1", className)}>
+      <div className="flex w-full flex-row items-start justify-between gap-1">
+        <div className="flex flex-col items-start flex-1">
+          <Button variant="default" className="w-full" onClick={() => setIsRunDialogOpen(true)}>
+            Run Compliance Check
+          </Button>
+          <AssertionsStatus className="-mt-1" />
+        </div>
         <RefreshAssertionsButton />
         <Tooltip delayDuration={500}>
           <TooltipTrigger asChild>
@@ -111,10 +114,9 @@ export default function AssertionsHeader({
           <TooltipContent>Jump to Streaming Asssertion</TooltipContent>
         </Tooltip>
       </div>
-      <AssertionsStatus />
       {/* <ViewLatestCheck className="mt-3" /> */}
       {/* Filters & Sorting*/}
-      <div className="flex flex-row items-center gap-2 mb-1">
+      <div className="flex flex-row items-center gap-3">
         <FilterPopover
           groups={groups}
           filters={filters}
@@ -122,7 +124,7 @@ export default function AssertionsHeader({
           onReset={resetFilters}
           activeCount={activeFilterCount}
         />
-        <Separator orientation="vertical" className="h-8" />
+        <div className="h-6 w-px shrink-0 bg-border" />
         <SortsControls
           size="xs"
           allowEmptySort={true}
