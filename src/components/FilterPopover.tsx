@@ -7,16 +7,18 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { ScrollArea } from "./ui/scroll-area"
 import { Separator } from "./ui/separator"
 
+type FilterPopoverValues = Record<string, (number | string)[]>
+
 export type FilterGroup = {
   key: string
   label: string
-  options: { id: number; name: string }[]
+  options: { id: number | string; name: string }[]
 }
 
 type FilterPopoverProps = {
   groups: FilterGroup[]
-  filters?: FilterValues
-  onToggle?: (key: string, id: number) => void
+  filters: FilterPopoverValues
+  onToggle: (key: string, id: number | string) => void
   onReset: () => void
   activeCount?: number
 }
@@ -72,8 +74,8 @@ export function FilterPopover({
                     <div key={option.id} className="flex items-center gap-2">
                       <Checkbox
                         id={`${group.key}-${option.id}`}
-                        //   checked={filters[group.key]?.includes(option.id)}
-                        //   onCheckedChange={() => onToggle(group.key, option.id)}
+                        checked={filters[group.key]?.includes(option.id) ?? false}
+                        onCheckedChange={() => onToggle(group.key, option.id)}
                       />
                       <label
                         htmlFor={`${group.key}-${option.id}`}

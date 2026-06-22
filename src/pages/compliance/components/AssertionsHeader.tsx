@@ -5,7 +5,11 @@ import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { useAllFrameworks } from "@/hooks/useFrameworks"
 import { cn } from "@/lib/utils"
-import { useAssertionStore } from "@/stores/useAssertionStore"
+import {
+  useAssertionFilterMap,
+  useAssertionStore,
+  type AssertionFilterKey,
+} from "@/stores/useAssertionStore"
 import { FastForward } from "lucide-react"
 import { useState } from "react"
 import { AssertionsStatus } from "./AssertionsStatus"
@@ -19,12 +23,22 @@ interface AssertionsHeaderProps {
   hasStreaming?: boolean
 }
 
+const STATUS_OPTIONS = [
+  { id: "PENDING", name: "Pending" },
+  { id: "ANALYZING", name: "Analyzing" },
+  { id: "EXECUTING", name: "Executing" },
+  { id: "COMPLETED", name: "Completed" },
+  { id: "FAILED", name: "Failed" },
+]
+
 export default function AssertionsHeader({
   className,
   onJumpToStreaming,
   hasStreaming,
 }: AssertionsHeaderProps) {
   const [isRunDialogOpen, setIsRunDialogOpen] = useState(false)
+
+  const filterMap = useAssertionFilterMap()
 
   const clientDb = useAssertionStore((s) => s.clientDb)
   const schema = useAssertionStore((s) => s.schema)
@@ -34,35 +48,45 @@ export default function AssertionsHeader({
 
   const { data: dbs } = useAllClientDBs()
   const { data: frameworks } = useAllFrameworks()
-  const { data: schemas } = useAllClientDBSchemas()
+  const { data: schemas } = useAllClientDBSchemas({ latest: true })
 
   const groups: FilterGroup[] = [
     {
-      key: "compliance_framework",
+      key: "complianceFramework",
       label: "Framework",
       options: frameworks?.results?.map((f) => ({ id: f.id, name: f.name })) ?? [],
     },
     {
-      key: "client_db",
+      key: "clientDb",
       label: "Database",
       options: dbs?.results?.map((db) => ({ id: db.id, name: db.name })) ?? [],
     },
     {
       key: "schema",
       label: "Schema",
-      options: schemas?.results?.map((s) => ({ id: s.id, name: `Schema #${s.id}` })) ?? [],
+      options: schemas?.results?.map((s) => ({ id: s.id, name: s.name })) ?? [],
+    },
+    {
+      key: "status",
+      label: "Status",
+      options: STATUS_OPTIONS,
     },
   ]
+
+  const filters = Object.fromEntries(Object.entries(filterMap).map(([key, [arr]]) => [key, arr]))
+
+  function handleToggle(key: string, id: number | string) {
+    filterMap[key as AssertionFilterKey][1](id)
+  }
 
   return (
     <div className={cn("w-full", className)}>
       <div className="flex w-full flex-row items-center justify-between gap-1">
         <FilterPopover
           groups={groups}
-          // filters={{ client_db: clientDb, schema, compliance_framework: complianceFramework }}
-          // onToggle={handleToggle}
+          filters={filters}
+          onToggle={handleToggle}
           onReset={resetFilters}
-          // activeCount={activeCount}
         />
         <Button className="flex-1" variant="default" onClick={() => setIsRunDialogOpen(true)}>
           Run Compliance Check
