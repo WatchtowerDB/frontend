@@ -10,7 +10,7 @@ import {
   useAssertionStore,
   type AssertionFilterKey,
 } from "@/stores/useAssertionStore"
-import { FastForward } from "lucide-react"
+import { Activity, Box, Database, FastForward, Network } from "lucide-react"
 import { useState } from "react"
 import { AssertionsStatus } from "./AssertionsStatus"
 import { RefreshAssertionsButton } from "./RefreshAssertionsButton"
@@ -54,21 +54,25 @@ export default function AssertionsHeader({
     {
       key: "complianceFramework",
       label: "Framework",
+      icon: Box,
       options: frameworks?.results?.map((f) => ({ id: f.id, name: f.name })) ?? [],
     },
     {
       key: "clientDb",
       label: "Database",
+      icon: Database,
       options: dbs?.results?.map((db) => ({ id: db.id, name: db.name })) ?? [],
     },
     {
       key: "schema",
       label: "Schema",
+      icon: Network,
       options: schemas?.results?.map((s) => ({ id: s.id, name: s.name })) ?? [],
     },
     {
       key: "status",
       label: "Status",
+      icon: Activity,
       options: STATUS_OPTIONS,
     },
   ]
