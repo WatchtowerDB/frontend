@@ -1,5 +1,6 @@
 import { GenericSidebar } from "@/components/GenericSidebar"
 import { SidebarInset } from "@/components/ui/sidebar"
+import { useAssertionStore } from "@/stores/useAssertionStore"
 import { useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 import { useState } from "react"
 import AssertionReport from "./components/AssertionReport"
@@ -21,6 +22,8 @@ function AssertionsPage() {
 
   const handleJumpToStreaming = () => {
     if (!streamingAssertionId) return
+    const checkId = liveAssertions[streamingAssertionId]?.checkId
+    if (checkId) useAssertionStore.getState().setComplianceCheckId([checkId])
     setSelectedId(streamingAssertionId)
   }
   return (

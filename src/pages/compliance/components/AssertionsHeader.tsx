@@ -3,6 +3,7 @@ import { SelectedFilters } from "@/components/SelectedFilters"
 import SortsControls from "@/components/SortsControls"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useAllChecks } from "@/hooks/useChecks"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
 import { useAllFrameworks } from "@/hooks/useFrameworks"
@@ -12,7 +13,7 @@ import {
   useAssertionStore,
   type AssertionFilterKey,
 } from "@/stores/useAssertionStore"
-import { Activity, Database, FastForward, Network, ShieldAlert } from "lucide-react"
+import { Activity, Database, FastForward, ListChecks, Network, ShieldAlert } from "lucide-react"
 import { useState } from "react"
 import { AssertionsStatus } from "./AssertionsStatus"
 import { RefreshAssertionsButton } from "./RefreshAssertionsButton"
@@ -48,7 +49,7 @@ export default function AssertionsHeader({
   const { data: dbs } = useAllClientDBs()
   const { data: frameworks } = useAllFrameworks()
   const { data: schemas } = useAllClientDBSchemas({ latest: true })
-
+  const { data: checks } = useAllChecks()
   const groups: FilterGroup[] = [
     {
       key: "complianceFramework",
@@ -78,6 +79,13 @@ export default function AssertionsHeader({
       icon: Activity,
       options: STATUS_OPTIONS,
     },
+    {
+      key: "complianceCheckId",
+      label: "Check",
+      icon: ListChecks,
+      options: checks?.results?.map((db) => ({ id: db.id, name: `Check ${String(db.id)}` })) ?? [],
+      hidden: true,
+    },
   ]
 
   const filters = Object.fromEntries(Object.entries(filterMap).map(([key, [arr]]) => [key, arr]))
@@ -89,13 +97,13 @@ export default function AssertionsHeader({
   }
 
   return (
-    <div className={cn("flex w-full flex-col gap-1", className)}>
+    <div className={cn("flex w-full flex-col gap-2", className)}>
       <div className="flex w-full flex-row items-start justify-between gap-1">
         <div className="flex flex-1 flex-col items-start">
           <Button variant="default" className="w-full" onClick={() => setIsRunDialogOpen(true)}>
             Run Compliance Check
           </Button>
-          <AssertionsStatus className="-mt-1" />
+          <AssertionsStatus />
         </div>
         <RefreshAssertionsButton />
         <Tooltip delayDuration={500}>

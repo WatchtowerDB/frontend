@@ -297,7 +297,7 @@ export default function Dashboard() {
                       key={check.id}
                       className="h-5 cursor-pointer"
                       onClick={() => {
-                        setCheckId(check.id)
+                        setCheckId([check.id])
                         navigate(`/compliance/assertions`)
                       }}
                     >
