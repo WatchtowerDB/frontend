@@ -1,9 +1,14 @@
+import { ClearableInput } from "@/components/ClearableInput"
+import { FilterPopover, type FilterGroup } from "@/components/FilterPopover"
 import Pagination from "@/components/Pagination"
+import { SelectedFilters } from "@/components/SelectedFilters"
 import Loader from "@/components/ui/loader"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useClientDBSchemas } from "@/hooks/useClientDBSchemas"
-import { useState } from "react"
+import { useFilterState } from "@/hooks/useFilterState"
+import { Database, Search } from "lucide-react"
+import { useEffect, useState } from "react"
 import { SchemaList } from "./components/SchemaList"
 import { SchemaPreview } from "./components/SchemaPreview"
 import { SchemaUploadForm } from "./components/SchemaUploadForm"
@@ -11,11 +16,51 @@ import { SchemaUploadForm } from "./components/SchemaUploadForm"
 export default function SchemasPage() {
   const [currentPage, setCurrentPage] = useState(1)
 
+  const {
+    filters: filterValues,
+    activeCount,
+    toggle,
+    reset,
+    removeSingle,
+  } = useFilterState(["client_db"])
+
+  const [searchInput, setSearchInput] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchInput), 300)
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
+  function handleToggle(key: string, id: number | string) {
+    toggle(key, id)
+    setCurrentPage(1)
+  }
+
+  function handleSearchChange(value: string) {
+    setSearchInput(value)
+    setCurrentPage(1)
+  }
+
   const { databases, schemas, isLoading, schemasLoading, isUploading, uploadSchema, totalCount } =
     useClientDBSchemas({
       page: currentPage,
       latest: true,
+      ...(filterValues.client_db?.length > 0 && {
+        client_db: filterValues.client_db as unknown as number[],
+      }),
+      ...(debouncedSearch.trim() !== "" && { search: debouncedSearch.trim() }),
     })
+
+  const groups: FilterGroup[] = [
+    {
+      key: "client_db",
+      label: "Database",
+      icon: Database,
+      options: databases?.map((db) => ({ id: db.id, name: db.name })) ?? [],
+    },
+  ]
+
   const [activeTab, setActiveTab] = useState("upload")
   const [selectedSchemaId, setSelectedSchemaId] = useState<number | null>(null)
   const [fileContent, setFileContent] = useState<string | null>(null)
@@ -63,6 +108,29 @@ export default function SchemasPage() {
           </TabsContent>
           {/* Schemas list tab */}
           <TabsContent value="schemas" className="flex h-full flex-1 flex-col overflow-hidden pt-4">
+            <div className="flex items-center gap-2 px-8 pb-2">
+              <FilterPopover
+                groups={groups}
+                filters={filterValues}
+                onToggle={handleToggle}
+                onReset={reset}
+                activeCount={activeCount}
+              />
+              <div className="relative flex-1">
+                <ClearableInput
+                  showClear={!!searchInput}
+                  onClear={() => setSearchInput("")}
+                  placeholder="Search schemas..."
+                  value={searchInput}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="bg-background focus-visible:ring-primary focus-visible:ring-offset-background w-full rounded-md pl-9 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                />
+                <Search className="text-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              </div>
+            </div>
+            <div className="px-8 pb-2">
+              <SelectedFilters groups={groups} filters={filterValues} onToggle={removeSingle} />
+            </div>
             {isLoading ? (
               <div className="flex h-full min-h-0 w-full items-center justify-center">
                 <Loader />

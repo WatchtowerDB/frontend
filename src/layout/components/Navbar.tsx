@@ -24,7 +24,7 @@ export function Navbar() {
 
       {/* Navigation Options */}
       <div className="flex flex-1">
-        <NavigationMenuList>
+        <NavigationMenuList className="m-0 p-0">
           {APP_NAV.map((item) => {
             const isDashboard = item.url === "/"
             const isActive = isDashboard
@@ -41,7 +41,9 @@ export function Navbar() {
                   <Link
                     to={item.url}
                     className={`flex items-center gap-2 ${
-                      isActive ? "text-foreground font-medium" : "text-muted-foreground"
+                      isActive
+                        ? "text-foreground border-b-primary border-b-3 font-medium"
+                        : "text-muted-foreground"
                     }`}
                   >
                     {item.title}
