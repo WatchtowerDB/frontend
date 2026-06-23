@@ -24,7 +24,7 @@ export function Navbar() {
 
       {/* Navigation Options */}
       <div className="flex flex-1">
-        <NavigationMenuList>
+        <NavigationMenuList className="p-0 m-0">
           {APP_NAV.map((item) => {
             const isDashboard = item.url === "/"
             const isActive = isDashboard
