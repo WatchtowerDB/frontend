@@ -172,7 +172,10 @@ export const useAssertionStore = create<AssertionFilterState & AssertionFilterAc
   }),
 )
 
-export function useAssertionFilterMap(): Record<AssertionFilterKey, [FilterId[], (id: FilterId) => void]> {
+export function useAssertionFilterMap(): Record<
+  AssertionFilterKey,
+  [FilterId[], (id: FilterId) => void]
+> {
   const clientDb = useAssertionStore((s) => s.clientDb)
   const schema = useAssertionStore((s) => s.schema)
   const complianceFramework = useAssertionStore((s) => s.complianceFramework)
