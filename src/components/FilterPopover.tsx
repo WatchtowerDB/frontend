@@ -95,7 +95,7 @@ export function FilterPopover({
         <Separator />
 
         {/* Groups */}
-        <ScrollArea className="h-72">
+        <ScrollArea className="max-h-72">
           <div className="flex flex-col gap-4 p-3">
             {visibleGroups.map((group, index) => (
               <div key={group.key} className="flex flex-col gap-2">
