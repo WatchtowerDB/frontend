@@ -17,11 +17,7 @@ function ClearableInput({
 }: ClearableInputProps) {
   return (
     <div className="relative flex w-full items-center">
-      <Input
-        type={type}
-        className={cn("pr-8", className)}
-        {...props}
-      />
+      <Input type={type} className={cn("pr-8", className)} {...props} />
 
       {showClear && (
         <button
