@@ -37,8 +37,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setAccessToken: (token) => set({ accessToken: token }),
 
   logout: () => {
-    if (!get().isAuthenticated) return
     useComplianceCheckStore.getState().reset()
+    if (!get().isAuthenticated) return
+    // TODO: if something breaks alongside the logout in terms of the streams, switch the two lines above this.
     set({ accessToken: null, userName: null, isAuthenticated: false })
     toast.info("You have been logged out.", {
       duration: 3000,

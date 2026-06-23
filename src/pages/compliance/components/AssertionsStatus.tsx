@@ -1,27 +1,23 @@
 import { useAssertions } from "@/hooks/useAssertions"
 import { useLatestCheck } from "@/hooks/useChecks"
-import { cn } from "@/lib/utils"
+import { cn, timeAgo } from "@/lib/utils"
 import { selectOverallPhase, useComplianceCheckStore } from "@/stores/useComplianceCheckStore"
 import { AlertCircleIcon, CheckIcon } from "lucide-react"
 import { startTransition, useEffect, useState } from "react"
 
 export type ViewState = "idle" | "fetching" | "streaming" | "complete" | "error"
 
-function timeAgo(date: Date): string {
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000)
-  if (seconds < 60) return "just now"
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes} min ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  return date.toLocaleDateString()
-}
-
 interface AssertionsStatusProps {
   className?: string
+  textClassName?: string
+  onStatusChange?: (status: ViewState) => void
 }
 
-export function AssertionsStatus({ className }: AssertionsStatusProps) {
+export function AssertionsStatus({
+  className,
+  textClassName,
+  onStatusChange,
+}: AssertionsStatusProps) {
   const { isError, error, isFetching } = useAssertions()
   const checkStreams = useComplianceCheckStore((s) => s.checkStreams)
   const clearCompletedChecks = useComplianceCheckStore((s) => s.clearCompletedChecks)
@@ -39,17 +35,22 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
   })()
 
   const [displayState, setDisplayState] = useState<ViewState>("idle")
+  const updateState = (s: ViewState) => {
+    startTransition(() => setDisplayState(s))
+    onStatusChange?.(s)
+  }
 
   useEffect(() => {
     if (viewState === "complete") {
-      startTransition(() => setDisplayState("complete"))
+      startTransition(() => updateState("complete"))
       const t = setTimeout(() => {
-        startTransition(() => setDisplayState("idle"))
+        startTransition(() => updateState("idle"))
         clearCompletedChecks()
       }, 2000)
       return () => clearTimeout(t)
     }
-    startTransition(() => setDisplayState(viewState))
+    startTransition(() => updateState(viewState))
+    onStatusChange?.(viewState)
   }, [viewState])
 
   // How many checks are actively streaming (for the label)?
@@ -58,20 +59,20 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
   ).length
 
   return (
-    <div className={cn("flex items-center gap-2 px-4 py-1", className)}>
+    <div className={cn("flex items-center gap-2", className)}>
       {displayState === "idle" && (
         <>
           {latestCheck?.date ? (
             <>
               <span className="bg-muted-foreground/40 size-1.5 shrink-0 rounded-full" />
-              <span className="text-muted-foreground text-[10px]">
+              <span className={cn("text-muted-foreground text-[10px]", textClassName)}>
                 Last ran: {timeAgo(new Date(latestCheck.date))}
               </span>
             </>
           ) : (
             <>
               <span className="size-1.5 shrink-0 rounded-full bg-amber-500/50" />
-              <span className="text-muted-foreground/70 text-[10px]">
+              <span className={cn("text-muted-foreground/70 text-[10px]", textClassName)}>
                 No compliance checks recorded
               </span>
             </>
@@ -82,7 +83,11 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
       {displayState === "fetching" && (
         <>
           <span className="bg-primary size-1.5 shrink-0 animate-pulse rounded-full" />
-          <span className="text-primary animate-pulse text-[10px] dark:text-white">Fetching…</span>
+          <span
+            className={cn("text-primary animate-pulse text-[10px] dark:text-white", textClassName)}
+          >
+            Fetching…
+          </span>
         </>
       )}
 
@@ -93,7 +98,10 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
             style={{ animationDuration: "0.8s" }}
           />
           <span
-            className="text-primary animate-pulse text-[10px] capitalize dark:text-white"
+            className={cn(
+              "text-primary animate-pulse text-[10px] capitalize dark:text-white",
+              textClassName,
+            )}
             style={{ animationDuration: "0.8s" }}
           >
             {activeCount > 1 ? `${activeCount} checks queued — ` : ""} {phase}…
@@ -104,14 +112,14 @@ export function AssertionsStatus({ className }: AssertionsStatusProps) {
       {displayState === "complete" && (
         <>
           <CheckIcon className="size-3 shrink-0 text-emerald-500" />
-          <span className="text-[10px] text-emerald-500">Done</span>
+          <span className={cn("text-[10px] text-emerald-500", textClassName)}>Done</span>
         </>
       )}
 
       {displayState === "error" && (
         <>
           <AlertCircleIcon className="text-destructive size-3 shrink-0" />
-          <span className="text-destructive text-[10px]">
+          <span className={cn("text-destructive text-[10px]", textClassName)}>
             {isError
               ? `Error: ${error instanceof Error ? error.message : String(error)}`
               : phase === "error"

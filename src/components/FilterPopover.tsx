@@ -1,4 +1,4 @@
-import { ChevronRight, Filter, RotateCcw, type LucideIcon } from "lucide-react"
+import { ChevronRight, Filter, Trash, type LucideIcon } from "lucide-react"
 import { useState } from "react"
 import { ClearableInput } from "./ClearableInput"
 import { Button } from "./ui/button"
@@ -6,12 +6,14 @@ import { Checkbox } from "./ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { ScrollArea } from "./ui/scroll-area"
 import { Separator } from "./ui/separator"
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip"
 
 export type FilterGroup = {
   key: string
   label: string
   icon?: LucideIcon
   options: { id: number | string; name: string }[]
+  hidden?: boolean
 }
 
 type FilterPopoverValues = Record<string, (number | string)[]>
@@ -50,6 +52,7 @@ export function FilterPopover({
   }
 
   const visibleGroups = groups
+    .filter((group) => !group.hidden)
     .map((group) => {
       const groupLabelMatches = normalize(group.label).includes(normalize(search))
       const options = groupLabelMatches
@@ -77,8 +80,9 @@ export function FilterPopover({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-64 p-0">
+      <PopoverContent align="start" className="flex h-100 w-64 flex-col p-0">
         {/* Search & Reset */}
+        {/* TODO: Figure out why I can't make the size of this popover dynamic. For now, schema filter does not look ideal. */}
         <div className="flex gap-2 p-3">
           <ClearableInput
             showClear={!!search}
@@ -88,14 +92,21 @@ export function FilterPopover({
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1"
           />
-          <Button variant="ghost" onClick={onReset}>
-            <RotateCcw />
-          </Button>
+          <Tooltip delayDuration={500}>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" onClick={onReset} size="icon">
+                <Trash className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" align="center">
+              <p className="text-xs">Reset filters</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
         <Separator />
 
         {/* Groups */}
-        <ScrollArea className="max-h-72">
+        <ScrollArea className="max-h-80 w-full">
           <div className="flex flex-col gap-4 p-3">
             {visibleGroups.map((group, index) => (
               <div key={group.key} className="flex flex-col gap-2">
