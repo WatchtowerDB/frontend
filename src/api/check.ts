@@ -1,11 +1,12 @@
 import api from "./axiosInstance"
 
 import { type PaginatedResponse } from "@/types/api"
-import { type Check } from "@/types/compliance"
+import { type Check, type CheckStatus } from "@/types/compliance"
 
 export interface CheckFilters {
-  client_db?: number
-  framework?: number
+  client_db?: number[]
+  framework?: number[]
+  status?: CheckStatus[]
   // Pagination & Sorting
   page?: number
   ordering?: string[]
@@ -29,7 +30,7 @@ export const getCheckById = async (id: number): Promise<Check> => {
 }
 
 // Retrieve the latest compliance check.
-export const getLatestCheck = async (): Promise<Check> => {
-  const response = await api.get<Check>(`/api/compliance/checks/latest/`)
+export const getLatestCheck = async (): Promise<Check | null> => {
+  const response = await api.get<Check | null>(`/api/compliance/checks/latest/`)
   return response.data
 }

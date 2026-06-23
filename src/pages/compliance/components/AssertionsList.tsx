@@ -76,10 +76,15 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                     <button
                       onClick={() => onSelect?.(item.id)}
                       className={`flex w-full flex-row items-center justify-between p-4 text-left backdrop-blur-sm ${
-                        result
-                          ? "border-l-4 border-emerald-500 bg-linear-to-br from-emerald-500/15 via-emerald-500/5 via-10% to-transparent to-15%"
-                          : "border-l-4 border-red-500 bg-linear-to-br from-red-500/15 via-red-500/5 via-10% to-transparent to-15%"
+                        // 1. Check for infrastructure execution FAILURE first
+                        item?.status === "FAILED"
+                          ? "border-l-4 border-zinc-500 bg-linear-to-br from-zinc-500/15 via-zinc-500/5 via-10% to-transparent to-15%"
+                          : // 2. Fallback to standard compliance results if the execution didn't fail
+                            result
+                            ? "border-l-4 border-emerald-500 bg-linear-to-br from-emerald-500/15 via-emerald-500/5 via-10% to-transparent to-15%"
+                            : "border-l-4 border-red-500 bg-linear-to-br from-red-500/15 via-red-500/5 via-10% to-transparent to-15%"
                       } ${selectedId === item.id ? "dark:bg-accent! bg-neutral-200/60!" : ""}`}
+                      // TODO: Figure out why the hell is a CSS clash happening here. These are mutually exclusive..
                     >
                       <div className="flex min-w-0 flex-1 flex-col gap-1 pr-2">
                         <span className="truncate font-mono text-xs">
@@ -100,9 +105,9 @@ const AssertionsList = ({ onSelect, selectedId }: AssertionListProps) => {
                           )}
                         </span>
                       </div>
-                      {isCurrentlyStreaming ? (
+                      {isCurrentlyStreaming && item.status !== "FAILED" ? (
                         <Disc3 className="h-6! w-6! shrink-0 animate-spin self-center text-red-500" />
-                      ) : isAssertionLoading ? (
+                      ) : isAssertionLoading && item.status !== "FAILED" ? (
                         <Loader2 className="text-primary h-6! w-6! shrink-0 animate-spin self-center" />
                       ) : null}
                     </button>

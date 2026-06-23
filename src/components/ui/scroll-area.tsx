@@ -20,7 +20,9 @@ function ScrollArea({
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
-      <ScrollBar />
+      <ScrollBar orientation="vertical" />
+      <ScrollBar orientation="horizontal" />
+      {/* Please note that I added a horizontal Scrollbar for schema previews */}
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
   )

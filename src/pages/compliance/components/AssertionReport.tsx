@@ -4,7 +4,7 @@ import ReactMarkdown, { type Components } from "react-markdown"
 import remarkGfm from "remark-gfm"
 
 import SqlBlock from "@/components/SqlBlock"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import Loader from "@/components/ui/loader"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -132,12 +132,35 @@ export default function AssertionReport({
           </Tooltip>
           {title}
           {assertion ? (
-            <Badge variant={result ? "outline" : "destructive"} className="ml-2">
-              {result ? "Pass" : "Fail"}
+            <Badge
+              variant={
+                assertion?.status === "FAILED" ? "secondary" : result ? "outline" : "destructive"
+              }
+              className="ml-2"
+            >
+              {assertion?.status === "FAILED" ? "Incomplete" : result ? "Pass" : "Fail"}
             </Badge>
           ) : null}
         </h2>
       </div>
+      {assertion?.status === "FAILED" && (
+        <Alert
+          variant="destructive"
+          className="mt-2 flex items-start gap-4 bg-red-700 p-4 text-white"
+        >
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+
+          <div className="flex-1 space-y-1">
+            <AlertTitle className="font-semibold tracking-wide">
+              Incomplete Assertion Detected
+            </AlertTitle>
+            <AlertDescription className="text-sm leading-relaxed text-white opacity-90">
+              This assertion is incomplete and should not be reviewed. It is highly recommended to
+              rerun the check using the same parameters.
+            </AlertDescription>
+          </div>
+        </Alert>
+      )}
 
       <div className="relative min-h-0 flex-1">
         <ScrollArea key={assertionId} className="h-full w-full">
@@ -165,7 +188,9 @@ export default function AssertionReport({
               case "passed":
                 return (
                   <div className="p-6">
-                    {assertion?.sql_query && <SqlBlock query={assertion.sql_query} label="SQL" />}
+                    {assertion?.sql_query && (
+                      <SqlBlock query={assertion.sql_query} label="SQL" className="mb-6" />
+                    )}
                     <div className="flex flex-col items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-12 text-center shadow-sm">
                       <CheckCircle2 className="mb-4 h-16 w-16 text-emerald-500" />
                       <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-400">
@@ -183,7 +208,9 @@ export default function AssertionReport({
               case "failed":
                 return (
                   <div className="p-6">
-                    {assertion?.sql_query && <SqlBlock query={assertion.sql_query} label="SQL" />}
+                    {assertion?.sql_query && (
+                      <SqlBlock query={assertion.sql_query} label="SQL" className="mb-6" />
+                    )}
                     <article
                       className={cn(
                         "prose prose-slate dark:prose-invert max-w-none",
@@ -205,6 +232,12 @@ export default function AssertionReport({
                 )
 
               case "loading":
+                if (assertion?.status === "FAILED")
+                  return (
+                    <div className="flex h-full flex-col items-center justify-center gap-2 py-20 text-zinc-400 dark:text-zinc-500">
+                      <p className="text-sm font-medium tracking-wide">Assertion Empty</p>
+                    </div>
+                  )
                 return (
                   <div className="flex h-full flex-col items-center justify-center gap-2 py-20 text-slate-400">
                     <Loader className="h-6 w-6 animate-spin text-indigo-500" />

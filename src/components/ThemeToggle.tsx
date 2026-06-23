@@ -19,7 +19,7 @@ export default function ThemeToggle() {
     <div className="flex items-center space-x-2">
       {/* Sun Icon: Glows when it's light mode */}
       <Sun
-        className={`h-4 w-4 transition-colors ${!isDark ? "text-yellow-500" : "text-muted-foreground"}`}
+        className={`h-4 w-4 transition-colors ${!isDark ? "text-yellow-600" : "text-muted-foreground"}`}
       />
 
       <Switch
