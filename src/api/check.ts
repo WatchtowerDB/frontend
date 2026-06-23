@@ -30,7 +30,7 @@ export const getCheckById = async (id: number): Promise<Check> => {
 }
 
 // Retrieve the latest compliance check.
-export const getLatestCheck = async (): Promise<Check> => {
-  const response = await api.get<Check>(`/api/compliance/checks/latest/`)
+export const getLatestCheck = async (): Promise<Check | null> => {
+  const response = await api.get<Check | null>(`/api/compliance/checks/latest/`)
   return response.data
 }
