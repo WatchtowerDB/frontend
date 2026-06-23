@@ -1,3 +1,4 @@
+import type { InferenceServerStatus } from "@/api/inference"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,6 +16,7 @@ import { useChecks } from "@/hooks/useChecks"
 import { useAllClientDBs } from "@/hooks/useClientDBs"
 import { useAssertionsByChecks } from "@/hooks/useDataAggregation"
 import { useFrameworks } from "@/hooks/useFrameworks"
+import { useInferencePolling } from "@/hooks/useInferenceStatus"
 import { cn, timeAgo } from "@/lib/utils"
 import { useAssertionStore } from "@/stores/useAssertionStore"
 import {
@@ -22,6 +24,7 @@ import {
   BrainCircuit,
   Cpu,
   Database,
+  Loader2,
   Moon,
   Play,
   ShieldCheck,
@@ -34,8 +37,6 @@ import { AssertionsStatus, type ViewState } from "../compliance/components/Asser
 import RunCheckDialog from "../compliance/components/RunCheckDialog"
 
 // Helpers
-type ModelStatus = "uninitialized" | "loading" | "initialized" | "error"
-
 const passRate = (passed: number, total: number) =>
   total === 0 ? 0 : Math.round((passed / total) * 100)
 
@@ -55,16 +56,18 @@ const statusConfig: Record<ViewState, { borderColor: string; iconColor: string }
 }
 
 const modelConfig: Record<
-  ModelStatus,
+  InferenceServerStatus,
   { borderColor: string; iconColor: string; textColor: string; text: string }
 > = {
-  uninitialized: {
+  not_initialized: {
+    // Fixed from "uninitialized"
     borderColor: "border-r-amber-500",
     iconColor: "text-amber-500",
     textColor: "text-amber-500",
     text: "Not initialized",
   },
-  loading: {
+  initializing: {
+    // Fixed from "loading"
     borderColor: "border-r-primary",
     iconColor: "text-primary",
     textColor: "text-primary",
@@ -113,7 +116,6 @@ export default function Dashboard() {
   const setCheckId = useAssertionStore((s) => s.setComplianceCheckId)
   const [runCheckOpen, setRunCheckOpen] = useState(false)
   const [complianceStatus, setComplianceStatus] = useState<ViewState>("idle")
-  const [modelStatus, setModelStatus] = useState<ModelStatus>("uninitialized")
 
   // Data fetching for the table
   const {
@@ -125,6 +127,14 @@ export default function Dashboard() {
 
   const { data: frameworks } = useFrameworks()
   const { data: clientDBs } = useAllClientDBs()
+  const {
+    data: inferenceData,
+    isError: isNetworkError,
+    refetch: refetchStatus,
+    isFetching,
+  } = useInferencePolling()
+
+  const modelStatus: InferenceServerStatus = inferenceData?.status ?? "not_initialized"
 
   const currentCheckIds = checkData?.results?.map((check) => check.id) ?? []
   const { summaryMap } = useAssertionsByChecks(currentCheckIds)
@@ -154,7 +164,7 @@ export default function Dashboard() {
     iconColor: modelIconColor,
     textColor: modelTextColor,
     text: modelStatusText,
-  } = modelConfig[modelStatus]
+  } = modelConfig[isNetworkError ? "error" : modelStatus]
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-6">
@@ -225,7 +235,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Init Model Card */}
+        {/* Model Status Card */}
         <Card
           className={cn("bg-muted/50 flex flex-col border-r-2 transition-colors", modelBorderColor)}
         >
@@ -234,21 +244,34 @@ export default function Dashboard() {
               <CardTitle className="flex items-center gap-2 text-xl">AI model</CardTitle>
               <BrainCircuit className={cn("size-5", modelIconColor)} />
             </div>
-            <p className={cn("text-xs", modelTextColor)}>{modelStatusText}</p>
+            <p className={cn("text-xs", modelTextColor)}>
+              {isNetworkError ? "Model connection lost" : modelStatusText}
+            </p>
           </CardHeader>
+
           <CardContent className="flex flex-1 flex-col justify-between pt-0">
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full text-xs"
-              onClick={() =>
-                setModelStatus((s) => (s === "initialized" ? "uninitialized" : "initialized"))
-              }
-              disabled={modelStatus === "loading"}
-            >
-              <Cpu size={12} className="mr-1" />
-              {modelStatus === "initialized" ? "Reinitialize" : "Initialize model"}
-            </Button>
+            {isNetworkError && (
+              <Button
+                size="sm"
+                variant={"destructive"}
+                className="w-full text-xs"
+                onClick={() => refetchStatus()}
+                disabled={isFetching || modelStatus === "initializing"}
+              >
+                <Cpu size={12} className="mr-1" />
+                {isFetching ? (
+                  <>
+                    <Loader2 size={12} className="mr-1 animate-spin" />
+                    Retrying...
+                  </>
+                ) : (
+                  <>
+                    <Cpu size={12} className="mr-1" />
+                    Retry Connection
+                  </>
+                )}
+              </Button>
+            )}
           </CardContent>
         </Card>
         <RunCheckDialog open={runCheckOpen} onOpenChange={setRunCheckOpen} />

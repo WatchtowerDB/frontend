@@ -12,6 +12,6 @@ export interface InferenceStatusResponse {
 
 // Get the current health and initialization state of the model.
 export const getInferenceServerStatus = async (): Promise<InferenceStatusResponse> => {
-  const response = await api.get<InferenceStatusResponse>("/api/model/status/")
+  const response = await api.get<InferenceStatusResponse>("/api/compliance/model/status/")
   return response.data
 }

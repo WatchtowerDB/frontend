@@ -16,7 +16,5 @@ export const useInferencePolling = (pollingIntervalMs = 5000) => {
 
     // Prevent garbage collection from wiping the cached status instantly on failure
     gcTime: 1000 * 60 * 5,
-
-    // TODO: Confirm if this configuration aligns with what Robin has in mind :>
   })
 }
