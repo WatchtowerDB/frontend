@@ -45,6 +45,8 @@ export function selectOverallPhase(checkStreams: Record<number, CheckStream>): P
 
 interface ComplianceCheckState {
   activeCheckIds: number[]
+  // ^^ This is completely useless right now. As the backend is being used as a source of truth.
+  // TODO: clear it up. it does not affect us negatively or positively.
   checkStreams: Record<number, CheckStream>
   liveAssertions: Record<number, LiveAssertion>
 
