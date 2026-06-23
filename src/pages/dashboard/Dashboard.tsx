@@ -60,14 +60,12 @@ const modelConfig: Record<
   { borderColor: string; iconColor: string; textColor: string; text: string }
 > = {
   not_initialized: {
-    // Fixed from "uninitialized"
     borderColor: "border-r-amber-500",
     iconColor: "text-amber-500",
     textColor: "text-amber-500",
     text: "Not initialized",
   },
   initializing: {
-    // Fixed from "loading"
     borderColor: "border-r-primary",
     iconColor: "text-primary",
     textColor: "text-primary",
@@ -93,22 +91,6 @@ const ResultBadge = ({ passed, total }: { passed: number; total: number }) => {
   const variant = rate === 100 ? "success" : rate > 0 ? "warning" : "destructive"
   return <Badge variant={variant}>{rate}% passed</Badge>
 }
-
-// const dummyChecks = [
-//   { id: 101, client_db: 4, framework: "soc2",     date: "2026-06-10T10:00:00Z" },
-//   { id: 102, client_db: 3, framework: "iso27001", date: "2026-06-05T14:30:00Z" },
-//   { id: 103, client_db: 2, framework: "hipaa",    date: "2026-05-20T09:15:00Z" },
-//   { id: 104, client_db: 1, framework: "gdpr",     date: "2026-01-01T12:00:00Z" },
-//   { id: 105, client_db: 2, framework: "soc2",     date: "2026-06-11T08:00:00Z" },
-// ]
-
-// const dummySummaryMap: Record<number, { passed: number; failed: number; total: number }> = {
-//   101: { passed: 10, failed: 0,  total: 10 }, // 100% - Success!
-//   102: { passed: 0,  failed: 5,  total: 5  }, // 0%   - Total Failure!
-//   103: { passed: 7,  failed: 3,  total: 10 }, // 70%  - Partial
-//   104: { passed: 2,  failed: 8,  total: 10 }, // 20%  - Partial (Mostly failing)
-//   105: { passed: 15, failed: 0,  total: 15 }, // 100% - Success!
-// }
 
 export default function Dashboard() {
   // For the cards
@@ -139,15 +121,10 @@ export default function Dashboard() {
   const currentCheckIds = checkData?.results?.map((check) => check.id) ?? []
   const { summaryMap } = useAssertionsByChecks(currentCheckIds)
 
-  // Specifically for the framework & client DB names
+  // Specifically for the framework names (The Future Holds Many Opportunities To Kill The Next 3 Lines)
   const frameworkMap = frameworks?.results
     ? Object.fromEntries(frameworks.results.map((f) => [f.id, f.name]))
     : {}
-  const dbMap = clientDBs?.results
-    ? Object.fromEntries(clientDBs.results.map((f) => [f.id, f.name]))
-    : {}
-
-  // const sorted = [...DUMMY_CHECKS].sort((a, b) => (sortAsc ? a.id - b.id : b.id - a.id))
 
   const formattedDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -328,11 +305,7 @@ export default function Dashboard() {
                       {/* Database */}
                       <TableCell className="text-muted-foreground">
                         {" "}
-                        {dbMap[check.client_db] ? (
-                          `${dbMap[check.client_db]}`
-                        ) : (
-                          <Skeleton className="mb-2 h-4 w-32" />
-                        )}
+                        {check ? `${check.client_db_name}` : <Skeleton className="mb-2 h-4 w-32" />}
                       </TableCell>
                       {/* Framework */}
                       <TableCell className="text-muted-foreground">
