@@ -134,7 +134,7 @@ export default function AssertionReport({
           {assertion ? (
             <Badge
               variant={
-                assertion?.status === "FAILED" ? "secondary" : result ? "outline" : "destructive"
+                assertion?.status === "FAILED" ? "warning" : result ? "outline" : "destructive"
               }
               className="ml-2"
             >
