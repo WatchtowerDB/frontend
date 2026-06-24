@@ -69,6 +69,7 @@ export function useRunComplianceCheck() {
       // Register the new check — the stream hook picks it up automatically.
       addActiveCheck(data.id)
       queryClient.invalidateQueries({ queryKey: ["checks", "list"] })
+      queryClient.invalidateQueries({ queryKey: ["checks", "all"] })
     },
   })
 }

@@ -251,7 +251,7 @@ export default function ChecksPage() {
                         <div className="flex flex-1 items-center justify-between pr-4">
                           {/* Context/Left Block */}
                           <div className="flex flex-col gap-2 text-left font-sans">
-                            <p className="text-foreground ms-0.5 text-sm font-semibold">
+                            <div className="text-foreground ms-0.5 text-sm font-semibold">
                               {check ? (
                                 <div className="flex items-center gap-2 text-sm">
                                   {/* ID Anchor*/}
@@ -286,7 +286,7 @@ export default function ChecksPage() {
                                   <Skeleton className="h-4 w-20" />
                                 </div>
                               )}
-                            </p>
+                            </div>
                             <div className="flex flex-row items-center gap-1">
                               {statusBadge && !LIVE_CHECK_STATUSES.includes(check.status) && (
                                 <Badge className={`${statusBadge.className} gap-1`}>

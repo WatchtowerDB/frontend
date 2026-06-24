@@ -15,9 +15,9 @@ import { Toaster } from "./components/ui/sonner"
 import { AuthProvider } from "./context/AuthProvider"
 import { ProtectedRoute } from "./context/ProtectedRoute"
 import { ThemeProvider } from "./context/ThemeProvider"
+import AnalyticsPage from "./pages/compliance/AnalyticsPage"
 import AssertionsPage from "./pages/compliance/AssertionsPage"
 import ChecksPage from "./pages/compliance/ChecksPage"
-import SummaryPage from "./pages/compliance/SummaryPage"
 import Login from "./pages/login/Login"
 import NotFound from "./pages/not-found/NotFound"
 import type { APIError } from "./types/api"
@@ -59,10 +59,10 @@ export default function App() {
                   {/* Compliance Route:*/}
                   <Route path="compliance" element={<ComplianceLayout />}>
                     {/* Redirect /compliance and /compliance/ to /compliance/summary */}
-                    <Route index element={<Navigate to="summary" replace />} />
+                    <Route index element={<Navigate to="analytics" replace />} />
 
-                    {/* The Sub-Route: Renders at /compliance/summary */}
-                    <Route path="summary" element={<SummaryPage />} />
+                    {/* The Sub-Route: Renders at /compliance/analytics */}
+                    <Route path="analytics" element={<AnalyticsPage />} />
 
                     {/* The Sub-Route: Renders at /compliance/queries */}
                     <Route path="assertions" element={<AssertionsPage />} />

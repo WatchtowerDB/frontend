@@ -1,15 +1,15 @@
 import { AppSidebar } from "@/components/AppSidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { LayoutDashboard, List, ListChecks } from "lucide-react"
+import { ChartLine, List, ListChecks } from "lucide-react"
 import { Outlet } from "react-router-dom"
 
 const COMPLIANCE_NAV = {
   title: "Compliance",
   items: [
     {
-      title: "Summary",
-      url: "/compliance/summary",
-      icon: LayoutDashboard,
+      title: "Analytics",
+      url: "/compliance/analytics",
+      icon: ChartLine,
     },
     {
       title: "Assertions",

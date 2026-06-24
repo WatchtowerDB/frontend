@@ -75,7 +75,7 @@ export function useComplianceStreams() {
   // This checks call is inherently different from the normal getChecks, and might have its own parameters.
   // TODO: Confirm that this is the best practice.
   const { data: liveChecksData } = useQuery({
-    queryKey: ["checks", "list", { status: LIVE_CHECK_STATUSES }],
+    queryKey: ["checks", "live", { status: LIVE_CHECK_STATUSES }],
     queryFn: () => getChecks({ status: LIVE_CHECK_STATUSES }),
     staleTime: 0,
     refetchInterval: 5000, // Catches checks that finished between polls without relying solely on SSE.
@@ -183,6 +183,7 @@ export function useComplianceStreams() {
                   setCheckPhase(checkId, "analyzing")
                   // Re-invalidate to ensure we have the latest results after gap
                   queryClient.invalidateQueries({ queryKey: ["assertions"] })
+                  queryClient.invalidateQueries({ queryKey: ["checks", "list"] })
                 }
               }
 
@@ -226,6 +227,9 @@ export function useComplianceStreams() {
                   queryClient.invalidateQueries({
                     queryKey: ["assertions", "detail", assertionId],
                   })
+                  queryClient.invalidateQueries({ queryKey: ["checks", "list"] })
+                  queryClient.invalidateQueries({ queryKey: ["compliance", "analytics"] })
+                  // TODO: - Likely have the cache for checks, and upon changes to the cache, invalidate accordingly.
                 }
                 if (data.event === "error") {
                   upsertLiveAssertion(assertionId, checkId, { streamingDone: true })
