@@ -59,7 +59,7 @@ export default function App() {
                   {/* Compliance Route:*/}
                   <Route path="compliance" element={<ComplianceLayout />}>
                     {/* Redirect /compliance and /compliance/ to /compliance/summary */}
-                    <Route index element={<Navigate to="analytics" replace />} />
+                    <Route index element={<Navigate to="assertions" replace />} />
 
                     {/* The Sub-Route: Renders at /compliance/analytics */}
                     <Route path="analytics" element={<AnalyticsPage />} />
