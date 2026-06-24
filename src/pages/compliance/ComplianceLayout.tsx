@@ -7,11 +7,6 @@ const COMPLIANCE_NAV = {
   title: "Compliance",
   items: [
     {
-      title: "Analytics",
-      url: "/compliance/analytics",
-      icon: ChartLine,
-    },
-    {
       title: "Assertions",
       url: "/compliance/assertions",
       icon: List,
@@ -20,6 +15,11 @@ const COMPLIANCE_NAV = {
       title: "Checks",
       url: "/compliance/checks",
       icon: ListChecks,
+    },
+    {
+      title: "Analytics",
+      url: "/compliance/analytics",
+      icon: ChartLine,
     },
   ],
 }
