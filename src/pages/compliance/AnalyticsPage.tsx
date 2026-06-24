@@ -33,15 +33,12 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { useDatabaseScore, useSchemaIterations } from "@/hooks/useAnalytics"
+import { useAllClientDBSchemas } from "@/hooks/useClientDBSchemas"
+import { useAllClientDBs } from "@/hooks/useClientDBs"
+import { useAllFrameworks } from "@/hooks/useFrameworks"
 import { InfoIcon } from "lucide-react"
 import { ScoreCard } from "./components/ScoreCard"
-import {
-  MOCK_CLIENT_DB_SCHEMAS,
-  MOCK_CLIENT_DBS,
-  MOCK_DATABASE_SCORES,
-  MOCK_FRAMEWORKS,
-  MOCK_SCHEMA_ITERATIONS,
-} from "./components/mock"
 
 const SCORE_BANDS = [
   {
@@ -91,30 +88,24 @@ export default function AnalyticsPage() {
   const [selectedSchemaName, setSelectedSchemaName] = useState<string | null>(null)
   const [selectedFrameworkId, setSelectedFrameworkId] = useState<number | null>(null)
 
-  const dbs = MOCK_CLIENT_DBS
-  const frameworks = MOCK_FRAMEWORKS
+  const { data: dbs } = useAllClientDBs()
+  const { data: frameworks } = useAllFrameworks()
 
-  const dbSchemas = selectedDbId ? MOCK_CLIENT_DB_SCHEMAS[selectedDbId] : undefined
-  const dbScore = selectedDbId ? MOCK_DATABASE_SCORES[selectedDbId] : undefined
-  const isScoreLoading = false
+  const { data: dbSchemas } = useAllClientDBSchemas({
+    client_db: selectedDbId ? [selectedDbId] : undefined,
+    latest: true,
+  })
 
-  const iterationsKey =
-    selectedDbId && selectedSchemaName ? `${selectedDbId}:${selectedSchemaName}` : null
-  const iterationsRaw = iterationsKey ? MOCK_SCHEMA_ITERATIONS[iterationsKey] : undefined
+  const { data: dbScore, isLoading: isScoreLoading } = useDatabaseScore({
+    db_id: selectedDbId as number,
+    framework_id: undefined,
+  })
 
-  const iterations = useMemo(() => {
-    if (!iterationsRaw) return iterationsRaw
-    if (!selectedFrameworkId) return iterationsRaw
-    return iterationsRaw.map((item) => ({
-      ...item,
-      framework_scores: Object.fromEntries(
-        Object.entries(item.framework_scores).filter(
-          ([frameworkId]) => frameworkId === String(selectedFrameworkId),
-        ),
-      ),
-    }))
-  }, [iterationsRaw, selectedFrameworkId])
-  const isIterationsLoading = false
+  const { data: iterations, isLoading: isIterationsLoading } = useSchemaIterations({
+    db_id: selectedDbId as number,
+    schema_name: selectedSchemaName as string,
+    framework_id: selectedFrameworkId ? [selectedFrameworkId] : undefined,
+  })
 
   const frameworkNameById = useMemo(() => {
     const map = new Map<string, string>()
@@ -349,21 +340,33 @@ export default function AnalyticsPage() {
                   <CardTitle className="text-sm font-semibold">Schema score history</CardTitle>
                   <div className="flex items-center gap-3">
                     <Select
-                      value={selectedFrameworkId ? String(selectedFrameworkId) : "all"}
+                      /* Keep it undefined when null so the dynamic placeholder still operates perfectly */
+                      value={selectedFrameworkId ? String(selectedFrameworkId) : undefined}
                       disabled={!selectedSchemaName}
-                      onValueChange={(value) =>
+                      onValueChange={(value) => {
+                        // If they choose the string "all", clear the state back to null
                         setSelectedFrameworkId(value === "all" ? null : Number(value))
-                      }
+                      }}
                     >
                       <SelectTrigger className="h-8 w-[160px] text-xs">
                         <SelectValue
-                          placeholder={selectedSchemaName ? "All frameworks" : "Select a schema"}
+                          placeholder={selectedSchemaName ? "All Frameworks" : "Select a schema…"}
                         />
                       </SelectTrigger>
+
                       <SelectContent position="popper" side="bottom">
-                        <SelectItem value="all">All frameworks</SelectItem>
+                        {selectedSchemaName && (
+                          /* Use a valid string token instead of an empty primitive. No more gray text! */
+                          <SelectItem value="all" className="text-foreground text-xs font-medium">
+                            All Frameworks
+                          </SelectItem>
+                        )}
                         {frameworkEntries.map((fw) => (
-                          <SelectItem key={fw.frameworkId} value={fw.frameworkId}>
+                          <SelectItem
+                            key={fw.frameworkId}
+                            value={fw.frameworkId}
+                            className="text-xs"
+                          >
                             {fw.name}
                           </SelectItem>
                         ))}
