@@ -350,7 +350,9 @@ export default function AnalyticsPage() {
                     >
                       <SelectTrigger className="h-8 w-[160px] text-xs">
                         <SelectValue
-                          placeholder={selectedSchemaName ? "All Frameworks" : "Select a schema…"}
+                          placeholder={
+                            selectedSchemaName ? "All Frameworks" : "Select a framework…"
+                          }
                         />
                       </SelectTrigger>
 
