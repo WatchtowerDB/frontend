@@ -35,7 +35,6 @@ import {
   Loader2,
   Moon,
   Play,
-  ScrollText,
   ShieldCheck,
   Sun,
   SunDim,
@@ -44,6 +43,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { AssertionsStatus, type ViewState } from "../compliance/components/AssertionsStatus"
 import RunCheckDialog from "../compliance/components/RunCheckDialog"
+import { ScoreCard } from "../compliance/components/ScoreCard"
 
 // Helpers
 const passRate = (passed: number, total: number) =>
@@ -211,68 +211,92 @@ export default function Dashboard() {
         </Card>
 
         {/* Score Card */}
-        <Card className="bg-muted/50 flex flex-col">
-          <CardHeader className="flex flex-col gap-1">
+        <Card className="bg-muted/50 border-border flex flex-col justify-between border">
+          <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex w-full flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-xl">Compliance status</CardTitle>
-              <ScrollText className={cn("size-5", iconColor)} />
+              <CardTitle className="text-foreground text-xl font-medium tracking-tight">
+                Compliance Score
+              </CardTitle>
+              {/* Dynamic Icon */}
+              <div className="shrink-0">
+                {!overviewDbId ? (
+                  <div className="border-muted-foreground/30 bg-muted/20 h-5 w-5 rounded-full border border-dashed" />
+                ) : !overviewDbScore ? (
+                  <Skeleton className="bg-muted-foreground/20 h-6 w-6 rounded-full" />
+                ) : (
+                  <ScoreCard
+                    label="Overall"
+                    score={overviewDbScore.compliance_score}
+                    size="miniature"
+                    /* Override the default 110px container dimensions to match icon size */
+                    className="h-7 w-7"
+                  />
+                )}
+              </div>
             </div>
-            {/* Selector tucked below */}
-            <Select
-              value={overviewDbId ? String(overviewDbId) : undefined}
-              onValueChange={(value) => setOverviewDbId(Number(value))}
-            >
-              <SelectTrigger className="h-6 w-40 px-2 py-0">
-                <SelectValue placeholder="Select a database..." />
-              </SelectTrigger>
-              <SelectContent position="popper" side="bottom">
-                {clientDBs?.results?.map((db) => (
-                  <SelectItem key={db.id} value={String(db.id)}>
-                    {db.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </CardHeader>
-          <CardContent className="flex flex-1 items-center justify-between pt-1">
-            {!overviewDbId && (
-              <p className="text-muted-foreground text-[10px] italic">
-                Select a database to view its score.
-              </p>
-            )}
-            {overviewDbId && !overviewDbScore && <Skeleton className="h-6 w-full rounded-sm" />}
-            {overviewDbId && overviewDbScore && (
-              <>
-                <div className="flex items-baseline font-mono">
-                  <span className="text-2xl font-extrabold tracking-tight">
+
+          <CardContent className="flex flex-1 flex-col justify-between pt-0">
+            {/* Main Value Display */}
+            <div className="flex items-center gap-2">
+              {!overviewDbId ? (
+                <p className="text-muted-foreground/30 font-mono text-3xl font-bold tracking-tight">
+                  --.-
+                </p>
+              ) : !overviewDbScore ? (
+                <Skeleton className="bg-muted-foreground/20 h-9 w-24 rounded-md" />
+              ) : (
+                <div className="flex items-baseline gap-x-1.5">
+                  <span className="text-foreground text-3xl font-medium">
                     {overviewDbScore.compliance_score.toFixed(1)}
                   </span>
-                  <span className="text-muted-foreground ml-1 text-xs">/ 10</span>
+                  <span className="text-muted-foreground/60 font-mono text-sm">/ 10</span>
+
+                  {/* Badge tucked cleanly next to the score */}
+                  {(() => {
+                    const score = overviewDbScore.compliance_score
+                    let label = "Compliant"
+                    let variant: "default" | "secondary" | "destructive" = "default"
+
+                    if (score <= 3.8) {
+                      label = "Failing"
+                      variant = "destructive"
+                    } else if (score <= 6.8) {
+                      label = "At risk"
+                      variant = "secondary"
+                    }
+
+                    return (
+                      <Badge
+                        variant={variant}
+                        className="ml-2 shrink-0 scale-95 border-0 px-1.5 py-0 text-[9px] font-bold tracking-wider uppercase"
+                      >
+                        {label}
+                      </Badge>
+                    )
+                  })()}
                 </div>
-                {(() => {
-                  const score = overviewDbScore.compliance_score
-                  let label = "Compliant"
-                  let variant: "default" | "secondary" | "destructive" = "default"
+              )}
+            </div>
 
-                  if (score <= 3.8) {
-                    label = "Failing"
-                    variant = "destructive"
-                  } else if (score <= 6.8) {
-                    label = "At risk"
-                    variant = "secondary"
-                  }
-
-                  return (
-                    <Badge
-                      variant={variant}
-                      className="shrink-0 px-1.5 py-0 text-[9px] font-bold tracking-tight uppercase"
-                    >
-                      {label}
-                    </Badge>
-                  )
-                })()}
-              </>
-            )}
+            {/* Selector replacing the bottom subtext descriptor */}
+            <div className="mt-3">
+              <Select
+                value={overviewDbId ? String(overviewDbId) : undefined}
+                onValueChange={(value) => setOverviewDbId(Number(value))}
+              >
+                <SelectTrigger className="bg-background/50 border-muted hover:bg-background h-7 w-full max-w-[160px] text-xs font-medium transition-colors">
+                  <SelectValue placeholder="Select a database..." />
+                </SelectTrigger>
+                <SelectContent position="popper" side="bottom">
+                  {clientDBs?.results?.map((db) => (
+                    <SelectItem key={db.id} value={String(db.id)} className="text-xs">
+                      {db.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </CardContent>
         </Card>
 

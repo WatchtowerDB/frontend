@@ -14,7 +14,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   PolarAngleAxis,
@@ -22,11 +21,19 @@ import {
   PolarRadiusAxis,
   Radar,
   RadarChart,
-  ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from "recharts"
+
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart"
+import { InfoIcon } from "lucide-react"
 import { ScoreCard } from "./components/ScoreCard"
 import {
   MOCK_CLIENT_DB_SCHEMAS,
@@ -36,8 +43,6 @@ import {
   MOCK_SCHEMA_ITERATIONS,
 } from "./components/mock"
 
-// Compliance score is on a 0–10 scale. Bands map a continuous score to a
-// discrete risk tier, mirroring how the underlying audit checks are graded.
 const SCORE_BANDS = [
   {
     max: 3.8,
@@ -62,92 +67,41 @@ const SCORE_BANDS = [
   },
 ]
 
-// Below this many frameworks, a radar chart doesn't have enough vertices to
-// read as a shape, so we fall back to a bar chart instead.
 const RADAR_MIN_FRAMEWORKS = 3
-
 const LINE_COLORS = ["#2563eb", "#16a34a", "#d97706", "#9333ea"]
+
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
+
+// Static config for the framework comparison chart
+const frameworkChartConfig = {
+  score: {
+    label: "Compliance score",
+    color: "#16a34a",
+  },
+} satisfies ChartConfig
 
 export default function AnalyticsPage() {
   const [selectedDbId, setSelectedDbId] = useState<number | null>(null)
   const [selectedSchemaName, setSelectedSchemaName] = useState<string | null>(null)
   const [selectedFrameworkId, setSelectedFrameworkId] = useState<number | null>(null)
 
-  // const { data: dbs } = useAllClientDBs()
-  // const { data: frameworks } = useAllFrameworks()
-
-  // const { data: dbSchemas } = useAllClientDBSchemas({
-  //   client_db: selectedDbId ? [selectedDbId] : undefined,
-  //   latest: true,
-  // })
-
-  // const { data: dbScore, isLoading: isScoreLoading } = useDatabaseScore({
-  //   db_id: selectedDbId as number,
-  //   framework_id: undefined,
-  // })
-
-  // const { data: iterations, isLoading: isIterationsLoading } = useSchemaIterations({
-  //   db_id: selectedDbId as number,
-  //   schema_name: selectedSchemaName as string,
-  //   framework_id: selectedFrameworkId ? [selectedFrameworkId] : undefined,
-  // })
-
-  // // framework_scores is keyed by framework id (as a string), so we resolve
-  // // display names against useAllFrameworks rather than assuming the key
-  // // itself is human-readable.
-  // const frameworkNameById = useMemo(() => {
-  //   const map = new Map<string, string>()
-  //   frameworks?.results?.forEach((fw: { id: number; name: string }) => {
-  //     map.set(String(fw.id), fw.name)
-  //   })
-  //   return map
-  // }, [frameworks])
-
-  // const frameworkEntries = useMemo(() => {
-  //   if (!dbScore?.framework_scores) return []
-  //   return Object.entries(dbScore.framework_scores).map(([frameworkId, data]) => ({
-  //     frameworkId,
-  //     name: frameworkNameById.get(frameworkId) ?? `Framework ${frameworkId}`,
-  //     // NOTE: FrameworkScoreData has both `framework_compliance` and a
-  //     // nested `compliance_score`. We surface `framework_compliance` as the
-  //     // headline number for a framework card to avoid colliding visually
-  //     // with the top-level, whole-database `compliance_score` shown above it.
-  //     score: data.framework_compliance,
-  //     schemaCount: data.schema_count,
-  //     assertionsPassed: data.assertions_passed,
-  //     assertionsTotal: data.assertions_total,
-  //   }))
-  // }, [dbScore, frameworkNameById])
-
-  // const showRadar = frameworkEntries.length >= RADAR_MIN_FRAMEWORKS
-
-  // const iterationChartData = useMemo(() => {
-  //   if (!iterations) return []
-  //   return iterations.map((item) => {
-  //     const row: Record<string, number | string> = {
-  //       version: item.version,
-  //       overall: item.compliance_score,
-  //     }
-  //     Object.entries(item.framework_scores).forEach(([frameworkId, fwData]) => {
-  //       row[frameworkNameById.get(frameworkId) ?? frameworkId] = fwData.score
-  //     })
-  //     return row
-  //   })
-  // }, [iterations, frameworkNameById])
-
   const dbs = MOCK_CLIENT_DBS
   const frameworks = MOCK_FRAMEWORKS
 
   const dbSchemas = selectedDbId ? MOCK_CLIENT_DB_SCHEMAS[selectedDbId] : undefined
-
   const dbScore = selectedDbId ? MOCK_DATABASE_SCORES[selectedDbId] : undefined
   const isScoreLoading = false
 
   const iterationsKey =
     selectedDbId && selectedSchemaName ? `${selectedDbId}:${selectedSchemaName}` : null
   const iterationsRaw = iterationsKey ? MOCK_SCHEMA_ITERATIONS[iterationsKey] : undefined
-  // Mock data doesn't carry framework_id filtering, so apply it client-side
-  // here to approximate what the real filtered endpoint would return.
+
   const iterations = useMemo(() => {
     if (!iterationsRaw) return iterationsRaw
     if (!selectedFrameworkId) return iterationsRaw
@@ -175,10 +129,6 @@ export default function AnalyticsPage() {
     return Object.entries(dbScore.framework_scores).map(([frameworkId, data]) => ({
       frameworkId,
       name: frameworkNameById.get(frameworkId) ?? `Framework ${frameworkId}`,
-      // NOTE: FrameworkScoreData has both `framework_compliance` and a
-      // nested `compliance_score`. We surface `framework_compliance` as the
-      // headline number for a framework card to avoid colliding visually
-      // with the top-level, whole-database `compliance_score` shown above it.
       score: data.framework_compliance,
       schemaCount: data.schema_count,
       assertionsPassed: data.assertions_passed,
@@ -188,6 +138,7 @@ export default function AnalyticsPage() {
 
   const showRadar = frameworkEntries.length >= RADAR_MIN_FRAMEWORKS
 
+  // Slugifying dynamic framework names to prevent key collision within chart rendering
   const iterationChartData = useMemo(() => {
     if (!iterations) return []
     return iterations.map((item) => {
@@ -196,11 +147,29 @@ export default function AnalyticsPage() {
         overall: item.compliance_score,
       }
       Object.entries(item.framework_scores).forEach(([frameworkId, fwData]) => {
-        row[frameworkNameById.get(frameworkId) ?? frameworkId] = fwData.score
+        const name = frameworkNameById.get(frameworkId) ?? frameworkId
+        row[slugify(name)] = fwData.score
       })
       return row
     })
   }, [iterations, frameworkNameById])
+
+  // Dynamically compiling the historical line chart config to feed Shadcn primitives cleanly
+  const historyChartConfig = useMemo(() => {
+    const config: ChartConfig = {
+      overall: {
+        label: "Schema overall",
+        color: "#64748b",
+      },
+    }
+    frameworkEntries.forEach((fw, i) => {
+      config[slugify(fw.name)] = {
+        label: fw.name,
+        color: LINE_COLORS[i % LINE_COLORS.length],
+      }
+    })
+    return config
+  }, [frameworkEntries])
 
   return (
     <ScrollArea className="h-[calc(100vh-4rem)] w-full">
@@ -231,9 +200,13 @@ export default function AnalyticsPage() {
         </div>
 
         {!selectedDbId && (
-          <p className="text-muted-foreground text-sm">
-            Select a database to view its compliance score.
-          </p>
+          <div className="flex flex-1 flex-col items-center justify-center pt-[30vh]">
+            {/* Hacky ass pt-3vh */}
+            <InfoIcon className="mb-2 h-8 w-8 opacity-20" />
+            <p className="text-muted-foreground text-sm">
+              Select a database to view its compliance score.
+            </p>
+          </div>
         )}
 
         {selectedDbId && isScoreLoading && (
@@ -251,7 +224,6 @@ export default function AnalyticsPage() {
           <>
             {/* Overall + per-framework score cards */}
             <div className="flex gap-4">
-              {/* Scrollable score cards */}
               <div className="min-w-0 flex-1">
                 <ScrollArea className="w-full pb-2 whitespace-nowrap">
                   <div className="flex w-max gap-3">
@@ -271,20 +243,17 @@ export default function AnalyticsPage() {
                       />
                     ))}
                   </div>
-
                   <ScrollBar orientation="horizontal" />
                 </ScrollArea>
               </div>
 
-              {/* Score-band legend kept permanently visible while cards scroll independently. */}
+              {/* Score-band legend */}
               <div className="bg-background flex h-[200px] w-52 shrink-0 border-l pl-4">
                 <div className="flex h-full w-full flex-col py-2 text-xs">
                   <div className="font-medium">Score Bands</div>
-
                   <div className="mt-2 flex flex-1 flex-col justify-evenly">
                     {SCORE_BANDS.map((band, i) => {
                       const min = i === 0 ? 0 : SCORE_BANDS[i - 1].max + 0.1
-
                       return (
                         <div
                           key={band.label}
@@ -296,7 +265,6 @@ export default function AnalyticsPage() {
                           >
                             {min.toFixed(1)}–{band.max.toFixed(1)}
                           </Badge>
-
                           <span className="font-medium">{band.label}</span>
                         </div>
                       )
@@ -306,9 +274,9 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            {/* Schema iteration history, filterable by framework */}
+            {/* Schema iteration history & analytics section */}
             <div className="flex flex-col gap-6 lg:flex-row">
-              {/* Framework comparison: radar for 3+, bar for fewer */}
+              {/* Framework comparison */}
               <Card className="lg:basis-[30%]">
                 <CardHeader className="space-y-0 pb-2">
                   <CardTitle className="text-sm font-semibold">
@@ -316,47 +284,81 @@ export default function AnalyticsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    {showRadar ? (
-                      <RadarChart data={frameworkEntries}>
-                        <PolarGrid />
-                        <PolarAngleAxis dataKey="name" tick={{ fontSize: 12 }} />
-                        <PolarRadiusAxis domain={[0, 10]} tick={{ fontSize: 10 }} />
-                        <Radar
-                          name="Compliance score"
-                          dataKey="score"
-                          stroke="#16a34a"
-                          fill="#16a34a"
-                          fillOpacity={0.25}
-                        />
-                        <Tooltip />
-                      </RadarChart>
-                    ) : (
-                      <BarChart data={frameworkEntries}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                        <YAxis domain={[0, 10]} tick={{ fontSize: 12 }} />
-                        <Tooltip />
-                        <Bar dataKey="score" fill="#16a34a" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    )}
-                  </ResponsiveContainer>
+                  {frameworkEntries.length < 2 ? (
+                    <div className="flex h-[300px] w-full flex-col items-center justify-center text-center">
+                      <p className="text-muted-foreground text-sm font-medium">
+                        Not enough frameworks tested
+                      </p>
+                      <p className="text-muted-foreground/70 mt-1 text-xs">
+                        Requires at least 2 frameworks to display a visual comparison.
+                      </p>
+                    </div>
+                  ) : (
+                    <ChartContainer config={frameworkChartConfig} className="h-[300px] w-full">
+                      {showRadar ? (
+                        <RadarChart data={frameworkEntries}>
+                          <PolarGrid />
+                          <PolarAngleAxis dataKey="name" tick={{ fontSize: 12 }} />
+                          <PolarRadiusAxis domain={[0, 10]} tick={{ fontSize: 10 }} />
+                          <Radar
+                            name="Compliance score"
+                            dataKey="score"
+                            stroke="var(--color-score)"
+                            fill="var(--color-score)"
+                            fillOpacity={0.25}
+                          />
+                          <ChartTooltip
+                            cursor={false}
+                            content={
+                              <ChartTooltipContent className="min-w-[150px] gap-4" hideLabel />
+                            }
+                          />
+                        </RadarChart>
+                      ) : (
+                        <BarChart
+                          data={frameworkEntries}
+                          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                          <XAxis
+                            dataKey="name"
+                            tickLine={false}
+                            axisLine={false}
+                            tick={{ fontSize: 12 }}
+                          />
+                          <YAxis
+                            domain={[0, 10]}
+                            tickLine={false}
+                            axisLine={false}
+                            tick={{ fontSize: 12 }}
+                          />
+                          <ChartTooltip
+                            content={<ChartTooltipContent className="min-w-[150px] gap-4" />}
+                          />
+                          <Bar dataKey="score" fill="var(--color-score)" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      )}
+                    </ChartContainer>
+                  )}
                 </CardContent>
               </Card>
 
-              {/* Schema iteration history, filterable by framework */}
+              {/* Schema iteration history */}
               <Card className="lg:flex-1">
                 <CardHeader className="flex flex-row flex-wrap items-baseline justify-between gap-2 space-y-0">
                   <CardTitle className="text-sm font-semibold">Schema score history</CardTitle>
                   <div className="flex items-center gap-3">
                     <Select
                       value={selectedFrameworkId ? String(selectedFrameworkId) : "all"}
+                      disabled={!selectedSchemaName}
                       onValueChange={(value) =>
                         setSelectedFrameworkId(value === "all" ? null : Number(value))
                       }
                     >
                       <SelectTrigger className="h-8 w-[160px] text-xs">
-                        <SelectValue placeholder="All frameworks" />
+                        <SelectValue
+                          placeholder={selectedSchemaName ? "All frameworks" : "Select a schema"}
+                        />
                       </SelectTrigger>
                       <SelectContent position="popper" side="bottom">
                         <SelectItem value="all">All frameworks</SelectItem>
@@ -397,33 +399,64 @@ export default function AnalyticsPage() {
                     <Skeleton className="h-[260px] w-full" />
                   )}
 
-                  {selectedSchemaName && iterationChartData.length > 0 && (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={iterationChartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="version" tick={{ fontSize: 12 }} />
-                        <YAxis domain={[0, 10]} tick={{ fontSize: 12 }} />
-                        <Tooltip />
-                        <Legend />
+                  {/* Only allow rendering if the data matches our standards—at least 3 iterations! */}
+                  {selectedSchemaName && !isIterationsLoading && iterationChartData.length < 3 && (
+                    <div className="flex h-[300px] w-full flex-col items-center justify-center text-center">
+                      <p className="text-muted-foreground text-sm font-medium">
+                        Not enough data available
+                      </p>
+                      <p className="text-muted-foreground/70 mt-1 text-xs">
+                        Requires at least 3 historical iterations to plot a history chart.
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedSchemaName && !isIterationsLoading && iterationChartData.length >= 3 && (
+                    <ChartContainer config={historyChartConfig} className="h-[300px] w-full">
+                      <LineChart
+                        data={iterationChartData}
+                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis
+                          dataKey="version"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tick={{ fontSize: 12 }}
+                        />
+                        <YAxis
+                          domain={[0, 10]}
+                          tickLine={false}
+                          axisLine={false}
+                          tick={{ fontSize: 12 }}
+                        />
+                        <ChartTooltip
+                          content={<ChartTooltipContent className="min-w-[150px] gap-4" />}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
                         <Line
                           type="monotone"
                           dataKey="overall"
-                          name="Schema overall"
-                          stroke="#64748b"
+                          stroke="var(--color-overall)"
                           strokeDasharray="5 4"
                           dot={false}
                         />
-                        {frameworkEntries.map((fw, i) => (
-                          <Line
-                            key={fw.frameworkId}
-                            type="monotone"
-                            dataKey={fw.name}
-                            stroke={LINE_COLORS[i % LINE_COLORS.length]}
-                            connectNulls
-                          />
-                        ))}
+                        {frameworkEntries.map((fw) => {
+                          const key = slugify(fw.name)
+                          return (
+                            <Line
+                              key={fw.frameworkId}
+                              type="monotone"
+                              dataKey={key}
+                              stroke={`var(--color-${key})`}
+                              connectNulls
+                              dot={true}
+                            />
+                          )
+                        })}
                       </LineChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                   )}
                 </CardContent>
               </Card>
