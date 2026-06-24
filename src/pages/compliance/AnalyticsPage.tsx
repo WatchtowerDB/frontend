@@ -120,7 +120,7 @@ export default function AnalyticsPage() {
     return Object.entries(dbScore.framework_scores).map(([frameworkId, data]) => ({
       frameworkId,
       name: frameworkNameById.get(frameworkId) ?? `Framework ${frameworkId}`,
-      score: data.framework_compliance,
+      score: data.compliance_score,
       schemaCount: data.schema_count,
       assertionsPassed: data.assertions_passed,
       assertionsTotal: data.assertions_total,
