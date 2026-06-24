@@ -104,15 +104,7 @@ export function ScoreCard({
   // DEFAULT VIEW: Full card layout
   // ==========================================
   return (
-    <Card
-      className={cn(
-        "w-[160px]",
-        emphasize
-          ? `border-2 ${band.borderColor}`
-          : `border-r-1 border-l-1 border-t-transparent border-b-transparent ${band.borderColor}`,
-        className,
-      )}
-    >
+    <Card className={cn("w-[160px]", className)}>
       <CardContent className="flex flex-col items-center gap-1.5 p-3">
         <p className="text-muted-foreground self-start text-xs">{label}</p>
         <div className="relative h-[110px] w-[110px]">

@@ -162,6 +162,8 @@ export default function AnalyticsPage() {
     return config
   }, [frameworkEntries])
 
+  const activeDbId = selectedDbId ?? dbs?.results?.[0]?.id ?? null
+
   return (
     <ScrollArea className="h-[calc(100vh-4rem)] w-full">
       <div className="flex min-w-0 flex-col gap-6 p-6">
@@ -171,10 +173,12 @@ export default function AnalyticsPage() {
             Database
           </label>
           <Select
+            /* Ensure a solid fallback string during the loading phase */
             value={selectedDbId ? String(selectedDbId) : undefined}
             onValueChange={(value) => {
               setSelectedDbId(Number(value))
               setSelectedSchemaName(null)
+              setSelectedFrameworkId(null)
             }}
           >
             <SelectTrigger id="db-select" className="w-[260px]">
@@ -214,25 +218,33 @@ export default function AnalyticsPage() {
         {selectedDbId && dbScore && (
           <>
             {/* Overall + per-framework score cards */}
+            {/*        emphasize
+          ? `border-2 ${band.borderColor}`
+          : `border-r-1 border-l-1 border-t-transparent border-b-transparent ${band.borderColor}`, */}
             <div className="flex gap-4">
               <div className="min-w-0 flex-1">
                 <ScrollArea className="w-full pb-2 whitespace-nowrap">
                   <div className="flex w-max gap-3">
                     <ScoreCard
+                      className={`border-2`}
                       label="Overall"
                       score={dbScore.compliance_score}
                       scoreBands={SCORE_BANDS}
                       emphasize
                     />
 
-                    {frameworkEntries.map((fw) => (
-                      <ScoreCard
-                        key={fw.frameworkId}
-                        label={fw.name}
-                        score={fw.score}
-                        scoreBands={SCORE_BANDS}
-                      />
-                    ))}
+                    <div className="bg-border h-55 w-px shrink-0" />
+
+                    <div className="flex gap-3">
+                      {frameworkEntries.map((fw) => (
+                        <ScoreCard
+                          key={fw.frameworkId}
+                          label={fw.name}
+                          score={fw.score}
+                          scoreBands={SCORE_BANDS}
+                        />
+                      ))}
+                    </div>
                   </div>
                   <ScrollBar orientation="horizontal" />
                 </ScrollArea>
