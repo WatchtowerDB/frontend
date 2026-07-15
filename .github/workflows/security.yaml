@@ -32,7 +32,7 @@ jobs:
       #     warnings: off # everything causes a warning I hate the js ecosystem
 
       - name: Set Up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
